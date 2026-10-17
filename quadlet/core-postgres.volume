@@ -1,0 +1,9 @@
+# Том с данными PostgreSQL Core-системы.
+# Живёт отдельно от контейнера: обновление или пересоздание контейнера данные не трогает.
+
+[Unit]
+Description=Том данных PostgreSQL (Core)
+
+[Volume]
+# Явное имя тома. Без него Quadlet добавил бы приставку "systemd-".
+VolumeName=core-postgres-data

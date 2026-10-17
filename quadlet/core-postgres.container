@@ -1,0 +1,39 @@
+# PostgreSQL 18.6 для Core-системы.
+# Запускается от пользователя core (без root), управляется systemd через Quadlet.
+
+[Unit]
+Description=PostgreSQL 18.6 (Core)
+
+[Container]
+ContainerName=core-postgres
+# Только точная версия и полное имя образа: никаких latest.
+Image=docker.io/library/postgres:18.6
+
+# Данные - в отдельном томе. В образах PostgreSQL 18+ том подключается к /var/lib/postgresql.
+Volume=core-postgres.volume:/var/lib/postgresql
+
+# Пароль суперпользователя - из секрета Podman, в виде файла внутри контейнера.
+Secret=pg_superuser_password
+Environment=POSTGRES_PASSWORD_FILE=/run/secrets/pg_superuser_password
+
+# Порт базы - только для самого сервера (127.0.0.1), снаружи недоступен.
+PublishPort=127.0.0.1:5432:5432
+
+# Ограничения ресурсов: не больше 2 ГБ ОЗУ; разделяемая память для PostgreSQL.
+Memory=2g
+ShmSize=256m
+
+# Дать базе до 60 секунд на корректную остановку (иначе Podman убьёт её через 10).
+StopTimeout=60
+
+# Встроенная проверка: отвечает ли база на подключения.
+HealthCmd=pg_isready -U postgres
+HealthInterval=30s
+
+[Service]
+Restart=always
+# Первый запуск скачивает образ, на это нужно время.
+TimeoutStartSec=300
+
+[Install]
+WantedBy=default.target
