@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Резервное копирование PostgreSQL Core-системы.
+# Запускается от пользователя core (вручную через core-run или по таймеру systemd).
+# Результат: /home/core/backups/<дата UTC>/ с файлами globals.sql и <база>.dump
+
+set -euo pipefail
+
+CONTAINER="${CONTAINER:-core-postgres}"
+BACKUP_DIR="${BACKUP_DIR:-/home/core/backups}"
+KEEP_DAYS="${KEEP_DAYS:-14}"
+
+umask 077                                   # новые файлы - только для владельца
+STAMP="$(date -u +%Y%m%dT%H%M%SZ)"          # например 20261018T000000Z
+DEST="$BACKUP_DIR/$STAMP"
+TMP="$DEST.partial"
+
+trap 'rm -rf "$TMP"; echo "ОШИБКА: копия не создана" >&2' ERR
+mkdir "$TMP"
+
+# 1. Роли и их пароли (в виде отпечатков scram) - общие для всего сервера
+podman exec "$CONTAINER" pg_dumpall -U postgres --globals-only > "$TMP/globals.sql"
+
+# 2. Каждая база - отдельным файлом в сжатом формате custom
+DBS="$(podman exec "$CONTAINER" psql -U postgres -At -c \
+  "SELECT datname FROM pg_database WHERE datallowconn AND NOT datistemplate ORDER BY 1")"
+for db in $DBS; do
+  podman exec "$CONTAINER" pg_dump -U postgres -Fc "$db" > "$TMP/$db.dump"
+done
+
+# 3. Всё прошло успешно - копия становится "настоящей"
+mv "$TMP" "$DEST"
+trap - ERR
+
+# 4. Удаляем копии старше KEEP_DAYS дней
+find "$BACKUP_DIR" -mindepth 1 -maxdepth 1 -type d -name '20*Z' -mtime +"$KEEP_DAYS" -exec rm -rf {} +
+
+echo "OK: $DEST"
+ls -l "$DEST"

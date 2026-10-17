@@ -1,0 +1,13 @@
+# Ночное расписание для core-pg-backup.service.
+
+[Unit]
+Description=Ночная резервная копия PostgreSQL (Core)
+
+[Timer]
+# Каждый день в 02:00 по ташкентскому времени.
+OnCalendar=*-*-* 02:00:00 Asia/Tashkent
+# Если сервер был выключен в 02:00, выполнить копию сразу после включения.
+Persistent=true
+
+[Install]
+WantedBy=timers.target

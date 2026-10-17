@@ -1,0 +1,11 @@
+# Резервное копирование PostgreSQL Core-системы (запускается таймером core-pg-backup.timer).
+
+[Unit]
+Description=Резервная копия PostgreSQL (Core)
+# Копировать имеет смысл, только если база запущена.
+Requires=core-postgres.service
+After=core-postgres.service
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/pg-backup
