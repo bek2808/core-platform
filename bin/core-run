@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# core-run — выполнить команду от имени служебного пользователя core.
+# sudo очищает окружение, поэтому передаём переменные,
+# без которых не работают podman и systemctl --user.
+# Пример: bin/core-run podman ps
+set -euo pipefail
+CORE_USER=core
+CORE_UID=$(id -u "$CORE_USER")
+exec sudo -u "$CORE_USER" env \
+  XDG_RUNTIME_DIR="/run/user/${CORE_UID}" \
+  DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${CORE_UID}/bus" \
+  bash -c 'cd ~ && exec "$@"' core-run "$@"
