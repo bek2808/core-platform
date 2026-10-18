@@ -40,7 +40,7 @@ NoNewPrivileges=true
 Memory=1g
 
 # Проверка живости: отвечает ли приложение на /healthz/.
-HealthCmd=python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz/', timeout=5)"
+HealthCmd=python /app/healthcheck.py
 HealthInterval=30s
 HealthStartPeriod=20s
 
