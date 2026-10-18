@@ -19,6 +19,8 @@ Exec=postgres -c hba_file=/etc/postgresql/pg_hba.conf
 Secret=pg_superuser_password
 Environment=POSTGRES_PASSWORD_FILE=/run/secrets/pg_superuser_password
 
+# Сеть core-net: в ней Django и другие сервисы находят базу по имени core-postgres.
+Network=core.network
 # Порт базы - только для самого сервера (127.0.0.1), снаружи недоступен.
 PublishPort=127.0.0.1:5432:5432
 
