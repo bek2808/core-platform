@@ -81,7 +81,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # Наши приложения
-    "accounts",
+    "accounts",        # пользователи (сотрудники)
+    "references",      # справочники ЕРСП
+    "companies",       # страховые компании (мультиарендность)
 ]
 
 MIDDLEWARE = [

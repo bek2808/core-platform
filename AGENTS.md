@@ -34,7 +34,9 @@ Core-система страховой компании: продажи, пол�
 AGENTS.md                этот файл
 app/                     Django-приложение (всё, что попадает в образ core-web)
   config/                настройки, адреса, точка входа WSGI
-  accounts/              модель пользователя accounts.User
+  accounts/              модель пользователя accounts.User (+ страховая компания сотрудника)
+  references/            справочники ЕРСП: модели, загрузчик, файлы data/
+  companies/             страховые компании (мультиарендность)
   */tests.py             автотесты (у каждого приложения свои)
   Containerfile          рецепт образа
   requirements.txt       зависимости, только точные версии
@@ -126,6 +128,7 @@ docs/                    требования аналитика и соглас
 | Журнал базы | `bin/core-run podman logs --tail 50 core-postgres` |
 | Консоль Django | `bin/core-run podman exec -it core-web python manage.py shell` |
 | SQL от суперпользователя | `bin/core-run podman exec -it core-postgres psql -U postgres -d core` |
+| Загрузить справочники ЕРСП | `bin/core-run podman exec core-web python manage.py load_ersp_references` |
 | Резервная копия вручную | `bin/core-run systemctl --user start core-pg-backup.service` |
 | Список копий | `bin/core-run ls -l /home/core/backups` |
 

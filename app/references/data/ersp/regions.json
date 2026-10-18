@@ -1,0 +1,90 @@
+{
+  "error": 0,
+  "error_message": "",
+  "result": [
+    {
+      "id": 13,
+      "name": "Джизакская обл.",
+      "nameUz": "Jizzax viloyati",
+      "nameUzc": "Жиззах вилояти"
+    },
+    {
+      "id": 15,
+      "name": "Ферганская обл.",
+      "nameUz": "Farg‘ona viloyati",
+      "nameUzc": "Фарғона вилояти"
+    },
+    {
+      "id": 10,
+      "name": "Город Ташкент",
+      "nameUz": "Toshkent shahri",
+      "nameUzc": "Тошкент шаҳри"
+    },
+    {
+      "id": 23,
+      "name": "Респ. Каракалпакстан",
+      "nameUz": "Qoraqalpog‘iston resp.",
+      "nameUzc": "Қорақалпоғистон Республикаси"
+    },
+    {
+      "id": 11,
+      "name": "Ташкентская обл.",
+      "nameUz": "Toshkent viloyati ",
+      "nameUzc": "Тошкент вилояти "
+    },
+    {
+      "id": 21,
+      "name": "Навоийская обл.",
+      "nameUz": "Navoiy viloyati",
+      "nameUzc": "Навоий вилояти"
+    },
+    {
+      "id": 18,
+      "name": "Кашкадарьинская обл.",
+      "nameUz": "Qashqadaryo viloyati",
+      "nameUzc": "Қашқадарё вилояти"
+    },
+    {
+      "id": 19,
+      "name": "Сурхандарьинская обл.",
+      "nameUz": "Surxondaryo viloyati",
+      "nameUzc": "Сурхондарё вилояти"
+    },
+    {
+      "id": 16,
+      "name": "Наманганская обл.",
+      "nameUz": "Namangan viloyati",
+      "nameUzc": "Наманган вилояти"
+    },
+    {
+      "id": 17,
+      "name": "Андижанская обл.",
+      "nameUz": "Andijon viloyati",
+      "nameUzc": "Андижон вилояти"
+    },
+    {
+      "id": 20,
+      "name": "Бухарская обл.",
+      "nameUz": "Buxoro viloyati",
+      "nameUzc": "Бухоро вилояти"
+    },
+    {
+      "id": 12,
+      "name": "Сырдарьинская обл.",
+      "nameUz": "Sirdaryo viloyati",
+      "nameUzc": "Сирдарё вилояти"
+    },
+    {
+      "id": 22,
+      "name": "Хорезмская обл.",
+      "nameUz": "Xorazm viloyati",
+      "nameUzc": "Хоразм вилояти"
+    },
+    {
+      "id": 14,
+      "name": "Самаркандская обл.",
+      "nameUz": "Samarqand viloyati ",
+      "nameUzc": "Самарқанд вилояти "
+    }
+  ]
+}

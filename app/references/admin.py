@@ -1,0 +1,53 @@
+"""
+Справочники ЕРСП в админ-панели: только просмотр.
+
+Добавлять, править и удалять записи здесь нельзя никому, даже суперпользователю:
+справочник - копия ЕРСП и меняется только командой load_ersp_references.
+"""
+import json
+
+from django.contrib import admin
+from django.utils.html import format_html
+
+from .models import ErspInsurer, ErspOwnershipForm, ErspRegion
+
+
+class ErspReferenceAdmin(admin.ModelAdmin):
+    """Общие настройки: только чтение, ответ ЕРСП показывается целиком."""
+
+    list_filter = ["is_present"]
+    readonly_fields = ["raw_pretty"]
+    exclude = ["raw"]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    @admin.display(description="ответ ЕРСП")
+    def raw_pretty(self, obj):
+        text = json.dumps(obj.raw, ensure_ascii=False, indent=2)
+        return format_html("<pre>{}</pre>", text)
+
+
+@admin.register(ErspRegion)
+class ErspRegionAdmin(ErspReferenceAdmin):
+    list_display = ["id", "name", "name_uz", "soato_code", "is_present"]
+    search_fields = ["name", "name_uz", "name_uzc", "soato_code"]
+
+
+@admin.register(ErspOwnershipForm)
+class ErspOwnershipFormAdmin(ErspReferenceAdmin):
+    list_display = ["id", "name", "is_present"]
+    search_fields = ["name"]
+
+
+@admin.register(ErspInsurer)
+class ErspInsurerAdmin(ErspReferenceAdmin):
+    list_display = ["id", "name", "tin", "industry", "license_stopped_date", "is_present"]
+    list_filter = ["is_present", "industry"]
+    search_fields = ["name", "tin"]
