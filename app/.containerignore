@@ -1,0 +1,6 @@
+# Что не попадает в образ при сборке.
+__pycache__/
+*.py[cod]
+staticfiles/
+.env
+.env.*

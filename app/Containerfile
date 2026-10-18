@@ -1,0 +1,35 @@
+# Образ веб-приложения Core-системы (Django + gunicorn).
+# Собирается скриптом bin/build-web из закоммиченного кода папки app/.
+
+# Точная версия базового образа: Python 3.14.8 на Debian 13 (trixie), урезанный вариант.
+FROM docker.io/library/python:3.14.8-slim-trixie
+
+# PYTHONDONTWRITEBYTECODE - не писать .pyc (файловая система будет только для чтения);
+# PYTHONUNBUFFERED - журналы сразу в вывод, без задержки.
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+WORKDIR /app
+
+# Отдельный пользователь без прав внутри контейнера: приложение не работает от root.
+RUN groupadd --system --gid 10001 app \
+ && useradd --system --uid 10001 --gid app --no-create-home --shell /usr/sbin/nologin app
+
+# Сначала только зависимости: этот слой кешируется и не пересобирается,
+# пока requirements.txt не изменился.
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+# Затем код приложения.
+COPY . .
+
+# Статика (CSS/JS админ-панели) собирается в образ. Ключ здесь временный,
+# только для сборки: настоящий приходит из секрета при запуске.
+RUN DJANGO_SECRET_KEY=build-only-not-secret python manage.py collectstatic --noinput
+
+USER app
+EXPOSE 8000
+
+CMD ["gunicorn", "config.wsgi:application", "--config", "gunicorn.conf.py"]
