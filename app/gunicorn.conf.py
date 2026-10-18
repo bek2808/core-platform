@@ -15,6 +15,11 @@ graceful_timeout = 30
 # контейнера доступна только для чтения.
 worker_tmp_dir = "/dev/shm"
 
+# Управляющий сокет gunicorn (утилита gunicornc, с версии 25.1) отключён:
+# приложением управляют systemd и Podman, а сокету негде жить - файловая
+# система контейнера только для чтения.
+control_socket_disable = True
+
 # Журналы запросов и ошибок - в стандартный вывод (их собирает journald).
 accesslog = "-"
 errorlog = "-"
