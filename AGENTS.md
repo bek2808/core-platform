@@ -35,13 +35,15 @@ AGENTS.md                этот файл
 app/                     Django-приложение (всё, что попадает в образ core-web)
   config/                настройки, адреса, точка входа WSGI
   accounts/              модель пользователя accounts.User
+  */tests.py             автотесты (у каждого приложения свои)
   Containerfile          рецепт образа
   requirements.txt       зависимости, только точные версии
   gunicorn.conf.py       настройки веб-сервера
   healthcheck.py         проверка живости для Podman
 bin/                     скрипты для сервера (запускаются под support из ~/core-platform)
   core-run               выполнить команду от имени core
-  build-web              собрать образ core-web из закоммиченного кода
+  build-web              собрать образ core-web из закоммиченного кода (с автотестами)
+  test                   прогнать автотесты в образе core-web
   pg-backup              резервная копия (ставится в /home/core/.local/bin/)
 quadlet/                 описания контейнеров, тома и сети для Podman Quadlet
 systemd/                 служба и таймер резервного копирования
@@ -54,7 +56,8 @@ postgres/                правила доступа к PostgreSQL
    описано файлом в git. Изменение, сделанное только на сервере, считается ошибкой.
 2. **Никаких секретов в git.** Пароли и ключи - только в секретах Podman
    (`podman secret`), в контейнер попадают файлами `/run/secrets/<имя>`.
-   Сейчас есть: `pg_superuser_password`, `pg_app_password`, `django_secret_key`.
+   Сейчас есть: `pg_superuser_password`, `pg_app_password`, `pg_test_password`,
+   `django_secret_key`.
    Не выводи значения секретов на экран и в журналы.
 3. **Только точные версии.** Образы - полное имя и точный тег
    (`docker.io/library/postgres:18.6`), никаких `latest`. Python-пакеты - `==`.
@@ -87,6 +90,13 @@ postgres/                правила доступа к PostgreSQL
   git pull && bin/build-web
   bin/core-run systemctl --user restart core-web.service
   ```
+- Автотесты лежат рядом с кодом: `app/<приложение>/tests.py`. Новое поведение -
+  новый тест в том же коммите. `bin/build-web` прогоняет тесты в свежем образе
+  и помечает его `:current` только если все прошли; упавшие тесты означают,
+  что работающая версия не меняется.
+  Тесты запускаются под ролью `core_test` (может создавать базы, в рабочую базу
+  `core` не допущена) во временной базе `test_core`, которую Django создаёт
+  и удаляет сам. Тесты не должны зависеть от данных рабочей базы.
 - Миграции создаются (`makemigrations`) вместе с изменением модели и коммитятся.
   Применяются на сервере:
   ```
@@ -104,6 +114,7 @@ postgres/                правила доступа к PostgreSQL
 | Что | Команда |
 |---|---|
 | Состояние контейнеров | `bin/core-run podman ps` |
+| Автотесты (текущий образ) | `bin/test` (одно приложение: `bin/test accounts`) |
 | Журнал приложения | `bin/core-run podman logs --tail 50 core-web` |
 | Журнал базы | `bin/core-run podman logs --tail 50 core-postgres` |
 | Консоль Django | `bin/core-run podman exec -it core-web python manage.py shell` |
@@ -119,5 +130,3 @@ postgres/                правила доступа к PostgreSQL
 - Резервные копии лежат на той же ВМ; нужна вторая площадка.
 - HTTPS и доступ из сети компании ещё не настроены (порты 80/443 в ufw открыты,
   но их никто не слушает).
-- Автотесты Django пока не запускаются: роли `core_app` нельзя создавать
-  тестовую базу. Решение - отдельный этап.

@@ -117,6 +117,11 @@ TEMPLATES = [
 
 # --- База данных ----------------------------------------------------------------
 # Подключение под ролью core_app (не суперпользователь) по сети core-net.
+#
+# Автотесты (bin/test) подключаются под другой ролью - core_test: ей можно
+# создавать базы, но в рабочую базу core её не пускают. Django создаёт пустую
+# базу test_core, прогоняет в ней тесты и удаляет её. Поэтому роль и имя
+# секрета с паролем задаются переменными окружения.
 
 DATABASES = {
     "default": {
@@ -125,7 +130,11 @@ DATABASES = {
         "PORT": env("DJANGO_DB_PORT", "5432"),
         "NAME": env("DJANGO_DB_NAME", "core"),
         "USER": env("DJANGO_DB_USER", "core_app"),
-        "PASSWORD": read_secret("pg_app_password", required=False),
+        # Пароль - из секрета Podman: pg_app_password у приложения,
+        # pg_test_password у автотестов.
+        "PASSWORD": read_secret(
+            env("DJANGO_DB_PASSWORD_SECRET", "pg_app_password"), required=False
+        ),
         # Держать соединение до 60 с, а не открывать новое на каждый запрос;
         # перед использованием проверять, что оно живо (например, после перезапуска базы).
         "CONN_MAX_AGE": 60,

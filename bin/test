@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# test - прогнать автотесты Django внутри образа core-web.
+# Запуск из ~/core-platform под support:
+#   bin/test                все тесты в образе localhost/core-web:current
+#   bin/test accounts       только тесты приложения accounts
+#   CORE_TEST_IMAGE=localhost/core-web:1a55902 bin/test     тесты конкретной сборки
+# bin/build-web вызывает этот скрипт сам, перед тем как пометить сборку :current.
+#
+# Как устроено. Тесты идут в отдельном временном контейнере из того же образа,
+# который потом пойдёт в работу (контейнер удаляется после прогона):
+# - подключение под ролью core_test: она может создавать базы, но в рабочую
+#   базу core её не пускают; Django создаёт пустую базу test_core, прогоняет
+#   в ней тесты и удаляет её;
+# - контейнер не получает ни пароль core_app, ни настоящий SECRET_KEY;
+# - защита та же, что у core-web: только чтение, без capabilities.
+# Код выхода 0 - все тесты прошли, иначе - нет.
+
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+IMAGE="${CORE_TEST_IMAGE:-localhost/core-web:current}"
+
+echo "Автотесты в образе $IMAGE"
+
+bin/core-run podman run --rm \
+  --name core-web-test \
+  --pull never \
+  --network core-net \
+  --secret pg_test_password \
+  --env DJANGO_SECRET_KEY=test-only-not-secret \
+  --env DJANGO_DB_HOST=core-postgres \
+  --env DJANGO_DB_USER=core_test \
+  --env DJANGO_DB_PASSWORD_SECRET=pg_test_password \
+  --read-only \
+  --cap-drop ALL \
+  --security-opt no-new-privileges \
+  --memory 1g \
+  "$IMAGE" \
+  python manage.py test --noinput --verbosity 2 "$@"

@@ -6,6 +6,10 @@
 #   :<коммит>  - например :1a55902, для отката на любую прошлую версию;
 #   :current   - его использует quadlet/core-web.container.
 # Сборка идёт от имени core: образ попадает в его хранилище Podman.
+#
+# Перед тем как пометить сборку :current, в ней прогоняются автотесты (bin/test).
+# Упал хотя бы один тест - :current остаётся на прошлой сборке, и перезапуск
+# core-web поднимет старую, проверенную версию.
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -27,12 +31,20 @@ echo "Сборка $IMAGE:$REV из коммита $REV"
 git archive --format=tar "HEAD:app" | bin/core-run bash -c \
   "rm -rf '$CONTEXT' && mkdir -p '$CONTEXT' && tar -x -C '$CONTEXT'"
 
-# 3. Собираем образ, помечая его номером коммита.
+# 3. Собираем образ, помечая его только номером коммита.
 bin/core-run podman build \
   --tag "$IMAGE:$REV" \
-  --tag "$IMAGE:current" \
   --label "org.opencontainers.image.revision=$REV" \
   --file "$CONTEXT/Containerfile" \
   "$CONTEXT"
 
-echo "OK: $IMAGE:$REV (он же :current)"
+# 4. Автотесты в только что собранном образе.
+if ! CORE_TEST_IMAGE="$IMAGE:$REV" bin/test; then
+  echo "ОШИБКА: автотесты не прошли. Сборка $IMAGE:$REV НЕ помечена :current." >&2
+  exit 1
+fi
+
+# 5. Тесты прошли - сборка становится текущей.
+bin/core-run podman tag "$IMAGE:$REV" "$IMAGE:current"
+
+echo "OK: $IMAGE:$REV (он же :current), автотесты пройдены"
