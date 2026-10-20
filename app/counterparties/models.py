@@ -13,6 +13,7 @@
 - проверки формата продублированы в базе (CheckConstraint): неверное
   значение не попадёт в таблицу, даже если его запишут в обход формы.
 """
+from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Q
@@ -134,6 +135,14 @@ class InputChoice(TrackedModel):
 
     def normalize(self):
         self.name = squash_spaces(self.name)
+
+    def clean(self):
+        # Правило «Иное нельзя выключить» уже есть в базе (CheckConstraint выше),
+        # но в админ-панели поле «пункт «Иное»» только для чтения, а Django
+        # не проверяет в форме ограничения, в которых участвует нередактируемое
+        # поле. Без этой проверки сотрудник получал ошибку 500 вместо сообщения.
+        if self.is_other and not self.is_active:
+            raise ValidationError({"is_active": "Пункт «Иное» нельзя выключить."})
 
 
 class PowerBasis(InputChoice):

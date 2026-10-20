@@ -198,6 +198,21 @@ class AdminTests(TestCase):
         self.assertTrue(Bank.objects.filter(pk=bank.pk).exists())
         self.assertTrue(Position.objects.filter(pk=position.pk).exists())
 
+    def test_switching_off_other_shows_error(self):
+        # Найдено при проверке на сервере 20.10: вместо сообщения была ошибка 500.
+        # Поле «пункт «Иное»» в форме только для чтения, поэтому Django не
+        # проверял правило «Иное нельзя выключить» в форме, и отказ приходил
+        # уже из базы. Теперь правило проверяется и в форме.
+        other = Position.objects.get(is_other=True)
+        response = self.client.post(
+            f"/admin/counterparties/position/{other.pk}/change/",
+            {"name": "Иное", "sort_order": "999"},  # галочка «действует» снята
+        )
+        self.assertEqual(response.status_code, 200)  # форма вернулась с ошибкой, не 500
+        self.assertContains(response, "Пункт «Иное» нельзя выключить")
+        other.refresh_from_db()
+        self.assertTrue(other.is_active)
+
     def test_other_flag_not_editable(self):
         # «Иное» нельзя назначить из админ-панели: поле только для чтения.
         self.client.post(
