@@ -47,7 +47,7 @@ app/                     Django-приложение (всё, что попад�
   integrations/          обмен с ЕРСП: клиент (ersp.py: вход, общий токен в tmpfs, запросы),
                          журнал обмена (Exchange), команда ersp_check, экран подключения
                          страховой к ЕРСП (ErspConnection, ErspCredentials: данные для
-                         входа в базе шифром), разовая команда ersp_import_secrets
+                         входа в базе шифром)
   */tests.py             автотесты (у каждого приложения свои)
   Containerfile          рецепт образа
   requirements.txt       зависимости, только точные версии
@@ -58,7 +58,6 @@ bin/                     скрипты для сервера (запускаю�
   build-web              собрать образ core-web из закоммиченного кода (с автотестами)
   test                   прогнать автотесты в образе core-web
   pg-backup              резервная копия (ставится в /home/core/.local/bin/)
-  ersp-secret            завести секрет с данными для входа в ЕРСП (prod / sandbox)
   encryption-key         завести ключ шифрования секретов в базе (core_encryption_key)
 quadlet/                 описания контейнеров, тома и сети для Podman Quadlet
 systemd/                 служба и таймер резервного копирования
@@ -80,10 +79,7 @@ docs/                    требования аналитика и соглас
 2. **Никаких секретов в git.** Пароли и ключи - только в секретах Podman
    (`podman secret`), в контейнер попадают файлами `/run/secrets/<имя>`.
    Сейчас есть: `pg_superuser_password`, `pg_app_password`, `pg_test_password`,
-   `django_secret_key`, `ersp_prod_credentials`, `ersp_sandbox_credentials`
-   (прежние данные для входа Mosaic в ЕРСП - нужны только для разового переноса
-   командой `ersp_import_secrets`, затем удаляются),
-   `core_encryption_key` (ключ шифрования секретов в базе - `bin/encryption-key`;
+   `django_secret_key`, `core_encryption_key` (ключ шифрования секретов в базе - `bin/encryption-key`;
    копии нет: потерян ключ - секреты вводятся заново).
    Секрет, который вводят люди через экран (пароль внешней системы), хранится
    в базе только шифром - через `config.crypto` (см. «Секреты в базе» ниже).

@@ -1,6 +1,5 @@
 """
-Автотесты экрана «Интеграции -> Подключение к ЕРСП» и разовой команды
-ersp_import_secrets.
+Автотесты экрана «Интеграции -> Подключение к ЕРСП».
 
 Главное, что проверяется:
 - client_secret и пароль не попадают в страницу ни значением, ни шифром;
@@ -14,12 +13,8 @@ ersp_import_secrets.
 
 Запуск на сервере: bin/test integrations
 """
-import io
-import json
-
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
-from django.core.management import CommandError, call_command
 from django.test import TestCase
 
 from accounts.models import User
@@ -330,85 +325,3 @@ class SendEnvironmentTests(ScreenCase):
         self.assertEqual(ersp.environment_for(ersp.PROVIDER, self.mosaic), "prod")
         self.assertEqual(ersp.environment_for(ersp.REFERENCES, self.mosaic), "prod")
 
-
-class ImportSecretsTests(ErspMixin, TestCase):
-    """Разовый перенос секретов ersp_*_credentials в карточку страховой."""
-
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
-        cls.target = InsuranceCompany.objects.create(name="Target Insurance", code="target", country="KZ")
-
-    def setUp(self):
-        super().setUp()
-        for environment in ("prod", "sandbox"):
-            path = self.secrets / f"ersp_{environment}_credentials"
-            path.write_text(json.dumps({**CREDENTIALS, "username": f"user_{environment}"}), encoding="utf-8")
-            self.addCleanup(path.unlink, missing_ok=True)
-
-    def run_import(self, code="target"):
-        out = io.StringIO()
-        call_command("ersp_import_secrets", "--company", code, stdout=out)
-        return out.getvalue()
-
-    def test_both_environments_imported(self):
-        output = self.run_import()
-        connection = ErspConnection.objects.get(insurance_company=self.target)
-        for environment in ("prod", "sandbox"):
-            credentials = connection.credentials.get(environment=environment)
-            self.assertEqual(credentials.login_data(), {**CREDENTIALS, "username": f"user_{environment}"})
-        self.assertIn("prod: перенесено", output)
-        self.assertIn("sandbox: перенесено", output)
-        for value in (CREDENTIALS["client_secret"], CREDENTIALS["password"]):
-            self.assertNotIn(value, output)
-
-    def test_logged_by_system_without_secrets(self):
-        self.run_import()
-        entries = ChangeLog.objects.filter(insurance_company=self.target, field="password_cipher")
-        self.assertEqual(entries.count(), 2)
-        for entry in entries:
-            self.assertIsNone(entry.user)
-            self.assertEqual(entry.new_value, "***")
-
-    def test_second_run_changes_nothing(self):
-        self.run_import()
-        credentials = ErspCredentials.objects.get(connection__insurance_company=self.target, environment="prod")
-        output = self.run_import()
-        self.assertIn("уже есть данные - не трогаю", output)
-        again = ErspCredentials.objects.get(pk=credentials.pk)
-        self.assertEqual(again.password_cipher, credentials.password_cipher)
-
-    def test_screen_values_not_overwritten(self):
-        connection = ErspConnection.for_company(self.target)
-        prod = connection.credentials.get(environment="prod")
-        prod.client_id = "typed-on-screen"
-        prod.save()
-        output = self.run_import()
-        self.assertIn("prod: в карточке уже есть данные", output)
-        prod.refresh_from_db()
-        self.assertEqual(prod.client_id, "typed-on-screen")
-        self.assertIn("sandbox: перенесено", output)
-
-    def test_missing_secret_skipped(self):
-        (self.secrets / "ersp_sandbox_credentials").unlink()
-        output = self.run_import()
-        self.assertIn("sandbox: секрета ersp_sandbox_credentials нет", output)
-        self.assertIn("prod: перенесено", output)
-
-    def test_no_secrets_at_all(self):
-        for environment in ("prod", "sandbox"):
-            (self.secrets / f"ersp_{environment}_credentials").unlink()
-        with self.assertRaisesMessage(CommandError, "переносить нечего"):
-            self.run_import()
-
-    def test_broken_secret(self):
-        (self.secrets / "ersp_prod_credentials").write_text("не json")
-        with self.assertRaisesMessage(CommandError, "не JSON"):
-            self.run_import()
-        (self.secrets / "ersp_prod_credentials").write_text(json.dumps({"client_id": "x"}))
-        with self.assertRaisesMessage(CommandError, "client_secret, username, password"):
-            self.run_import()
-
-    def test_unknown_company(self):
-        with self.assertRaisesMessage(CommandError, "'nope'"):
-            self.run_import("nope")

@@ -23,11 +23,10 @@ PublishPort=127.0.0.1:8000:8000
 # Секреты - в виде файлов /run/secrets/<имя> внутри контейнера.
 Secret=pg_app_password
 Secret=django_secret_key
-# Данные для входа в ЕРСП (bin/ersp-secret). Токен приложение получает само.
-Secret=ersp_prod_credentials
-Secret=ersp_sandbox_credentials
-# Ключ шифрования секретов в базе (bin/encryption-key; app/config/crypto.py).
-# Заводится ДО установки этого файла: без секрета контейнер не запустится.
+# Ключ шифрования секретов в базе (bin/encryption-key; app/config/crypto.py):
+# данные для входа в ЕРСП каждой страховой лежат в базе шифром, а вводятся
+# на экране «Интеграции -> Подключение к ЕРСП». Токен приложение получает само.
+# Ключ заводится ДО установки этого файла: без секрета контейнер не запустится.
 Secret=core_encryption_key
 
 # Настройки среды (см. app/config/settings.py).
@@ -35,11 +34,8 @@ Environment=DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
 Environment=DJANGO_DB_HOST=core-postgres
 Environment=DJANGO_DB_NAME=core
 Environment=DJANGO_DB_USER=core_app
-# ЕРСП: чтение (провайдер, справочники) - боевая среда, отправка - песочница.
-Environment=ERSP_READ_ENV=prod
-Environment=ERSP_SEND_ENV=sandbox
-# Краткий код страховой, которой принадлежат секреты ersp_*_credentials.
-Environment=ERSP_CREDENTIALS_COMPANY=mosaic
+# Среда ЕРСП по группам операций - правило в коде (integrations.ersp.environment_for):
+# справочники и провайдер - боевая, отправка полисов - из карточки страховой.
 
 # Защита: файловая система только для чтения, никаких особых прав Linux,
 # процессы не могут повысить себе права.
