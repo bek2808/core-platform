@@ -7,6 +7,8 @@
 from django.db import connection
 from django.test import SimpleTestCase, TestCase
 
+from .testing import refusal_expected
+
 
 class HealthzTests(SimpleTestCase):
     """Адрес /healthz/: по нему Podman каждые 30 секунд проверяет, живо ли приложение."""
@@ -19,7 +21,8 @@ class HealthzTests(SimpleTestCase):
 
     def test_only_get_allowed(self):
         # Проверка живости только читает; любой другой метод - ошибка 405.
-        response = self.client.post("/healthz/")
+        with refusal_expected(self):
+            response = self.client.post("/healthz/")
         self.assertEqual(response.status_code, 405)
 
 

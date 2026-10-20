@@ -10,6 +10,7 @@ from django.db.models import ProtectedError
 from django.test import TestCase
 
 from accounts.models import User
+from config.testing import refusal_expected
 from references.loader import load_from_files
 from references.models import ErspInsurer, ErspRegion
 
@@ -19,8 +20,11 @@ STRONG_PASSWORD = "Kx7#mQ2v!pLr9zT"
 
 
 class InsuranceCompanyTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        load_from_files()  # один раз на группу тестов
+
     def setUp(self):
-        load_from_files()
         self.mosaic_ersp = ErspInsurer.objects.get(pk=1084)
         self.tashkent = ErspRegion.objects.get(pk=10)
 
@@ -81,10 +85,13 @@ class InsuranceCompanyTests(TestCase):
 
 
 class InsuranceCompanyAdminTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        load_from_files()  # один раз на группу тестов
+        cls.admin = User.objects.create_superuser("admin", password=STRONG_PASSWORD)
+
     def setUp(self):
-        load_from_files()
-        admin = User.objects.create_superuser("admin", password=STRONG_PASSWORD)
-        self.client.force_login(admin)
+        self.client.force_login(self.admin)
 
     def test_create_company_in_admin(self):
         page = self.client.post(
@@ -104,7 +111,8 @@ class InsuranceCompanyAdminTests(TestCase):
 
     def test_no_delete_in_admin(self):
         company = InsuranceCompany.objects.create(name="Test", code="test", country="KZ")
-        page = self.client.get(f"/admin/companies/insurancecompany/{company.pk}/delete/")
+        with refusal_expected(self):
+            page = self.client.get(f"/admin/companies/insurancecompany/{company.pk}/delete/")
         self.assertEqual(page.status_code, 403)
 
     def test_user_page_shows_company_field(self):

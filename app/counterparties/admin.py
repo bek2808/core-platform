@@ -194,6 +194,29 @@ class CounterpartyAdmin(NoRelatedLinks, TrackedAdmin):
     search_fields = ["search_text"]
     search_help_text = "Наименование (любой частью, кириллицей или латиницей) или ИНН."
 
+    actions = ["archive", "restore"]
+
+    @admin.action(description="В архив", permissions=["change"])
+    def archive(self, request, queryset):
+        count = self._set_status(request, queryset, Counterparty.Status.ARCHIVED)
+        self.message_user(request, f"Переведено в архив: {count}.")
+
+    @admin.action(description="Вернуть из архива", permissions=["change"])
+    def restore(self, request, queryset):
+        count = self._set_status(request, queryset, Counterparty.Status.ACTIVE)
+        self.message_user(request, f"Возвращено из архива: {count}.")
+
+    @staticmethod
+    def _set_status(request, queryset, status):
+        # По одной записи и с сотрудником - чтобы каждая смена статуса
+        # попала в журнал (массовое изменение журнал обходит и запрещено).
+        count = 0
+        for counterparty in queryset.exclude(status=status):
+            counterparty.status = status
+            counterparty.save(by=request.user, update_fields=["status"])
+            count += 1
+        return count
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         company_id = request.user.insurance_company_id

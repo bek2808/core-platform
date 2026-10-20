@@ -13,6 +13,7 @@ from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 
 from accounts.models import User
+from config.testing import refusal_expected
 from counterparties.models import Bank
 
 from .models import ChangeLog, Source, UntrackedChangeError
@@ -267,8 +268,11 @@ class JournalAdminTests(TestCase):
         self.assertEqual(
             self.client.get(f"/admin/audit/changelog/{entry.pk}/change/").status_code, 200
         )
-        self.assertEqual(self.client.get("/admin/audit/changelog/add/").status_code, 403)
-        self.client.post(f"/admin/audit/changelog/{entry.pk}/change/", {"field": "x"})
-        self.client.post(f"/admin/audit/changelog/{entry.pk}/delete/", {"post": "yes"})
+        with refusal_expected(self):
+            self.assertEqual(self.client.get("/admin/audit/changelog/add/").status_code, 403)
+        with refusal_expected(self):
+            self.client.post(f"/admin/audit/changelog/{entry.pk}/change/", {"field": "x"})
+        with refusal_expected(self):
+            self.client.post(f"/admin/audit/changelog/{entry.pk}/delete/", {"post": "yes"})
         entry.refresh_from_db()
         self.assertEqual(entry.field, field_before)

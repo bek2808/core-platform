@@ -11,6 +11,7 @@ import datetime
 import uuid
 from decimal import Decimal
 
+from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
@@ -19,6 +20,7 @@ from django.test import SimpleTestCase, TestCase
 from accounts.models import User
 from audit.models import ChangeLog, Source, UntrackedChangeError
 from companies.models import InsuranceCompany
+from config.testing import refusal_expected
 from references.loader import load_from_files
 
 from .models import (
@@ -224,7 +226,7 @@ class AdminTests(TestCase):
             f"/admin/counterparties/bank/{bank.pk}/delete/",
             f"/admin/counterparties/position/{position.pk}/delete/",
         ]:
-            with self.subTest(url=url):
+            with self.subTest(url=url), refusal_expected(self):
                 self.assertEqual(self.client.post(url, {"post": "yes"}).status_code, 403)
         self.assertTrue(Bank.objects.filter(pk=bank.pk).exists())
         self.assertTrue(Position.objects.filter(pk=position.pk).exists())
@@ -273,16 +275,20 @@ INSON = {
 class CounterpartyTestCase(TestCase):
     """Общая подготовка: справочники ЕРСП, две страховые, сотрудник Mosaic."""
 
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
+        # Справочники ЕРСП загружаются один раз на группу тестов, а не перед
+        # каждым: каждый тест всё равно видит их в исходном виде (его
+        # изменения откатываются).
         load_from_files()
-        self.mosaic = InsuranceCompany.objects.create(
+        cls.mosaic = InsuranceCompany.objects.create(
             name="Mosaic Insurance Group", code="mosaic", ersp_insurer_id=1084, ersp_region_id=10
         )
-        self.other_company = InsuranceCompany.objects.create(
+        cls.other_company = InsuranceCompany.objects.create(
             name="Test Insurance KZ", code="test-kz", country="KZ"
         )
-        self.bekzod = User.objects.create_superuser(
-            "bekzod", password=STRONG_PASSWORD, insurance_company=self.mosaic
+        cls.bekzod = User.objects.create_superuser(
+            "bekzod", password=STRONG_PASSWORD, insurance_company=cls.mosaic
         )
 
     def make(self, company=None, by=None, counterparty_fields=None, **legal_fields):
@@ -693,9 +699,10 @@ class CounterpartyAdminTests(CounterpartyTestCase):
 
     def test_no_delete(self):
         counterparty, _ = self.make()
-        response = self.client.post(
-            f"/admin/counterparties/counterparty/{counterparty.pk}/delete/", {"post": "yes"}
-        )
+        with refusal_expected(self):
+            response = self.client.post(
+                f"/admin/counterparties/counterparty/{counterparty.pk}/delete/", {"post": "yes"}
+            )
         self.assertEqual(response.status_code, 403)
         self.assertTrue(Counterparty.objects.filter(pk=counterparty.pk).exists())
 
@@ -967,3 +974,113 @@ class BankAccountTests(CounterpartyTestCase):
         account = self.account(bank=self.bank, number="20216000004849419001")
         with self.assertRaises(UntrackedChangeError):
             account.delete()
+
+
+# --- Права: группы «Администратор справочников» и «Сотрудник» -------------------
+
+ADMIN_GROUP = "Администратор справочников"
+EMPLOYEE_GROUP = "Сотрудник"
+
+
+class AccessTests(CounterpartyTestCase):
+    """Права обычных (не суперпользователей) сотрудников в админ-панели."""
+
+    def login(self, username, group=None, company=None):
+        user = User.objects.create_user(
+            username, password=STRONG_PASSWORD, is_staff=True,
+            insurance_company=company or self.mosaic,
+        )
+        if group:
+            user.groups.add(Group.objects.get(name=group))
+        self.client.force_login(user)
+        return user
+
+    def test_groups_created_by_migration(self):
+        admin_rights = set(
+            Group.objects.get(name=ADMIN_GROUP).permissions.values_list("codename", flat=True)
+        )
+        employee_rights = set(
+            Group.objects.get(name=EMPLOYEE_GROUP).permissions.values_list("codename", flat=True)
+        )
+        self.assertTrue({"add_counterparty", "change_bankaccount", "change_bank",
+                         "view_erspoked", "view_changelog"} <= admin_rights)
+        self.assertNotIn("change_erspoked", admin_rights)  # справочники ЕРСП - только просмотр
+        self.assertTrue(all(code.startswith("view_") for code in employee_rights))
+        self.assertIn("view_counterparty", employee_rights)
+        # Удалять не может никто.
+        self.assertFalse(any(code.startswith("delete_") for code in admin_rights | employee_rights))
+
+    def test_employee_only_views(self):
+        counterparty, _ = self.make()
+        self.login("ivanov", EMPLOYEE_GROUP)
+        self.assertContains(self.client.get("/admin/counterparties/counterparty/"), "AJ ST")
+        card = self.client.get(f"/admin/counterparties/counterparty/{counterparty.pk}/change/")
+        self.assertEqual(card.status_code, 200)
+        self.assertNotContains(card, 'name="phone"')  # поля только для чтения, без ввода
+        with refusal_expected(self):
+            self.assertEqual(self.client.get("/admin/counterparties/counterparty/add/").status_code, 403)
+        with refusal_expected(self):
+            response = self.client.post(
+                f"/admin/counterparties/counterparty/{counterparty.pk}/change/", {"phone": "998900000000"}
+            )
+        self.assertEqual(response.status_code, 403)
+        counterparty.refresh_from_db()
+        self.assertEqual(counterparty.phone, "")
+
+    def test_employee_has_no_archive_action(self):
+        self.make()
+        self.login("ivanov", EMPLOYEE_GROUP)
+        listing = self.client.get("/admin/counterparties/counterparty/")
+        self.assertNotContains(listing, 'value="archive"')
+
+    def test_without_group_no_access(self):
+        self.make()
+        self.login("petrov")  # статус персонала есть, группы нет
+        with refusal_expected(self):
+            self.assertEqual(self.client.get("/admin/counterparties/counterparty/").status_code, 403)
+
+    def test_admin_group_archives_and_restores(self):
+        counterparty, _ = self.make()
+        user = self.login("admin1", ADMIN_GROUP)
+        self.assertEqual(self.client.get("/admin/counterparties/counterparty/add/").status_code, 200)
+        url = "/admin/counterparties/counterparty/"
+        self.client.post(url, {"action": "archive", "_selected_action": [counterparty.pk]})
+        counterparty.refresh_from_db()
+        self.assertEqual(counterparty.status, Counterparty.Status.ARCHIVED)
+        entry = ChangeLog.objects.filter(field="status").first()
+        self.assertEqual((entry.user, entry.old_value, entry.new_value), (user, "active", "archived"))
+        self.client.post(url, {"action": "restore", "_selected_action": [counterparty.pk]})
+        counterparty.refresh_from_db()
+        self.assertEqual(counterparty.status, Counterparty.Status.ACTIVE)
+
+    def test_admin_group_cannot_delete(self):
+        counterparty, _ = self.make()
+        self.login("admin1", ADMIN_GROUP)
+        with refusal_expected(self):
+            response = self.client.post(
+                f"/admin/counterparties/counterparty/{counterparty.pk}/delete/", {"post": "yes"}
+            )
+        self.assertEqual(response.status_code, 403)
+
+    def test_admin_group_search_in_references(self):
+        # Поиск банка, валюты и ОКЭД в карточке требует права просмотра этих
+        # справочников - иначе поле поиска молча ничего не находит.
+        self.login("admin1", ADMIN_GROUP)
+        for model, field, term in [("bankaccount", "currency", "USD"),
+                                   ("legalentity", "oked", "65120")]:
+            with self.subTest(field=field):
+                response = self.client.get("/admin/autocomplete/", {
+                    "app_label": "counterparties", "model_name": model,
+                    "field_name": field, "term": term,
+                })
+                self.assertEqual(response.status_code, 200)
+                self.assertTrue(response.json()["results"])
+
+    def test_journal_of_other_company_hidden(self):
+        self.make(by=self.bekzod, short_name="Клиент Mosaic")
+        Bank(mfo="00842", name="KDB BANK").save(by=self.bekzod)  # общий справочник
+        self.login("kz_admin", ADMIN_GROUP, company=self.other_company)
+        journal = self.client.get("/admin/audit/changelog/")
+        self.assertEqual(journal.status_code, 200)
+        self.assertNotContains(journal, "Клиент Mosaic")
+        self.assertContains(journal, "KDB BANK")  # изменения общих справочников видны всем

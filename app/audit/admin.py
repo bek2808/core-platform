@@ -175,6 +175,17 @@ class ChangeLogAdmin(admin.ModelAdmin):
     ]
     readonly_fields = fields
 
+    def get_queryset(self, request):
+        # Мультиарендность: сотрудник видит изменения клиентов своей страховой
+        # и общих справочников (банки, должности - без страховой).
+        qs = super().get_queryset(request)
+        company_id = request.user.insurance_company_id
+        if company_id:
+            return qs.filter(Q(insurance_company_id=company_id) | Q(insurance_company__isnull=True))
+        if request.user.is_superuser:
+            return qs  # администратор системы видит всё
+        return qs.none()
+
     def has_add_permission(self, request):
         return False
 

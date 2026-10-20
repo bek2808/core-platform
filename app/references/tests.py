@@ -12,6 +12,7 @@ from django.core.management import call_command
 from django.test import SimpleTestCase, TestCase
 
 from accounts.models import User
+from config.testing import refusal_expected
 
 from .loader import (
     DATA_DIR,
@@ -82,8 +83,9 @@ class DataFilesTests(SimpleTestCase):
 class LoadFromFilesTests(TestCase):
     """Первая загрузка из файлов."""
 
-    def setUp(self):
-        self.results = load_from_files()
+    @classmethod
+    def setUpTestData(cls):
+        cls.results = load_from_files()  # один раз на группу тестов
 
     def test_counts(self):
         self.assertEqual(ErspRegion.objects.count(), 14)
@@ -163,9 +165,12 @@ class LoadFromFilesTests(TestCase):
 class ReloadTests(TestCase):
     """Повторные загрузки: изменения, пропавшие записи, ошибки."""
 
+    @classmethod
+    def setUpTestData(cls):
+        sync_all(**file_rows())  # первая загрузка - один раз на группу тестов
+
     def setUp(self):
-        self.rows = file_rows()
-        sync_all(**copy.deepcopy(self.rows))
+        self.rows = file_rows()  # свежая копия строк - тест может их менять
 
     def test_second_load_changes_nothing(self):
         results = sync_all(**copy.deepcopy(self.rows))
@@ -267,10 +272,13 @@ class CommandTests(TestCase):
 class AdminReadOnlyTests(TestCase):
     """Справочники ЕРСП в админ-панели видны, но не редактируются никем."""
 
+    @classmethod
+    def setUpTestData(cls):
+        load_from_files()  # один раз на группу тестов
+        cls.admin = User.objects.create_superuser("admin", password="Kx7#mQ2v!pLr9zT")
+
     def setUp(self):
-        load_from_files()
-        admin = User.objects.create_superuser("admin", password="Kx7#mQ2v!pLr9zT")
-        self.client.force_login(admin)
+        self.client.force_login(self.admin)
 
     def test_list_and_view_pages_open(self):
         self.assertEqual(self.client.get("/admin/references/erspinsurer/").status_code, 200)
@@ -279,13 +287,14 @@ class AdminReadOnlyTests(TestCase):
         self.assertContains(page, "308143734")
 
     def test_superuser_cannot_add_or_delete(self):
-        self.assertEqual(self.client.get("/admin/references/erspregion/add/").status_code, 403)
-        self.assertEqual(
-            self.client.post("/admin/references/erspregion/10/delete/", {"post": "yes"}).status_code,
-            403,
-        )
+        with refusal_expected(self):
+            self.assertEqual(self.client.get("/admin/references/erspregion/add/").status_code, 403)
+        with refusal_expected(self):
+            response = self.client.post("/admin/references/erspregion/10/delete/", {"post": "yes"})
+        self.assertEqual(response.status_code, 403)
         self.assertTrue(ErspRegion.objects.filter(pk=10).exists())
 
     def test_superuser_cannot_change(self):
-        self.client.post("/admin/references/erspregion/10/change/", {"name": "Взлом"})
+        with refusal_expected(self):
+            self.client.post("/admin/references/erspregion/10/change/", {"name": "Взлом"})
         self.assertEqual(ErspRegion.objects.get(pk=10).name, "Город Ташкент")
