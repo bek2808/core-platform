@@ -38,7 +38,8 @@ app/                     Django-приложение (всё, что попад�
   accounts/              модель пользователя accounts.User (+ страховая компания сотрудника),
                          группы доступа (миграция 0003)
   references/            справочники ЕРСП (регионы, районы, формы собственности,
-                         страховщики, валюты, ОКЭД): модели, загрузчик, файлы data/
+                         страховщики, валюты, ОКЭД): модели, загрузчик, файлы data/;
+                         перечень банков ЦБ (CbuBank, cbu.py: поиск и разбор файла cbu.uz)
   companies/             страховые компании (мультиарендность)
   audit/                 кто и когда создал и изменил запись (основа TrackedModel), журнал изменений
   counterparties/        справочник контрагентов: карточка, данные юрлица, представители,
@@ -143,7 +144,7 @@ docs/                    требования аналитика и соглас
   через главный ключ (`OneToOneField(primary_key=True)`), во время проверки
   формы не видит ещё не сохранённую карточку. Карточку передаёт формсет
   (пример - `LegalEntityFormSet` и `LegalEntity.card()` в `counterparties`).
-- Справочник ЕРСП хранится как прислал ЕРСП (ответ целиком - в `raw`), без
+- Справочник ЕРСП (и перечень банков ЦБ) хранится как прислал источник (целиком - в `raw`), без
   исправлений ошибок ЕРСП. Логика опирается на id записи, а не на название
   или буквенный код (у валют id - цифровой код ISO 4217).
 - Миграция, которая переносит данные на справочник, требует загруженного
@@ -258,6 +259,7 @@ docs/                    требования аналитика и соглас
 | Консоль Django | `bin/core-run podman exec -it core-web python manage.py shell` |
 | SQL от суперпользователя | `bin/core-run podman exec -it core-postgres psql -U postgres -d core` |
 | Загрузить справочники ЕРСП | `bin/core-run podman exec core-web python manage.py load_ersp_references` |
+| Загрузить перечень банков ЦБ (и дописать ИНН банков) | `bin/core-run podman exec core-web python manage.py load_cbu_banks` (сайт недоступен: `bin/core-run podman exec -i core-web python manage.py load_cbu_banks --file - < файл.xlsx`) |
 | Проверить вход в ЕРСП | экран «Интеграции -> Подключение к ЕРСП», кнопка «Проверить подключение»; или `bin/core-run podman exec core-web python manage.py ersp_check` (`--company mosaic --env prod --inn 207078596` - и провайдер) |
 | Резервная копия вручную | `bin/core-run systemctl --user start core-pg-backup.service` |
 | Список копий | `bin/core-run ls -l /home/core/backups` |

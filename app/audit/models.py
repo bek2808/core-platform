@@ -51,6 +51,7 @@ MASK = "***"
 class Source(models.TextChoices):
     MANUAL = "manual", "вручную"
     PROVIDER = "provider", "провайдер ЕРСП"
+    CBU = "cbu", "перечень банков ЦБ"
     SYSTEM = "system", "система"
 
 

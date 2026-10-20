@@ -25,10 +25,12 @@ from django.urls import path, reverse
 from django.utils.html import format_html, format_html_join
 
 from audit.admin import TrackedAdmin
+from audit.models import Source
 from integrations.ersp import PROVIDER, ErspClient, ErspError
 from integrations.models import Exchange
+from references.models import CbuBank
 
-from . import provider
+from . import banks, provider
 
 from .models import (
     Bank,
@@ -45,10 +47,46 @@ from .normalize import remove_spaces, search_key
 
 @admin.register(Bank)
 class BankAdmin(TrackedAdmin):
+    """
+    Справочник банков. Рядом - данные перечня ЦБ по этому МФО
+    (references.CbuBank); при сохранении пустой ИНН подставляется
+    из ЦБ (counterparties/banks.py), отдельной записью в журнале.
+    """
+
     list_display = ["mfo", "name", "inn", "is_active"]
     list_filter = ["is_active"]
     search_fields = ["mfo", "name", "inn"]
-    fields = ["mfo", "name", "inn", "is_active"]
+    fields = ["mfo", "name", "inn", "is_active", "cbu_info"]
+    readonly_fields = ["cbu_info"]
+
+    @admin.display(description="по данным ЦБ")
+    def cbu_info(self, bank):
+        if not bank.pk:
+            return "после сохранения пустой ИНН подставится из перечня ЦБ, если МФО там есть"
+        record = CbuBank.objects.filter(mfo=bank.mfo).first()
+        if record is None:
+            if not CbuBank.objects.exists():
+                return "перечень ЦБ ещё не загружен (команда load_cbu_banks)"
+            return "МФО нет в перечне ЦБ"
+        parts = [record.branch_name, f"ИНН {record.inn}" if record.inn else "ИНН не указан",
+                 record.get_kind_display()]
+        if record.changed_on:
+            parts.append(f"изменено в ЦБ {record.changed_on:%d.%m.%Y}")
+        text = "; ".join(parts)
+        if not record.is_present:
+            text += ". В последнем перечне ЦБ этого МФО нет - возможно, филиал закрыт."
+        if bank.inn and record.inn and bank.inn != record.inn:
+            text += ". ИНН в ЦБ отличается от нашего - проверьте."
+        return text
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        record = banks.cbu_record(obj.mfo)
+        changed = banks.fill_from_cbu(obj, record) if record is not None else []
+        if changed:
+            obj.save(by=request.user, source=Source.CBU)
+            what = {"inn": f"ИНН {obj.inn}", "name": f"название «{obj.name}»"}
+            messages.info(request, "Из перечня ЦБ подставлено: " + ", ".join(what[f] for f in changed) + ".")
 
 
 class InputChoiceAdmin(TrackedAdmin):

@@ -1,6 +1,7 @@
 """
 Справочники ЕРСП (единый реестр страховых полисов): регионы, районы, формы
-собственности, страховщики, валюты, ОКЭД.
+собственности, страховщики, валюты, ОКЭД. И перечень банков Центрального
+банка (CbuBank, в конце файла) - по тем же правилам.
 
 Откуда данные. Это копии справочников ЕРСП: их не правят руками, а загружают
 командой load_ersp_references (сейчас из файлов в references/data/ersp/, позже -
@@ -17,6 +18,7 @@
 опирается на id, а не на название или буквенный код.
 """
 from django.db import models
+from django.db.models import Q
 
 
 class ErspReference(models.Model):
@@ -193,3 +195,64 @@ class ErspOked(ErspReference):
 
     def __str__(self):
         return f"{self.id} - {self.name_uz or self.name}"
+
+
+class CbuBank(models.Model):
+    """
+    Банк (головной офис или филиал) по перечню Центрального банка
+    Узбекистана - файл «Филиалы коммерческих банков» на cbu.uz (решение
+    Бекзода 21.10). Нужен ради ИНН банка: провайдер ЕРСП его не отдаёт.
+
+    Копия перечня ЦБ: не правится руками, загружается командой
+    load_cbu_banks. Ключ - МФО (в файле ЦБ - «Код филиала», 5 цифр).
+    Строка файла целиком - в raw. Записи не удаляются: МФО, пропавший из
+    перечня (филиал закрыт), получает отметку «нет в перечне».
+    """
+
+    class Kind(models.IntegerChoices):
+        CENTRAL_BANK = 0, "подразделение ЦБ"
+        HEAD_OFFICE = 1, "головной офис банка"
+        PAYMENT_CENTER = 2, "платёжный центр банка"
+        BRANCH = 3, "филиал банка"
+
+    mfo = models.CharField("МФО", max_length=5, primary_key=True)
+    kind = models.PositiveSmallIntegerField(
+        "вид", choices=Kind.choices, help_text="«Признак филиала» в файле ЦБ: 0 - ЦБ, 1 - головной офис, 2 - платёжный центр, 3 - филиал.",
+    )
+    bank_name = models.CharField("банк", max_length=255)
+    branch_name = models.CharField("наименование", max_length=500)
+    inn = models.CharField("ИНН", max_length=9, blank=True)
+    address = models.CharField("адрес", max_length=500, blank=True)
+    region = models.CharField("область", max_length=255, blank=True)
+    district = models.CharField("район", max_length=255, blank=True)
+    city = models.CharField("город", max_length=255, blank=True)
+    opened_on = models.DateField("дата открытия", null=True, blank=True)
+    changed_on = models.DateField("дата изменения в ЦБ", null=True, blank=True)
+    raw = models.JSONField("строка файла ЦБ", help_text="Строка файла целиком: колонка -> значение.")
+    is_present = models.BooleanField(
+        "есть в перечне", default=True,
+        help_text="Был ли МФО в последнем загруженном файле ЦБ.",
+    )
+    synced_at = models.DateTimeField(
+        "обновлено из ЦБ", help_text="Когда запись последний раз создана или изменена загрузкой.",
+    )
+
+    class Meta:
+        verbose_name = "банк по перечню ЦБ"
+        verbose_name_plural = "банки по перечню ЦБ"
+        ordering = ["mfo"]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(mfo__regex=r"^[0-9]{5}$"),
+                name="references_cbubank_mfo_5_digits",
+                violation_error_message="МФО - ровно 5 цифр.",
+            ),
+            models.CheckConstraint(
+                condition=Q(inn="") | Q(inn__regex=r"^[0-9]{9}$"),
+                name="references_cbubank_inn_9_digits_or_empty",
+                violation_error_message="ИНН - ровно 9 цифр или пусто.",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.mfo} - {self.branch_name}"

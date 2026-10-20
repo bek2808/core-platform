@@ -34,6 +34,7 @@ from django.utils import timezone
 from audit.models import Source
 from references.models import ErspCurrency, ErspOked
 
+from . import banks
 from .models import (
     LOCAL_ACCOUNT_REGEX,
     LOCAL_PHONE_REGEX,
@@ -355,7 +356,14 @@ def compare(card, data):
     else:
         bank_note = ""
         if not Bank.objects.filter(mfo=data.bank_mfo).exists():
-            bank_note = f" Банка с МФО {data.bank_mfo} в справочнике нет - будет заведён (ИНН банка - дописать вручную)."
+            record = banks.cbu_record(data.bank_mfo)
+            if record is None:
+                bank_note = (f" Банка с МФО {data.bank_mfo} в справочнике нет, в перечне ЦБ тоже - "
+                             f"будет заведён (ИНН банка - дописать вручную).")
+            else:
+                inn = f"ИНН {record.inn}" if record.inn else "ИНН в перечне ЦБ нет - дописать вручную"
+                bank_note = (f" Банка с МФО {data.bank_mfo} в справочнике нет - будет заведён "
+                             f"по перечню ЦБ: {record.branch_name}, {inn}.")
         exists = card is not None and card.pk and card.accounts.filter(number=account.value).first()
         if exists:
             state = "основной" if exists.is_primary else ("закрыт" if exists.is_closed else "неосновной")
@@ -453,9 +461,18 @@ def _apply_account(card, data, user):
     bank = Bank.objects.filter(mfo=data.bank_mfo).first()
     note = ""
     if bank is None:
-        bank = Bank(mfo=data.bank_mfo, name=data.bank_name or f"Банк {data.bank_mfo}")
-        _save(bank, user)
-        note = f"; заведён банк {bank.mfo} - допишите его ИНН в справочнике банков"
+        # Есть в перечне ЦБ - название и ИНН оттуда (источник в журнале - ЦБ);
+        # нет - название от провайдера или заглушка «Банк <МФО>», ИНН пустой.
+        bank, source, record = banks.new_bank(data.bank_mfo, data.bank_name)
+        if record is not None:
+            bank.full_clean()
+            bank.save(by=user, source=source)
+            note = f"; заведён банк {bank.mfo} по перечню ЦБ"
+        else:
+            _save(bank, user)
+            note = f"; заведён банк {bank.mfo}"
+        if not bank.inn:
+            note += " - допишите его ИНН в справочнике банков"
     has_primary = card.accounts.filter(is_primary=True).exists()
     account = BankAccount(
         counterparty=card, bank=bank, number=data.account_number.value, is_primary=not has_primary

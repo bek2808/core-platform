@@ -1,8 +1,9 @@
 """
-Справочники ЕРСП в админ-панели: только просмотр.
+Справочники ЕРСП и перечень банков ЦБ в админ-панели: только просмотр.
 
 Добавлять, править и удалять записи здесь нельзя никому, даже суперпользователю:
-справочник - копия ЕРСП и меняется только командой load_ersp_references.
+справочник - копия ЕРСП (ЦБ) и меняется только командой load_ersp_references
+(load_cbu_banks).
 """
 import json
 
@@ -10,6 +11,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 
 from .models import (
+    CbuBank,
     ErspCurrency,
     ErspDistrict,
     ErspInsurer,
@@ -77,3 +79,14 @@ class ErspCurrencyAdmin(ErspReferenceAdmin):
 class ErspOkedAdmin(ErspReferenceAdmin):
     list_display = ["id", "name_uz", "name", "is_present"]
     search_fields = ["id", "name", "name_uz", "name_uzc"]
+
+
+@admin.register(CbuBank)
+class CbuBankAdmin(ErspReferenceAdmin):
+    list_display = ["mfo", "branch_name", "bank_name", "inn", "kind", "changed_on", "is_present"]
+    list_filter = ["is_present", "kind", "bank_name"]
+    search_fields = ["mfo", "branch_name", "bank_name", "inn"]
+
+    @admin.display(description="строка файла ЦБ")
+    def raw_pretty(self, obj):
+        return super().raw_pretty(obj)

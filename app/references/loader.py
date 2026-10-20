@@ -173,10 +173,11 @@ def oked_fields(row):
 
 # --- Сверка с базой ----------------------------------------------------------------
 
-def sync_reference(model, rows, to_fields, now=None, id_of=_row_id):
+def sync_reference(model, rows, to_fields, now=None, id_of=_row_id, raw_of=None):
     """
     Сверить один справочник с ответом ЕРСП. to_fields(row) -> поля модели,
-    id_of(row) -> id записи. Вызывается внутри транзакции (см. sync_all).
+    id_of(row) -> id записи, raw_of(row) -> что хранить в raw (по умолчанию
+    строка целиком). Вызывается внутри транзакции (см. sync_all).
     """
     now = now or timezone.now()
     parsed = {}
@@ -184,14 +185,15 @@ def sync_reference(model, rows, to_fields, now=None, id_of=_row_id):
         row_id = id_of(row)
         if row_id in parsed:
             raise LoadError(f"{model._meta.verbose_name_plural}: id {row_id} повторяется")
-        parsed[row_id] = (row, to_fields(row))
+        parsed[row_id] = (raw_of(row) if raw_of else row, to_fields(row))
 
     result = SyncResult()
-    existing = {obj.id: obj for obj in model.objects.filter(id__in=parsed)}
+    # pk, а не id: у перечня ЦБ ключ - МФО (CbuBank.mfo).
+    existing = {obj.pk: obj for obj in model.objects.filter(pk__in=parsed)}
     for row_id, (row, fields) in parsed.items():
         obj = existing.get(row_id)
         if obj is None:
-            model.objects.create(id=row_id, raw=row, synced_at=now, **fields)
+            model.objects.create(pk=row_id, raw=row, synced_at=now, **fields)
             result.created += 1
             continue
         changed = obj.raw != row or not obj.is_present or any(
@@ -210,7 +212,7 @@ def sync_reference(model, rows, to_fields, now=None, id_of=_row_id):
 
     result.hidden = (
         model.objects.filter(is_present=True)
-        .exclude(id__in=parsed)
+        .exclude(pk__in=parsed)
         .update(is_present=False, synced_at=now)
     )
     return result
