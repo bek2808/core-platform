@@ -23,7 +23,7 @@ from audit.models import ChangeLog, Source
 from config.testing import refusal_expected
 from integrations import ersp
 from integrations.models import Exchange
-from integrations.tests import FakeErsp, SecretsMixin, token_answer
+from integrations.tests import ErspMixin, FakeErsp, token_answer
 
 from . import provider
 from .models import Bank, BankAccount, Counterparty, LegalEntity, Representative
@@ -304,7 +304,7 @@ class ApplyTests(ProviderCase):
         self.assertFalse(Counterparty.objects.exists())
 
 
-class ProviderAdminTests(SecretsMixin, ProviderCase):
+class ProviderAdminTests(ErspMixin, ProviderCase):
     """Страницы «Сверить с провайдером» и «Новый по ИНН»."""
 
     def setUp(self):

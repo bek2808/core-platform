@@ -4,7 +4,8 @@
 админ-панель журнала, команда ersp_check.
 
 В сеть тесты НЕ ходят: вместо ЕРСП - заглушка FakeErsp, которая отвечает
-заранее заданными ответами и запоминает, что ей отправили. Данные для входа -
+заранее заданными ответами и запоминает, что ей отправили. Данные для входа
+Mosaic - в карточке подключения (ErspMixin), ключ шифрования и токены -
 во временной папке вместо /run/secrets.
 
 Запуск на сервере: bin/test integrations
@@ -21,11 +22,12 @@ from django.test import SimpleTestCase, TestCase, override_settings
 
 from accounts.models import User
 from companies.models import InsuranceCompany
+from config.test_crypto import write_key
 from config.testing import refusal_expected
 
 from . import ersp
-from .ersp import ErspClient, ErspConfigError, ErspError, credentials_secret, is_error, mask
-from .models import Exchange
+from .ersp import ErspClient, ErspConfigError, ErspError, environment_for, is_error, load_credentials, mask
+from .models import Environment, ErspConnection, ErspCredentials, Exchange
 
 STRONG_PASSWORD = "Kx7#mQ2v!pLr9zT"
 
@@ -107,22 +109,56 @@ class Clock:
         return self.now
 
 
-class SecretsMixin:
-    """Временная папка с секретами вместо /run/secrets; токены забываются."""
+def fill_credentials(company, environments=Environment.values, values=CREDENTIALS, by=None):
+    """Заполнить карточку подключения страховой (как администратор на экране)."""
+    connection = ErspConnection.for_company(company, by=by)
+    for credentials in connection.credentials.filter(environment__in=environments):
+        credentials.client_id = values["client_id"]
+        credentials.username = values["username"]
+        credentials.set_secret("client_secret", values["client_secret"])
+        credentials.set_secret("password", values["password"])
+        credentials.save(by=by)
+    return connection
+
+
+class ErspMixin:
+    """
+    Временная папка вместо /run/secrets: ключ шифрования и папка токенов.
+    У страховой Mosaic (cls.mosaic) заполнены данные для входа обеих сред.
+    Подклассы со своим setUpTestData вызывают super().setUpTestData() первым.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls._secrets_folder = tempfile.TemporaryDirectory()
+        cls.secrets = Path(cls._secrets_folder.name)
+        write_key(cls.secrets)
+        cls.token_dir = cls.secrets / "tokens"
+        cls._settings_override = override_settings(SECRETS_DIR=cls.secrets, ERSP_TOKEN_DIR=cls.token_dir)
+        cls._settings_override.enable()
+        try:
+            super().setUpClass()
+        except Exception:
+            cls._settings_override.disable()
+            cls._secrets_folder.cleanup()
+            raise
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        cls._settings_override.disable()
+        cls._secrets_folder.cleanup()
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.mosaic = InsuranceCompany.objects.filter(code="mosaic").first() or InsuranceCompany.objects.create(
+            name="Mosaic Insurance Group", code="mosaic"
+        )
+        fill_credentials(cls.mosaic)
 
     def setUp(self):
         super().setUp()
-        folder = tempfile.TemporaryDirectory()
-        self.addCleanup(folder.cleanup)
-        self.secrets = Path(folder.name)
-        for name in ("ersp_prod_credentials", "ersp_sandbox_credentials"):
-            (self.secrets / name).write_text(json.dumps(CREDENTIALS), encoding="utf-8")
-        self.token_dir = self.secrets / "tokens"
-        settings_override = override_settings(
-            SECRETS_DIR=self.secrets, ERSP_CREDENTIALS_COMPANY="mosaic", ERSP_TOKEN_DIR=self.token_dir,
-        )
-        settings_override.enable()
-        self.addCleanup(settings_override.disable)
         ersp.forget_tokens()
         self.addCleanup(ersp.forget_tokens)
 
@@ -146,54 +182,70 @@ class HelperTests(SimpleTestCase):
             self.assertTrue(is_error({"error": bad}), bad)
 
 
-class CredentialsTests(SecretsMixin, TestCase):
+class CredentialsTests(ErspMixin, TestCase):
+    """Данные для входа - из карточки подключения своей страховой."""
+
     @classmethod
     def setUpTestData(cls):
-        cls.mosaic = InsuranceCompany.objects.create(name="Mosaic Insurance Group", code="mosaic")
+        super().setUpTestData()
         cls.other = InsuranceCompany.objects.create(name="Test Insurance KZ", code="test-kz", country="KZ")
 
-    def test_owner_uses_common_secret(self):
-        self.assertEqual(credentials_secret("prod", self.mosaic), "ersp_prod_credentials")
-        self.assertEqual(credentials_secret("sandbox", None), "ersp_sandbox_credentials")
+    def test_loaded_from_card(self):
+        self.assertEqual(load_credentials(self.mosaic, "prod"), CREDENTIALS)
 
-    def test_company_secret_preferred(self):
-        (self.secrets / "ersp_prod_credentials_mosaic").write_text(json.dumps(CREDENTIALS))
-        self.assertEqual(credentials_secret("prod", self.mosaic), "ersp_prod_credentials_mosaic")
+    def test_other_company_never_gets_mosaic_credentials(self):
+        with self.assertRaisesMessage(ErspConfigError, "не заполнено подключение"):
+            load_credentials(self.other, "prod")
+        own = {**CREDENTIALS, "client_id": "kz_client", "password": "kz-password"}
+        fill_credentials(self.other, values=own)
+        self.assertEqual(load_credentials(self.other, "prod"), own)
+        self.assertEqual(load_credentials(self.mosaic, "prod"), CREDENTIALS)
 
-    def test_other_company_never_gets_owner_credentials(self):
-        with self.assertRaisesMessage(ErspConfigError, "ersp_prod_credentials_test-kz"):
-            credentials_secret("prod", self.other)
-        (self.secrets / "ersp_prod_credentials_test-kz").write_text(json.dumps(CREDENTIALS))
-        self.assertEqual(credentials_secret("prod", self.other), "ersp_prod_credentials_test-kz")
-
-    def test_missing_secret_explained(self):
-        (self.secrets / "ersp_prod_credentials").unlink()
-        client = ErspClient("prod", transport=FakeErsp())
-        with self.assertRaisesMessage(ErspConfigError, "bin/ersp-secret"):
+    def test_incomplete_card_explained(self):
+        ErspConnection.for_company(self.other)
+        client = ErspClient("prod", self.other, transport=FakeErsp())
+        with self.assertRaisesMessage(ErspConfigError, "нет: client_id, client_secret, логин, пароль"):
             client.token_info()
         self.assertFalse(Exchange.objects.exists())  # до ЕРСП дело не дошло
 
-    def test_broken_secret_explained(self):
-        (self.secrets / "ersp_prod_credentials").write_text("не json")
-        with self.assertRaisesMessage(ErspConfigError, "не JSON"):
-            ErspClient("prod", transport=FakeErsp()).token_info()
-        (self.secrets / "ersp_prod_credentials").write_text(json.dumps({"client_id": "x"}))
-        with self.assertRaisesMessage(ErspConfigError, "client_secret, username, password"):
-            ErspClient("prod", transport=FakeErsp()).token_info()
+    def test_undecryptable_explained(self):
+        write_key(self.secrets)  # ключ заменили - старые шифры не читаются
+        self.addCleanup(write_key, self.secrets)
+        with self.assertRaisesMessage(ErspConfigError, "Введите его заново"):
+            ErspClient("prod", self.mosaic, transport=FakeErsp()).token_info()
+        self.assertFalse(Exchange.objects.exists())
+
+    def test_company_required(self):
+        with self.assertRaisesMessage(ErspConfigError, "Не указана страховая"):
+            ErspClient("prod", None)
 
     def test_unknown_environment(self):
         with self.assertRaises(ErspConfigError):
-            ErspClient("test")
+            ErspClient("test", self.mosaic)
+
+    def test_environment_by_purpose(self):
+        # Справочники и провайдер - всегда боевая; отправка - из карточки.
+        self.assertEqual(environment_for(ersp.REFERENCES, self.mosaic), "prod")
+        self.assertEqual(environment_for(ersp.PROVIDER, self.mosaic), "prod")
+        self.assertEqual(environment_for(ersp.SEND, self.mosaic), "sandbox")
+        self.assertEqual(environment_for(ersp.SEND, self.other), "sandbox")  # карточки нет - песочница
+        connection = ErspConnection.objects.get(insurance_company=self.mosaic)
+        connection.send_environment = "prod"
+        connection.save()
+        self.assertEqual(environment_for(ersp.SEND, self.mosaic), "prod")
+        self.assertEqual(ErspClient.for_purpose(ersp.SEND, self.mosaic).environment, "prod")
+        with self.assertRaises(ErspConfigError):
+            environment_for("policies", self.mosaic)
 
 
-class ClientTests(SecretsMixin, TestCase):
+class ClientTests(ErspMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.mosaic = InsuranceCompany.objects.create(name="Mosaic Insurance Group", code="mosaic")
+        super().setUpTestData()
         cls.bekzod = User.objects.create_user("bekzod", password=STRONG_PASSWORD, insurance_company=cls.mosaic)
 
-    def client_for(self, fake, environment="prod", clock=None, **kwargs):
-        return ErspClient(environment, transport=fake, clock=clock or Clock(), **kwargs)
+    def client_for(self, fake, environment="prod", clock=None, company=None, **kwargs):
+        return ErspClient(environment, company or self.mosaic, transport=fake, clock=clock or Clock(), **kwargs)
 
     def test_login_request(self):
         fake = FakeErsp(token_answer())
@@ -228,7 +280,7 @@ class ClientTests(SecretsMixin, TestCase):
         self.assertEqual(exchange.response_body["result"], INSON)
         self.assertIsNotNone(exchange.duration_ms)
 
-    def test_system_request_logged_under_owner_company(self):
+    def test_system_request_logged_under_company(self):
         fake = FakeErsp(token_answer())
         self.client_for(fake).token_info()
         exchange = Exchange.objects.get()
@@ -280,7 +332,7 @@ class ClientTests(SecretsMixin, TestCase):
 
     def test_second_401_stops(self):
         fake = FakeErsp(token_answer(), (401, {}), token_answer(), (401, {}))
-        with self.assertRaisesMessage(ErspError, "bin/ersp-secret --replace"):
+        with self.assertRaisesMessage(ErspError, "Подключение к ЕРСП"):
             self.client_for(fake).provider_inn("207078596")
         self.assertEqual(len(fake.calls), 4)  # повтор только один
 
@@ -354,13 +406,13 @@ class ClientTests(SecretsMixin, TestCase):
         self.assertEqual(login.response_body["result"]["expires_in"], 3600)
 
 
-class SharedTokenTests(SecretsMixin, TestCase):
-    """Один токен на всё приложение: файл в папке токенов (в контейнере - tmpfs)."""
+class SharedTokenTests(ErspMixin, TestCase):
+    """Один токен на всё приложение (на страховую и среду): файл в папке токенов (в контейнере - tmpfs)."""
 
     def test_file_readable_only_by_application(self):
-        ErspClient("prod", transport=FakeErsp(token_answer())).token_info()
+        ErspClient("prod", self.mosaic, transport=FakeErsp(token_answer())).token_info()
         self.assertEqual(self.token_dir.stat().st_mode & 0o777, 0o700)
-        token_file = self.token_dir / "ersp_prod_credentials.json"
+        token_file = self.token_dir / "mosaic.prod.json"
         self.assertEqual(token_file.stat().st_mode & 0o777, 0o600)
         content = token_file.read_text()
         self.assertIn(TOKEN, content)
@@ -370,16 +422,16 @@ class SharedTokenTests(SecretsMixin, TestCase):
     def test_another_process_uses_same_token(self):
         # Каждый ErspClient читает общий файл - как соседний процесс gunicorn.
         fake = FakeErsp(token_answer(), provider_answer(), provider_answer())
-        ErspClient("prod", transport=fake).provider_inn("207078596")
+        ErspClient("prod", self.mosaic, transport=fake).provider_inn("207078596")
         ersp._memory_store.clear()  # памяти процесса тут нет - только файл
-        ErspClient("prod", transport=fake).provider_inn("308143734")
+        ErspClient("prod", self.mosaic, transport=fake).provider_inn("308143734")
         self.assertEqual(fake.paths().count("/oauth/v2/token"), 1)
 
     def test_environments_have_separate_tokens(self):
         fake = FakeErsp(token_answer(token="prod-token"), provider_answer(),
                         token_answer(token="sandbox-token"), provider_answer())
-        ErspClient("prod", transport=fake).provider_inn("207078596")
-        ErspClient("sandbox", transport=fake).provider_inn("207078596")
+        ErspClient("prod", self.mosaic, transport=fake).provider_inn("207078596")
+        ErspClient("sandbox", self.mosaic, transport=fake).provider_inn("207078596")
         self.assertEqual(fake.calls[1]["headers"]["Authorization"], "Bearer prod-token")
         self.assertEqual(fake.calls[3]["headers"]["Authorization"], "Bearer sandbox-token")
 
@@ -391,7 +443,7 @@ class SharedTokenTests(SecretsMixin, TestCase):
         held = []
 
         def transport(method, url, headers, body, timeout):
-            fd = os.open(self.token_dir / "ersp_prod_credentials.lock", os.O_RDWR)
+            fd = os.open(self.token_dir / "mosaic.prod.lock", os.O_RDWR)
             try:
                 fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
                 held.append(False)
@@ -401,42 +453,73 @@ class SharedTokenTests(SecretsMixin, TestCase):
                 os.close(fd)
             return FakeErsp(token_answer())(method, url, headers, body, timeout)
 
-        ErspClient("prod", transport=transport).token_info()
+        ErspClient("prod", self.mosaic, transport=transport).token_info()
         self.assertEqual(held, [True])
 
     def test_rejected_token_does_not_erase_fresh_one(self):
         store = ersp.token_store()
-        store.write("ersp_prod_credentials", "fresh-from-neighbour", None)
-        store.drop("ersp_prod_credentials", "old-rejected")
-        self.assertEqual(store.read("ersp_prod_credentials")[0], "fresh-from-neighbour")
-        store.drop("ersp_prod_credentials", "fresh-from-neighbour")
-        self.assertIsNone(store.read("ersp_prod_credentials"))
+        store.write("mosaic.prod", "fresh-from-neighbour", None)
+        store.drop("mosaic.prod", "old-rejected")
+        self.assertEqual(store.read("mosaic.prod")[0], "fresh-from-neighbour")
+        store.drop("mosaic.prod", "fresh-from-neighbour")
+        self.assertIsNone(store.read("mosaic.prod"))
 
     def test_expiry_shared_by_wall_clock(self):
         clock = Clock()
         fake = FakeErsp(token_answer(expires_in=3600), provider_answer(),
                         token_answer(token="second-token"), provider_answer())
-        ErspClient("prod", transport=fake, clock=clock).provider_inn("207078596")
+        ErspClient("prod", self.mosaic, transport=fake, clock=clock).provider_inn("207078596")
         clock.now += 3600
-        ErspClient("prod", transport=fake, clock=clock).provider_inn("207078596")
+        ErspClient("prod", self.mosaic, transport=fake, clock=clock).provider_inn("207078596")
         self.assertEqual(fake.paths().count("/oauth/v2/token"), 2)
+
+    def test_companies_have_separate_tokens(self):
+        other = InsuranceCompany.objects.create(name="Test Insurance KZ", code="test-kz", country="KZ")
+        fill_credentials(other, values={**CREDENTIALS, "username": "kz_ins"})
+        fake = FakeErsp(token_answer(token="mosaic-token"), provider_answer(),
+                        token_answer(token="kz-token"), provider_answer())
+        ErspClient("prod", self.mosaic, transport=fake).provider_inn("207078596")
+        ErspClient("prod", other, transport=fake).provider_inn("207078596")
+        self.assertEqual(fake.calls[2]["body"]["username"], "kz_ins")  # вход своими данными
+        self.assertEqual(fake.calls[3]["headers"]["Authorization"], "Bearer kz-token")
+
+    def test_status_without_token(self):
+        clock = Clock()
+        self.assertIsNone(ersp.token_status(self.mosaic, "prod"))
+        ErspClient("prod", self.mosaic, transport=FakeErsp(token_answer(expires_in=3600)), clock=clock).token_info()
+        status = ersp.token_status(self.mosaic, "prod")
+        self.assertEqual(status, {"obtained_at": 1000.0, "expires_at": 4600.0})
+        self.assertIsNone(ersp.token_status(self.mosaic, "sandbox"))
+
+    def test_status_when_lifetime_unknown(self):
+        ErspClient("prod", self.mosaic, transport=FakeErsp(token_answer(expires_in=0)), clock=Clock()).token_info()
+        self.assertEqual(ersp.token_status(self.mosaic, "prod"), {"obtained_at": 1000.0, "expires_at": None})
+
+    def test_forget_token_means_new_login(self):
+        fake = FakeErsp(token_answer(), provider_answer(), token_answer(token="after-change"), provider_answer())
+        ErspClient("prod", self.mosaic, transport=fake).provider_inn("207078596")
+        ersp.forget_token(self.mosaic, "prod")
+        self.assertIsNone(ersp.token_status(self.mosaic, "prod"))
+        ErspClient("prod", self.mosaic, transport=fake).provider_inn("207078596")
+        self.assertEqual(fake.paths().count("/oauth/v2/token"), 2)
+        self.assertEqual(fake.calls[-1]["headers"]["Authorization"], "Bearer after-change")
 
     def test_unusable_folder_falls_back_to_memory(self):
         blocker = self.secrets / "not-a-folder"
         blocker.write_text("x")
         with override_settings(ERSP_TOKEN_DIR=blocker / "tokens"), self.assertLogs("integrations.ersp", "WARNING"):
             fake = FakeErsp(token_answer(), provider_answer(), provider_answer())
-            ErspClient("prod", transport=fake).provider_inn("207078596")
-            ErspClient("prod", transport=fake).provider_inn("207078596")
+            ErspClient("prod", self.mosaic, transport=fake).provider_inn("207078596")
+            ErspClient("prod", self.mosaic, transport=fake).provider_inn("207078596")
         self.assertEqual(fake.paths().count("/oauth/v2/token"), 1)
 
 
-class AppendOnlyTests(SecretsMixin, TestCase):
+class AppendOnlyTests(ErspMixin, TestCase):
     """Журнал обмена только пополняется: базу защищает триггер (integrations/0001)."""
 
     def setUp(self):
         super().setUp()
-        ErspClient("prod", transport=FakeErsp(token_answer())).token_info()
+        ErspClient("prod", self.mosaic, transport=FakeErsp(token_answer())).token_info()
         self.exchange = Exchange.objects.get()
 
     def test_entry_cannot_be_changed_or_deleted(self):
@@ -454,15 +537,15 @@ class AppendOnlyTests(SecretsMixin, TestCase):
         self.assertTrue(Exchange.objects.filter(pk=self.exchange.pk).exists())
 
 
-class ExchangeAdminTests(SecretsMixin, TestCase):
+class ExchangeAdminTests(ErspMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.mosaic = InsuranceCompany.objects.create(name="Mosaic Insurance Group", code="mosaic")
+        super().setUpTestData()
         cls.other = InsuranceCompany.objects.create(name="Test Insurance KZ", code="test-kz", country="KZ")
+        fill_credentials(cls.other)
 
     def setUp(self):
         super().setUp()
-        (self.secrets / "ersp_prod_credentials_test-kz").write_text(json.dumps(CREDENTIALS))
         ErspClient("prod", company=self.mosaic, transport=FakeErsp(token_answer(), provider_answer())).provider_inn("207078596")
         ersp.forget_tokens()
         ErspClient("prod", company=self.other, transport=FakeErsp(token_answer(), provider_answer({"name": "ЧУЖОЙ"}))).provider_inn("999999999")
@@ -477,8 +560,8 @@ class ExchangeAdminTests(SecretsMixin, TestCase):
         self.client.force_login(user)
         return user
 
-    def test_both_groups_may_view(self):
-        for name in ("Администратор справочников", "Сотрудник"):
+    def test_groups_may_view(self):
+        for name in ("Администратор справочников", "Сотрудник", "Администратор интеграций"):
             self.assertIn(
                 "view_exchange",
                 Group.objects.get(name=name).permissions.values_list("codename", flat=True),
@@ -512,7 +595,7 @@ class ExchangeAdminTests(SecretsMixin, TestCase):
         self.assertEqual(self.own.subject, "207078596")
 
 
-class CheckCommandTests(SecretsMixin, TestCase):
+class CheckCommandTests(ErspMixin, TestCase):
     """Команда ersp_check: что видит человек на экране сервера."""
 
     def run_check(self, fake, *args):
@@ -525,9 +608,9 @@ class CheckCommandTests(SecretsMixin, TestCase):
 
     def test_both_environments_by_default(self):
         output = self.run_check(FakeErsp(token_answer(expires_in=86400), token_answer(expires_in=3600)))
-        self.assertIn("prod: вход выполнен (секрет ersp_prod_credentials)", output)
+        self.assertIn("mosaic prod: вход выполнен;", output)
         self.assertIn("действует 86400 с (1 дн.)", output)
-        self.assertIn("sandbox: вход выполнен", output)
+        self.assertIn("mosaic sandbox: вход выполнен", output)
         self.assertIn("3600 с (1 ч)", output)
         for value in SECRET_VALUES:
             self.assertNotIn(value, output)
@@ -535,6 +618,20 @@ class CheckCommandTests(SecretsMixin, TestCase):
     def test_with_inn(self):
         output = self.run_check(FakeErsp(token_answer(), provider_answer()), "--env", "prod", "--inn", "207078596")
         self.assertIn("провайдер ответил - \"INSON\" AKSIYADORLIK JAMIYATI", output)
+
+    def test_company_chosen_by_code(self):
+        output = self.run_check(FakeErsp(token_answer()), "--company", "mosaic", "--env", "prod")
+        self.assertIn("mosaic prod: вход выполнен", output)
+        with self.assertRaisesMessage(CommandError, "'nope'"):
+            self.run_check(FakeErsp(), "--company", "nope")
+
+    def test_company_without_card_reported(self):
+        # Карточки нет - понятное сообщение на экране, а не трассировка.
+        InsuranceCompany.objects.create(name="Test Insurance KZ", code="test-kz", country="KZ")
+        out = io.StringIO()
+        with self.assertRaisesMessage(CommandError, "журнале обмена"):
+            call_command("ersp_check", "--company", "test-kz", "--env", "prod", stdout=out)
+        self.assertIn("test-kz prod: вход не выполнен - У страховой «Test Insurance KZ» не заполнено", out.getvalue())
 
     def test_failure_reported(self):
         fake = FakeErsp((400, {"error": "invalid_grant", "error_message": "Invalid username and password"}))

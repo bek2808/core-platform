@@ -192,32 +192,25 @@ STORAGES = {
 
 
 # --- ЕРСП (единый реестр страховых полисов, НАПП) -----------------------------------
-# Клиент - integrations/ersp.py. Данные для входа - в секретах Podman
-# ersp_prod_credentials и ersp_sandbox_credentials (скрипт bin/ersp-secret);
-# токен приложение получает само и держит только в памяти.
+# Клиент - integrations/ersp.py. Данные для входа у каждой страховой свои:
+# вводятся на экране «Интеграции -> Подключение к ЕРСП» и хранятся в базе
+# зашифрованными (ключ - секрет core_encryption_key). Токен приложение
+# получает само и держит только в памяти.
+# Какая среда для чего - не настройка, а правило в коде (решение 20.10):
+# справочники и провайдер - боевая, отправка полисов - из карточки страховой
+# (integrations.ersp.environment_for).
 
 ERSP_ENVIRONMENTS = ("prod", "sandbox")
 ERSP_URLS = {
     "prod": env("ERSP_PROD_URL", "https://erspapiv2.e-osgo.uz"),
     "sandbox": env("ERSP_SANDBOX_URL", "https://sandboxerspapiv2.e-osgo.uz"),
 }
-# Какая среда для чего - явной настройкой (решение 19.10): чтение данных
-# провайдера и справочников - боевая, отправка полисов - песочница.
-ERSP_READ_ENV = env("ERSP_READ_ENV", "prod")
-ERSP_SEND_ENV = env("ERSP_SEND_ENV", "sandbox")
-for _name, _value in [("ERSP_READ_ENV", ERSP_READ_ENV), ("ERSP_SEND_ENV", ERSP_SEND_ENV)]:
-    if _value not in ERSP_ENVIRONMENTS:
-        raise ImproperlyConfigured(f"{_name}={_value!r}: нужно prod или sandbox")
 # Общий токен ЕРСП для всех процессов приложения (integrations/ersp.py).
 # В контейнере /tmp - tmpfs (оперативная память): Podman монтирует его сам,
 # потому что контейнер работает только для чтения. На диск токен не попадает.
 ERSP_TOKEN_DIR = env("ERSP_TOKEN_DIR", "/tmp/ersp-tokens")
 # Сколько ждать ответа ЕРСП, секунд.
 ERSP_TIMEOUT_S = int(env("ERSP_TIMEOUT_S", "15"))
-# Чьи общие данные для входа (секреты без кода страховой в имени):
-# краткий код страховой компании. Другой страховой нужен свой секрет
-# ersp_<среда>_credentials_<её код>.
-ERSP_CREDENTIALS_COMPANY = env("ERSP_CREDENTIALS_COMPANY", "mosaic")
 
 
 # --- Журналы ----------------------------------------------------------------------

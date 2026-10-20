@@ -1,13 +1,14 @@
 """
 Клиент ЕРСП: вход (временный токен) и запросы к API, с записью в журнал обмена.
 
-Как устроен вход (решение Бекзода 20.10):
-- в секретах Podman лежат данные для входа, а не токен:
-  ersp_prod_credentials и ersp_sandbox_credentials (JSON с client_id,
-  client_secret, username, password; заводятся скриптом bin/ersp-secret);
+Как устроен вход (решения Бекзода 20.10):
+- данные для входа (client_id, client_secret, логин, пароль) у каждой
+  страховой свои: их вводит администратор страховой на экране
+  «Интеграции -> Подключение к ЕРСП», в базе они лежат зашифрованными
+  (integrations.models.ErspCredentials, docs/integrations-model.md);
 - токен клиент получает сам методом /oauth/v2/token. Он один на всё
-  приложение (решение Бекзода 20.10): процессы gunicorn делят его через файл
-  в /tmp контейнера. Контейнер работает «только для чтения», и Podman
+  приложение для каждой пары «страховая + среда»: процессы gunicorn делят
+  его через файл в /tmp контейнера. Контейнер работает «только для чтения», и Podman
   монтирует /tmp как tmpfs - это оперативная память, а не диск. Поэтому
   токена нет ни в базе, ни в журнале, ни в резервных копиях, а после
   перезапуска контейнера он исчезает (первый запрос входит заново);
@@ -19,16 +20,14 @@
   любой выданный токен стоит считать бессрочным паролем - тем важнее, что
   он не попадает на диск.
 
-Среда задаётся явно: environment = "prod" или "sandbox". Какая среда для
-чего - в настройках: ERSP_READ_ENV (чтение: провайдер, справочники)
-и ERSP_SEND_ENV (отправка полисов).
+Среда - по группе операций (решение Бекзода 20.10), см. environment_for():
+справочники и провайдер - всегда боевая среда; отправка полисов - та,
+что выбрана в карточке подключения страховой (по умолчанию песочница).
+Клиент для операции: ErspClient.for_purpose(PROVIDER, company, user).
+Явная среда (ErspClient("sandbox", company)) - для проверки входа.
 
-Данные для входа выбираются по страховой компании (мультиарендность):
-- секрет ersp_<среда>_credentials_<код страховой>, если он есть;
-- иначе общий ersp_<среда>_credentials - но только для страховой, которой
-  он принадлежит (настройка ERSP_CREDENTIALS_COMPANY, сейчас Mosaic).
-Чужая страховая без своего секрета получает понятную ошибку, а не данные
-для входа Mosaic.
+Страховая обязательна: у каждой свои данные для входа, и чужих она
+не получит ни при каких настройках.
 
 Каждый запрос пишется в журнал обмена (integrations.models.Exchange), и
 успешный, и ошибочный. Запись журнала идёт в своей транзакции: вызывайте
@@ -36,7 +35,7 @@
 о запросе.
 
 Пример:
-    client = ErspClient(settings.ERSP_READ_ENV, company=user.insurance_company, user=user)
+    client = ErspClient.for_purpose(PROVIDER, company=card.insurance_company, user=user)
     try:
         organization = client.provider_inn("207078596")
     except ErspError as error:
@@ -56,7 +55,9 @@ from pathlib import Path
 
 from django.conf import settings
 
-from .models import Environment, Exchange
+from config.crypto import CryptoError
+
+from .models import Environment, ErspConnection, ErspCredentials, Exchange
 
 # Ключи, значения которых в журнал не пишутся (заменяются на ***).
 SECRET_KEYS = {"client_secret", "password", "access_token", "refresh_token"}
@@ -86,6 +87,16 @@ class ErspConfigError(ErspError):
     """Неверная настройка: нет данных для входа, неизвестная среда."""
 
 
+# Группы операций: от группы зависит среда (решение Бекзода 20.10).
+REFERENCES = "references"  # справочники ЕРСП
+PROVIDER = "provider"      # провайдер: организация по ИНН и др.
+SEND = "send"              # отправка полисов
+PURPOSES = (REFERENCES, PROVIDER, SEND)
+
+# Где сотрудник заполняет данные для входа - для текста ошибок.
+SCREEN = "Интеграции -> Подключение к ЕРСП"
+
+
 def mask(value):
     """Копия JSON-значения, в которой секреты заменены на ***."""
     if isinstance(value, dict):
@@ -112,38 +123,51 @@ def token_result(payload):
     return result if isinstance(result, dict) else payload
 
 
-# --- Данные для входа --------------------------------------------------------------
+# --- Среда и данные для входа -------------------------------------------------------
 
-def credentials_secret(environment, company=None):
-    """Имя секрета с данными для входа этой страховой в эту среду."""
-    owner = settings.ERSP_CREDENTIALS_COMPANY
-    code = company.code if company is not None else owner
-    own = f"ersp_{environment}_credentials_{code}"
-    if (settings.SECRETS_DIR / own).is_file():
-        return own
-    if code == owner:
-        return f"ersp_{environment}_credentials"
-    raise ErspConfigError(
-        f"Нет данных для входа в ЕРСП у страховой «{company}» (среда {environment}): "
-        f"нужен секрет {own}."
-    )
+def environment_for(purpose, company):
+    """
+    Среда ЕРСП для группы операций. Справочники и провайдер - боевая
+    (в песочнице справочники неполные); меняется только коммитом.
+    Отправка полисов - из карточки подключения страховой.
+    """
+    if purpose in (REFERENCES, PROVIDER):
+        return Environment.PROD
+    if purpose == SEND:
+        connection = ErspConnection.objects.filter(insurance_company=company).first()
+        return connection.send_environment if connection else Environment.SANDBOX
+    raise ErspConfigError(f"Неизвестная группа операций ЕРСП: {purpose!r}.")
 
 
-def read_credentials(secret_name):
-    path = settings.SECRETS_DIR / secret_name
-    if not path.is_file():
+def load_credentials(company, environment):
+    """
+    Данные для входа страховой в среду - из карточки подключения
+    (секреты расшифрованы). Только для запроса токена: никуда не сохранять.
+    """
+    label = Environment(environment).label
+    row = ErspCredentials.objects.select_related("connection").filter(
+        connection__insurance_company=company, environment=environment
+    ).first()
+    if row is None:
         raise ErspConfigError(
-            f"Не найден секрет {secret_name}. Его заводят на сервере командой "
-            f"bin/ersp-secret, а в контейнер передают строкой Secret= в quadlet/core-web.container."
+            f"У страховой «{company}» не заполнено подключение к ЕРСП ({label} среда). "
+            f"Заполните: {SCREEN}."
+        )
+    missing = row.missing()
+    if missing:
+        raise ErspConfigError(
+            f"Подключение к ЕРСП ({label} среда) заполнено не полностью, нет: "
+            f"{', '.join(missing)}. Заполните: {SCREEN}."
         )
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except ValueError:
-        raise ErspConfigError(f"Секрет {secret_name} - не JSON. Заведите его заново: bin/ersp-secret --replace.")
-    missing = [k for k in ("client_id", "client_secret", "username", "password") if not data.get(k)]
-    if missing:
-        raise ErspConfigError(f"В секрете {secret_name} нет значений: {', '.join(missing)}.")
-    return data
+        return row.login_data()
+    except CryptoError as error:
+        raise ErspConfigError(f"Данные для входа в ЕРСП ({label} среда): {error.message}")
+
+
+def token_name(company, environment):
+    """Имя токена в общем хранилище: отдельно для каждой страховой и среды."""
+    return f"{company.code}.{environment}"
 
 
 # --- Общий токен для всех процессов ----------------------------------------------
@@ -154,7 +178,9 @@ logger = logging.getLogger(__name__)
 class FileTokenStore:
     """
     Токены в файлах папки settings.ERSP_TOKEN_DIR (в контейнере - /tmp,
-    оперативная память). Один файл на секрет: {"token": ..., "valid_until": ...}.
+    оперативная память). Один файл на страховую и среду (mosaic.prod.json):
+    токен, до какого времени им пользуемся (valid_until), когда получен
+    и до какого времени действует по словам ЕРСП (для экрана).
     Права: папка 0700, файлы 0600 - читать может только пользователь приложения.
 
     locked(name) - блокировка файлом (flock): пока один процесс входит в ЕРСП,
@@ -179,21 +205,34 @@ class FileTokenStore:
             fcntl.flock(fd, fcntl.LOCK_UN)
             os.close(fd)
 
-    def read(self, name):
+    def _data(self, name):
         try:
             data = json.loads(self._file(name, ".json").read_text(encoding="utf-8"))
-            return data["token"], data.get("valid_until")
-        except (OSError, ValueError, KeyError, TypeError):
+            return data if isinstance(data, dict) and data.get("token") else None
+        except (OSError, ValueError):
             return None
 
-    def write(self, name, token, valid_until):
+    def read(self, name):
+        data = self._data(name)
+        return (data["token"], data.get("valid_until")) if data else None
+
+    def info(self, name):
+        """Сведения о токене без самого токена: когда получен, до какого времени действует."""
+        data = self._data(name)
+        return {k: data.get(k) for k in ("obtained_at", "expires_at")} if data else None
+
+    def write(self, name, token, valid_until, obtained_at=None, expires_at=None):
         # Сначала во временный файл, потом подмена: соседний процесс никогда
         # не прочитает наполовину записанный файл.
         temp = self._file(name, f".{os.getpid()}.tmp")
         fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o600)
         with os.fdopen(fd, "w", encoding="utf-8") as file:
-            json.dump({"token": token, "valid_until": valid_until}, file)
+            json.dump({"token": token, "valid_until": valid_until,
+                       "obtained_at": obtained_at, "expires_at": expires_at}, file)
         os.replace(temp, self._file(name, ".json"))
+
+    def forget(self, name):
+        self._file(name, ".json").unlink(missing_ok=True)
 
     def drop(self, name, token):
         """Стереть токен, но только если это тот, который отверг ЕРСП."""
@@ -219,14 +258,23 @@ class MemoryTokenStore:
             yield
 
     def read(self, name):
-        return self.tokens.get(name)
+        data = self.tokens.get(name)
+        return (data["token"], data["valid_until"]) if data else None
 
-    def write(self, name, token, valid_until):
-        self.tokens[name] = (token, valid_until)
+    def info(self, name):
+        data = self.tokens.get(name)
+        return {k: data[k] for k in ("obtained_at", "expires_at")} if data else None
+
+    def write(self, name, token, valid_until, obtained_at=None, expires_at=None):
+        self.tokens[name] = {"token": token, "valid_until": valid_until,
+                             "obtained_at": obtained_at, "expires_at": expires_at}
 
     def drop(self, name, token):
-        if self.tokens.get(name, (None,))[0] == token:
+        if (self.tokens.get(name) or {}).get("token") == token:
             self.tokens.pop(name, None)
+
+    def forget(self, name):
+        self.tokens.pop(name, None)
 
     def clear(self):
         self.tokens.clear()
@@ -245,10 +293,30 @@ def token_store():
 
 
 def forget_tokens():
-    """Забыть все токены (для тестов и после замены секрета)."""
+    """Забыть все токены (для тестов)."""
     _memory_store.clear()
     store = token_store()
     store.clear()
+
+
+def forget_token(company, environment):
+    """
+    Забыть токен страховой в среде - после смены данных для входа: следующий
+    запрос войдёт заново уже с новыми данными (и сразу покажет, если они неверны).
+    """
+    store = token_store()
+    name = token_name(company, environment)
+    with store.locked(name):
+        store.forget(name)
+
+
+def token_status(company, environment):
+    """
+    Состояние токена для экрана - без самого токена: {"obtained_at",
+    "expires_at"} (секунды Unix; expires_at - None, если ЕРСП срок не назвал)
+    или None, если токена нет (не было входа или контейнер перезапускался).
+    """
+    return token_store().info(token_name(company, environment))
 
 
 # --- Отправка HTTP-запроса --------------------------------------------------------
@@ -270,9 +338,14 @@ def urllib_transport(method, url, headers, body, timeout):
 
 
 class ErspClient:
-    def __init__(self, environment, company=None, user=None, transport=None, clock=time.time):
+    def __init__(self, environment, company, user=None, transport=None, clock=time.time):
         if environment not in Environment.values:
             raise ErspConfigError(f"Неизвестная среда ЕРСП: {environment!r} (нужно prod или sandbox).")
+        if company is None:
+            raise ErspConfigError(
+                "Не указана страховая компания: данные для входа в ЕРСП у каждой страховой свои "
+                "(в учётной записи сотрудника должна быть страховая)."
+            )
         self.environment = environment
         self.company = company
         self.user = user
@@ -280,27 +353,32 @@ class ErspClient:
         self.transport = transport or urllib_transport
         self.clock = clock  # обычные часы: срок токена сравнивают разные процессы
         self.store = token_store()
-        self.secret_name = credentials_secret(environment, company)
+        self.token_name = token_name(company, environment)
         # Последняя строка журнала обмена: по ней страница сверки находит
         # ответ, который видел сотрудник (и применяет именно его).
         self.last_exchange = None
+
+    @classmethod
+    def for_purpose(cls, purpose, company, user=None, **kwargs):
+        """Клиент для группы операций: среду выбирает environment_for()."""
+        return cls(environment_for(purpose, company), company, user=user, **kwargs)
 
     # --- Вход ---------------------------------------------------------------------
 
     def token_info(self):
         """
         Войти в ЕРСП (всегда новый вход) и вернуть сведения о токене без самого
-        токена: тип, срок жизни, область. Для проверки входа командой ersp_check.
-        Новый токен становится общим токеном приложения.
+        токена: тип, срок жизни, область. Для проверки подключения (кнопка на
+        экране, команда ersp_check). Новый токен становится общим токеном.
         """
-        with self.store.locked(self.secret_name):
+        with self.store.locked(self.token_name):
             result = self._login()
         return {k: result.get(k) for k in ("token_type", "expires_in", "scope")}
 
     def _token(self):
         """Общий токен; если его нет или срок вышел - войти (один процесс за раз)."""
-        with self.store.locked(self.secret_name):
-            cached = self.store.read(self.secret_name)
+        with self.store.locked(self.token_name):
+            cached = self.store.read(self.token_name)
             if cached is not None:
                 token, valid_until = cached
                 if valid_until is None or self.clock() < valid_until:
@@ -309,7 +387,7 @@ class ErspClient:
 
     def _login(self):
         """Вход в ЕРСП. Вызывается под блокировкой store.locked()."""
-        credentials = read_credentials(self.secret_name)
+        credentials = load_credentials(self.company, self.environment)
         body = {
             "client_id": credentials["client_id"],
             "client_secret": credentials["client_secret"],
@@ -321,10 +399,12 @@ class ErspClient:
         result = token_result(payload)
         token = result["access_token"]  # наличие проверил _send
         expires_in = result.get("expires_in")
-        valid_until = None
-        if isinstance(expires_in, (int, float)) and expires_in > 0:
-            valid_until = self.clock() + max(expires_in - TOKEN_MARGIN_S, 0)
-        self.store.write(self.secret_name, token, valid_until)
+        obtained_at = self.clock()
+        valid_until = expires_at = None
+        if isinstance(expires_in, (int, float)) and not isinstance(expires_in, bool) and expires_in > 0:
+            expires_at = obtained_at + expires_in
+            valid_until = obtained_at + max(expires_in - TOKEN_MARGIN_S, 0)
+        self.store.write(self.token_name, token, valid_until, obtained_at=obtained_at, expires_at=expires_at)
         return result
 
     # --- Запросы к API --------------------------------------------------------------
@@ -344,17 +424,17 @@ class ErspClient:
         try:
             return self._send(operation, path, body, subject=subject, token=token)
         except _Unauthorized:
-            with self.store.locked(self.secret_name):
+            with self.store.locked(self.token_name):
                 # Стираем только отвергнутый токен: если соседний процесс уже
                 # вошёл заново, его свежий токен остаётся.
-                self.store.drop(self.secret_name, token)
+                self.store.drop(self.token_name, token)
             try:
                 return self._send(operation, path, body, subject=subject, token=self._token())
             except _Unauthorized as again:
                 self._fail(
                     again.exchange, None,
                     "ЕРСП не принимает вход (401) даже с новым токеном. "
-                    "Проверьте данные для входа: bin/ersp-secret --replace.",
+                    f"Проверьте данные для входа: {SCREEN}.",
                 )
 
     def _send(self, operation, path, body, subject="", token=None, authorized=True):
@@ -372,7 +452,7 @@ class ErspClient:
             headers["Authorization"] = f"Bearer {token}"
         log = Exchange(
             user=self.user,
-            insurance_company=self.company or _owner_company(),
+            insurance_company=self.company,
             environment=self.environment,
             operation=operation,
             subject=str(subject)[:100],
@@ -439,9 +519,3 @@ class _Unauthorized(Exception):
     def __init__(self, exchange):
         self.exchange = exchange
 
-
-def _owner_company():
-    """Страховая, которой принадлежат общие данные для входа (для журнала)."""
-    from companies.models import InsuranceCompany
-
-    return InsuranceCompany.objects.filter(code=settings.ERSP_CREDENTIALS_COMPANY).first()

@@ -12,7 +12,6 @@
 """
 import re
 
-from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin.utils import unquote
 from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
@@ -26,7 +25,7 @@ from django.urls import path, reverse
 from django.utils.html import format_html, format_html_join
 
 from audit.admin import TrackedAdmin
-from integrations.ersp import ErspClient, ErspError
+from integrations.ersp import PROVIDER, ErspClient, ErspError
 from integrations.models import Exchange
 
 from . import provider
@@ -326,8 +325,8 @@ class CounterpartyAdmin(NoRelatedLinks, TrackedAdmin):
 
     def _ask_provider(self, request, company, inn):
         """Запрос к провайдеру. Возвращает строку журнала или None (ошибка уже показана)."""
-        client = ErspClient(settings.ERSP_READ_ENV, company=company, user=request.user)
         try:
+            client = ErspClient.for_purpose(PROVIDER, company, user=request.user)
             client.provider_inn(inn)
         except ErspError as error:
             messages.error(request, f"Провайдер ЕРСП: {error.message}")

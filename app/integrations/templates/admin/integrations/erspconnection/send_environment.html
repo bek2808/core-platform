@@ -1,0 +1,50 @@
+{% extends "admin/base_site.html" %}
+{% comment %}
+Смена среды отправки полисов (ErspConnectionAdmin.send_environment_view).
+Переход на боевую - только с отметкой подтверждения.
+{% endcomment %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">Начало</a>
+  &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+  &rsaquo; <a href="{% url 'admin:integrations_erspconnection_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+  &rsaquo; <a href="{{ change_url }}">{{ connection }}</a>
+  &rsaquo; Среда отправки полисов
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <p>Страховая: <strong>{{ connection.insurance_company }}</strong>.
+     Сейчас полисы уходят в <strong>{{ connection.get_send_environment_display }}</strong> среду.</p>
+  <ul>
+    <li><strong>песочница</strong> - тестовый реестр ЕРСП: полисы никуда по-настоящему не попадают;</li>
+    <li><strong>боевая</strong> - настоящий реестр регулятора: каждый отправленный полис
+        регистрируется официально.</li>
+  </ul>
+  <p>Справочники и запросы к провайдеру (организация по ИНН) всегда идут в боевую среду -
+     эта настройка их не меняет.</p>
+
+  {% if error %}<p class="errornote">{{ error }}</p>{% endif %}
+
+  <form method="post">{% csrf_token %}
+    <fieldset class="module aligned">
+      {% for value, label in environments %}
+        <div class="form-row">
+          <label><input type="radio" name="send_environment" value="{{ value }}"
+                 {% if value == connection.send_environment %}checked{% endif %}> {{ label }}</label>
+        </div>
+      {% endfor %}
+      <div class="form-row">
+        <label><input type="checkbox" name="confirm" value="yes">
+          Подтверждаю: при выборе боевой среды полисы будут уходить в настоящий реестр регулятора.</label>
+      </div>
+    </fieldset>
+    <div class="submit-row">
+      <input type="submit" class="default" value="Сохранить">
+      <a href="{{ change_url }}" class="closelink">Отмена</a>
+    </div>
+  </form>
+  <p class="help">Изменение записывается в журнал: кто, когда, было -> стало.</p>
+</div>
+{% endblock %}

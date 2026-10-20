@@ -1,0 +1,11 @@
+{% extends "admin/change_form.html" %}
+{% comment %}
+Карточка подключения к ЕРСП: кнопка «Среда отправки полисов» - для тех,
+кто может править карточку (ErspConnectionAdmin.send_environment_view).
+{% endcomment %}
+{% block object-tools-items %}
+  {% if original and has_change_permission %}
+    <li><a href="{% url 'admin:integrations_erspconnection_send_environment' original.pk %}">Среда отправки полисов</a></li>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}
