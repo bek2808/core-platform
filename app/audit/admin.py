@@ -42,6 +42,14 @@ class TrackedAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         obj.save(by=request.user)
 
+    def save_formset(self, request, form, formset, change):
+        # Вложенные блоки карточки (данные юрлица, позже представители
+        # и счета) сохраняются по одной записи и с сотрудником - иначе
+        # их изменения прошли бы мимо журнала.
+        for obj in formset.save(commit=False):
+            obj.save(by=request.user)
+        formset.save_m2m()
+
     def has_delete_permission(self, request, obj=None):
         return False
 

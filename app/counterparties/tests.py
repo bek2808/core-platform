@@ -1,19 +1,27 @@
 """
 Автотесты справочника контрагентов.
 
-Сейчас: банки, основания полномочий, должности - формат, нормализация,
-защита в базе, стартовые списки, админ-панель.
+Банки, основания полномочий, должности, карточки контрагентов и данные
+юрлица: формат, нормализация, защита в базе, мультиарендность,
+стартовые списки, журнал изменений, админ-панель.
 
 Запуск на сервере: bin/test counterparties
 """
+import datetime
+from decimal import Decimal
+
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.test import SimpleTestCase, TestCase
 
 from accounts.models import User
+from audit.models import ChangeLog, Source
+from companies.models import InsuranceCompany
+from references.loader import load_from_files
 
-from .models import Bank, PowerBasis, Position
-from .normalize import remove_spaces, squash_spaces
+from .models import Bank, Counterparty, LegalEntity, PowerBasis, Position
+from .normalize import digits_only, remove_spaces, search_key, squash_spaces
 
 STRONG_PASSWORD = "Kx7#mQ2v!pLr9zT"
 
@@ -36,6 +44,18 @@ class NormalizeTests(SimpleTestCase):
     def test_empty_values_kept(self):
         self.assertIsNone(squash_spaces(None))
         self.assertEqual(remove_spaces(""), "")
+
+    def test_phone_digits_only(self):
+        self.assertEqual(digits_only("+998 (99) 894-44-40"), "998998944440")
+
+    def test_search_key_mixed_alphabets(self):
+        # okedTitle от провайдера: в «Hаyotni» буква «а» - кириллическая.
+        mixed = "Hаyotni sug`urtаlаsh"
+        self.assertEqual(search_key(mixed), search_key("Hayotni sug'urtalash"))
+
+    def test_search_key_quotes_and_apostrophes(self):
+        self.assertEqual(search_key('"INSON" AJ ST'), "inson aj st")
+        self.assertEqual(search_key("Choʻlpon"), search_key("Cho'lpon"))
 
 
 class BankTests(TestCase):
@@ -222,3 +242,378 @@ class AdminTests(TestCase):
             {"name": "Ректор", "is_other": "on", "sort_order": "100", "is_active": "on"},
         )
         self.assertFalse(Position.objects.get(name="Ректор").is_other)
+
+
+# --- Контрагенты --------------------------------------------------------------------
+
+# Ответ провайдера ЕРСП по Inson (docs/requirements/counterparties-legal-entities.md).
+INSON = {
+    "inn": "207078596",
+    "full_name": '"INSON" AKSIYADORLIK JAMIYATI SUG\'URTA TASHKILOTI',
+    "short_name": '"INSON" AJ ST',
+    "oked": "65120",
+    # «а» в этой строке - кириллические, как присылает провайдер.
+    "oked_title": "Hаyotni sug`urtаlаshdаn tаshqаri sug`urtаlаsh",
+    "okpo": "23047346",
+    "soato_code": "1726277",
+    "soato_name": "Шайхантахурский район",
+    "reg_certificate_number": "82",
+    "reg_certificate_date": datetime.date(2010, 5, 12),
+    "charter_capital": Decimal("85751457400"),
+}
+
+
+class CounterpartyTestCase(TestCase):
+    """Общая подготовка: справочники ЕРСП, две страховые, сотрудник Mosaic."""
+
+    def setUp(self):
+        load_from_files()
+        self.mosaic = InsuranceCompany.objects.create(
+            name="Mosaic Insurance Group", code="mosaic", ersp_insurer_id=1084, ersp_region_id=10
+        )
+        self.other_company = InsuranceCompany.objects.create(
+            name="Test Insurance KZ", code="test-kz", country="KZ"
+        )
+        self.bekzod = User.objects.create_superuser(
+            "bekzod", password=STRONG_PASSWORD, insurance_company=self.mosaic
+        )
+
+    def make(self, company=None, by=None, counterparty_fields=None, **legal_fields):
+        """Создать контрагента-юрлицо так же, как это делает админ-панель."""
+        counterparty = Counterparty(
+            insurance_company=company or self.mosaic, **(counterparty_fields or {})
+        )
+        counterparty.full_clean()
+        counterparty.save(by=by)
+        legal = LegalEntity(counterparty=counterparty, **{**INSON, **legal_fields})
+        legal.full_clean()
+        legal.save(by=by)
+        counterparty.refresh_from_db()
+        return counterparty, legal
+
+
+class LegalEntityTests(CounterpartyTestCase):
+    def test_inson_from_provider_response(self):
+        counterparty, legal = self.make(counterparty_fields={
+            "phone": "998998944440",
+            "address": "Labzak MFY, Zulfiyaxonim ko'chasi, 12-uy  ",
+        })
+        self.assertEqual(counterparty.display_name, '"INSON" AJ ST')
+        self.assertEqual(counterparty.kind, Counterparty.Kind.LEGAL_ENTITY)
+        self.assertEqual(counterparty.status, Counterparty.Status.ACTIVE)
+        self.assertEqual(counterparty.address, "Labzak MFY, Zulfiyaxonim ko'chasi, 12-uy")
+        self.assertEqual(counterparty.region_id, 10)  # город Ташкент - по СОАТО 1726…
+        legal.refresh_from_db()
+        self.assertEqual(legal.country, "UZ")
+        self.assertEqual(legal.insurance_company, self.mosaic)
+        self.assertEqual(legal.charter_capital, Decimal("85751457400.00"))
+        self.assertEqual(legal.charter_capital_currency, "UZS")
+        self.assertEqual(legal.oked_title, INSON["oked_title"])  # хранится как пришло
+
+    def test_full_name_shown_when_no_short_name(self):
+        counterparty, _ = self.make(short_name="")
+        self.assertEqual(counterparty.display_name, INSON["full_name"])
+
+    def test_inn_and_full_name_required(self):
+        counterparty = Counterparty(insurance_company=self.mosaic)
+        counterparty.save()
+        with self.assertRaises(ValidationError) as error:
+            LegalEntity(counterparty=counterparty).full_clean()
+        self.assertIn("inn", error.exception.message_dict)
+        self.assertIn("full_name", error.exception.message_dict)
+
+    def test_everything_else_may_be_empty(self):
+        # Карточку можно сохранить неполной: обязательны только ИНН и наименование.
+        empty = {field: "" for field in ["short_name", "oked", "oked_title", "okpo",
+                                         "soato_code", "soato_name", "reg_certificate_number"]}
+        counterparty, _ = self.make(**empty, reg_certificate_date=None, charter_capital=None)
+        self.assertIsNone(counterparty.region)
+
+    def test_inn_spaces_removed(self):
+        _, legal = self.make(inn=" 207 078 596 ")
+        self.assertEqual(legal.inn, "207078596")
+
+    def test_local_inn_format(self):
+        for wrong in ["20707859", "2070785960", "20707859A"]:
+            with self.subTest(inn=wrong), self.assertRaises(ValidationError):
+                self.make(inn=wrong)
+
+    def test_foreign_inn(self):
+        _, legal = self.make(inn="kz 1234 5678 90", is_foreign=True, country="kz")
+        self.assertEqual(legal.inn, "KZ1234567890")
+        self.assertEqual(legal.country, "KZ")
+
+    def test_foreign_inn_too_short(self):
+        with self.assertRaises(ValidationError):
+            self.make(inn="AB12345", is_foreign=True, country="KZ")
+
+    def test_foreign_needs_other_country(self):
+        with self.assertRaises(ValidationError):
+            self.make(inn="KZ1234567890", is_foreign=True, country="UZ")
+
+    def test_local_country_always_uz(self):
+        _, legal = self.make(country="KZ")
+        self.assertEqual(legal.country, "UZ")
+
+    def test_codes_format(self):
+        for field, wrong in [("oked", "6512"), ("okpo", "2304734"), ("soato_code", "17262")]:
+            with self.subTest(field=field), self.assertRaises(ValidationError):
+                self.make(**{field: wrong})
+
+    def test_negative_capital_rejected(self):
+        with self.assertRaises(ValidationError):
+            self.make(charter_capital=Decimal("-1"))
+
+    def test_region_not_overwritten(self):
+        # Регион, выбранный сотрудником, СОАТО не заменяет.
+        counterparty, _ = self.make(counterparty_fields={"region_id": 14})
+        self.assertEqual(counterparty.region_id, 14)
+
+    def test_unknown_soato_leaves_region_empty(self):
+        counterparty, _ = self.make(soato_code="9999999")
+        self.assertIsNone(counterparty.region)
+
+
+class PhoneTests(CounterpartyTestCase):
+    def test_local_phone_normalized(self):
+        counterparty, _ = self.make(counterparty_fields={"phone": "+998 (99) 894-44-40"})
+        self.assertEqual(counterparty.phone, "998998944440")
+
+    def test_local_phone_must_be_998_and_9_digits(self):
+        with self.assertRaises(ValidationError) as error:
+            self.make(counterparty_fields={"phone": "77012345678"})
+        self.assertIn("998", str(error.exception))
+
+    def test_foreign_phone_international(self):
+        counterparty, _ = self.make(
+            inn="KZ1234567890", is_foreign=True, country="KZ",
+            counterparty_fields={"phone": "+7 701 234 56 78"},
+        )
+        self.assertEqual(counterparty.phone, "77012345678")
+
+    def test_phone_optional(self):
+        counterparty, _ = self.make(inn="KZ1234567890", is_foreign=True, country="KZ")
+        self.assertEqual(counterparty.phone, "")
+
+
+class DuplicateInnTests(CounterpartyTestCase):
+    def test_same_inn_same_company_rejected_with_name(self):
+        self.make()
+        with self.assertRaises(ValidationError) as error:
+            self.make()
+        self.assertIn('"INSON" AJ ST', error.exception.message_dict["inn"][0])
+
+    def test_database_also_rejects(self):
+        # Даже без проверки формы (сразу save) база не даст завести дубль.
+        self.make()
+        counterparty = Counterparty(insurance_company=self.mosaic)
+        counterparty.save()
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            LegalEntity(counterparty=counterparty, **INSON).save()
+
+    def test_same_inn_in_other_company_allowed(self):
+        # Клиенты разных страховых не пересекаются.
+        self.make()
+        self.make(company=self.other_company)
+
+    def test_archived_counterparty_still_holds_inn(self):
+        # Архив не освобождает ИНН: клиента возвращают из архива, а не заводят снова.
+        counterparty, _ = self.make()
+        counterparty.status = Counterparty.Status.ARCHIVED
+        counterparty.save()
+        with self.assertRaises(ValidationError):
+            self.make()
+
+
+class SameCompanyTests(CounterpartyTestCase):
+    """Составная ссылка в базе: страховая у карточки и у данных юрлица одна."""
+
+    def test_legal_entity_company_cannot_diverge(self):
+        _, legal = self.make()
+        # _base_manager - намеренный обход запретов кода, чтобы проверить базу.
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            LegalEntity._base_manager.filter(pk=legal.pk).update(
+                insurance_company=self.other_company
+            )
+
+    def test_counterparty_company_cannot_change(self):
+        counterparty, _ = self.make()
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Counterparty._base_manager.filter(pk=counterparty.pk).update(
+                insurance_company=self.other_company
+            )
+
+    def test_company_copied_from_card(self):
+        _, legal = self.make(company=self.other_company)
+        self.assertEqual(legal.insurance_company, self.other_company)
+
+
+class SearchTests(CounterpartyTestCase):
+    def test_search_key_built_from_names_and_inn(self):
+        counterparty, _ = self.make()
+        self.assertIn("inson aj st", counterparty.search_text)
+        self.assertIn("207078596", counterparty.search_text)
+
+    def test_mixed_alphabets_found(self):
+        # «о» в «Tоshkent» - кириллическая, ищем латиницей.
+        counterparty, _ = self.make(full_name="Tоshkent Trade MChJ", short_name="")
+        found = Counterparty.objects.filter(search_text__icontains=search_key("toshkent"))
+        self.assertEqual(list(found), [counterparty])
+
+
+class CounterpartyJournalTests(CounterpartyTestCase):
+    def entries(self, model, pk):
+        return ChangeLog.objects.filter(
+            content_type=ContentType.objects.get_for_model(model), object_id=pk
+        )
+
+    def test_creation_logged_with_company(self):
+        counterparty, _ = self.make(by=self.bekzod)
+        fields = set(self.entries(LegalEntity, counterparty.pk).values_list("field", flat=True))
+        self.assertIn("inn", fields)
+        self.assertIn("charter_capital", fields)
+        entry = self.entries(LegalEntity, counterparty.pk).get(field="inn")
+        self.assertEqual(entry.insurance_company, self.mosaic)
+        self.assertEqual(entry.user, self.bekzod)
+        self.assertEqual(entry.new_value, "207078596")
+
+    def test_system_fields_not_logged(self):
+        # Наименование для списка и ключ для поиска собирает система -
+        # в журнал пишутся исходные наименования, а не они.
+        counterparty, _ = self.make(by=self.bekzod)
+        fields = set(self.entries(Counterparty, counterparty.pk).values_list("field", flat=True))
+        self.assertNotIn("display_name", fields)
+        self.assertNotIn("search_text", fields)
+
+    def test_region_from_soato_logged_as_system(self):
+        counterparty, _ = self.make(by=self.bekzod)
+        entry = self.entries(Counterparty, counterparty.pk).get(field="region")
+        self.assertEqual(entry.source, Source.SYSTEM)
+        self.assertEqual(entry.new_value, 10)
+
+    def test_capital_logged_exactly(self):
+        counterparty, legal = self.make(by=self.bekzod)
+        legal.charter_capital = Decimal("140556531000.50")
+        legal.save(by=self.bekzod)
+        entry = self.entries(LegalEntity, counterparty.pk).get(
+            field="charter_capital", action="update"
+        )
+        self.assertEqual(Decimal(entry.old_value), Decimal("85751457400"))
+        self.assertEqual(Decimal(entry.new_value), Decimal("140556531000.50"))
+
+
+class CounterpartyAdminTests(CounterpartyTestCase):
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.bekzod)
+
+    def post_data(self, counterparty=None, **legal):
+        """Данные формы карточки так, как их отправляет браузер."""
+        values = {**INSON, **legal}
+        data = {
+            "phone": "998998944440",
+            "email": "",
+            "region": "",
+            "address": "Labzak MFY",
+            "status": "active",
+            "legal_entity-TOTAL_FORMS": "1",
+            "legal_entity-INITIAL_FORMS": "1" if counterparty else "0",
+            "legal_entity-MIN_NUM_FORMS": "1",
+            "legal_entity-MAX_NUM_FORMS": "1",
+            "legal_entity-0-country": "UZ",
+            "legal_entity-0-charter_capital_currency": "UZS",
+        }
+        for field, value in values.items():
+            if field == "is_foreign":
+                if value:
+                    data["legal_entity-0-is_foreign"] = "on"
+                continue
+            data[f"legal_entity-0-{field}"] = str(value)
+        if counterparty:
+            data["legal_entity-0-counterparty"] = str(counterparty.pk)
+        return data
+
+    def test_pages_open(self):
+        counterparty, _ = self.make()
+        for url in ["/admin/counterparties/counterparty/",
+                    "/admin/counterparties/counterparty/add/",
+                    f"/admin/counterparties/counterparty/{counterparty.pk}/change/"]:
+            with self.subTest(url=url):
+                self.assertEqual(self.client.get(url).status_code, 200)
+
+    def test_create_through_admin(self):
+        response = self.client.post("/admin/counterparties/counterparty/add/", self.post_data())
+        self.assertEqual(response.status_code, 302)
+        counterparty = Counterparty.objects.get()
+        self.assertEqual(counterparty.insurance_company, self.mosaic)  # из учётной записи
+        self.assertEqual(counterparty.display_name, '"INSON" AJ ST')
+        self.assertEqual(counterparty.created_by, self.bekzod)
+        self.assertEqual(counterparty.legal_entity.created_by, self.bekzod)
+        self.assertTrue(ChangeLog.objects.filter(field="inn", user=self.bekzod).exists())
+
+    def test_duplicate_inn_shows_message(self):
+        # Ловушка из AGENTS.md: страховой нет в форме, но повтор ИНН должен
+        # показаться сообщением, а не ошибкой 500.
+        self.make()
+        response = self.client.post("/admin/counterparties/counterparty/add/", self.post_data())
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Контрагент с таким ИНН уже есть")
+        self.assertEqual(Counterparty.objects.count(), 1)
+
+    def test_wrong_local_phone_shows_message(self):
+        data = self.post_data()
+        data["phone"] = "77012345678"
+        response = self.client.post("/admin/counterparties/counterparty/add/", data)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "998 и 9 цифр")
+        self.assertFalse(Counterparty.objects.exists())
+
+    def test_company_field_hidden_for_company_employee(self):
+        page = self.client.get("/admin/counterparties/counterparty/add/")
+        self.assertNotContains(page, 'name="insurance_company"')
+
+    def test_other_company_not_visible(self):
+        foreign_client, _ = self.make(company=self.other_company, short_name="Чужой клиент")
+        listing = self.client.get("/admin/counterparties/counterparty/")
+        self.assertNotContains(listing, "Чужой клиент")
+        page = self.client.get(f"/admin/counterparties/counterparty/{foreign_client.pk}/change/")
+        self.assertEqual(page.status_code, 302)  # «такой записи нет» и возврат на главную
+
+    def test_system_admin_sees_all_and_chooses_company(self):
+        root = User.objects.create_superuser("root", password=STRONG_PASSWORD)
+        self.client.force_login(root)
+        self.make(company=self.other_company, short_name="Чужой клиент")
+        self.assertContains(self.client.get("/admin/counterparties/counterparty/"), "Чужой клиент")
+        self.assertContains(
+            self.client.get("/admin/counterparties/counterparty/add/"), 'name="insurance_company"'
+        )
+
+    def test_search_by_name_and_inn(self):
+        self.make()
+        for query in ["inson", "INSON AJ", "207078596", "207 078 596"]:
+            with self.subTest(query=query):
+                listing = self.client.get("/admin/counterparties/counterparty/", {"q": query})
+                self.assertContains(listing, "AJ ST")
+        nothing = self.client.get("/admin/counterparties/counterparty/", {"q": "Mosaic"})
+        self.assertNotContains(nothing, "AJ ST")
+
+    def test_change_through_admin_shown_in_history(self):
+        counterparty, _ = self.make(by=self.bekzod)
+        response = self.client.post(
+            f"/admin/counterparties/counterparty/{counterparty.pk}/change/",
+            self.post_data(counterparty, oked="65200"),
+        )
+        self.assertEqual(response.status_code, 302)
+        history = self.client.get(
+            f"/admin/counterparties/counterparty/{counterparty.pk}/history/", follow=True
+        )
+        self.assertContains(history, "ОКЭД")
+        self.assertContains(history, "65200")
+
+    def test_no_delete(self):
+        counterparty, _ = self.make()
+        response = self.client.post(
+            f"/admin/counterparties/counterparty/{counterparty.pk}/delete/", {"post": "yes"}
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertTrue(Counterparty.objects.filter(pk=counterparty.pk).exists())

@@ -10,6 +10,7 @@
 from django.contrib.contenttypes.models import ContentType
 from django.db import DatabaseError, connection, transaction
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 
 from accounts.models import User
 from counterparties.models import Bank
@@ -156,6 +157,14 @@ class JournalTests(TestCase):
         self.bank.name = "Не сохранится"
         self.bank.save(by=self.ivanov, update_fields=["is_active"])
         self.assertEqual(journal(self.bank), {"is_active": (True, False)})
+
+    def test_row_locked_while_reading_before_value(self):
+        # «Было» читается с блокировкой строки (FOR UPDATE): при одновременном
+        # сохранении второй сотрудник дождётся первого, и журнал будет точным.
+        self.bank.inn = "123456789"
+        with CaptureQueriesContext(connection) as queries:
+            self.bank.save(by=self.ivanov)
+        self.assertTrue(any("FOR UPDATE" in q["sql"] for q in queries.captured_queries))
 
     def test_failed_save_leaves_no_journal(self):
         # Ошибка при сохранении - нет ни изменения, ни строки в журнале.

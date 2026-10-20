@@ -159,9 +159,16 @@ class TrackedModel(models.Model):
         ]
 
     def _values_in_database(self, fields):
-        """Значения полей, как они лежат в базе сейчас (None - записи ещё нет)."""
+        """
+        Значения полей, как они лежат в базе сейчас (None - записи ещё нет).
+
+        Строка блокируется до конца транзакции (select_for_update): если два
+        сотрудника сохраняют одну запись одновременно, второй дождётся
+        первого и запишет в журнал точное «было» - уже с правкой первого.
+        """
         return (
-            type(self)._base_manager.filter(pk=self.pk)
+            type(self)._base_manager.select_for_update()
+            .filter(pk=self.pk)
             .values(*[f.attname for f in fields])
             .first()
         )
