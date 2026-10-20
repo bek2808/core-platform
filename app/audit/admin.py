@@ -1,13 +1,25 @@
 """
-Общие настройки админ-панели для таблиц с аудитом (audit.models.TrackedModel).
+Админ-панель аудита.
 
-TrackedAdmin:
+TrackedAdmin - основа для таблиц с аудитом (audit.models.TrackedModel):
 - при сохранении передаёт в запись сотрудника, который нажал «Сохранить»;
 - показывает поля «создал / изменил» только для чтения;
-- запрещает удаление: в Core-системе записи не удаляют, а выводят из
-  работы (архив, «не действует»), потому что на них ссылаются полисы.
+- запрещает удаление: записи выводят из работы (архив, «не действует»),
+  потому что на них ссылаются полисы;
+- кнопка «История» в карточке ведёт в журнал изменений этой записи.
+
+ChangeLogAdmin - журнал изменений: только просмотр, даже у суперпользователя.
 """
+from urllib.parse import urlencode
+
 from django.contrib import admin
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import FieldDoesNotExist
+from django.db import models
+from django.shortcuts import redirect
+from django.urls import reverse
+
+from .models import ChangeLog
 
 AUDIT_FIELDS = ["created_at", "created_by", "updated_at", "updated_by"]
 
@@ -32,3 +44,104 @@ class TrackedAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+    def history_view(self, request, object_id, extra_context=None):
+        # Вместо стандартной истории Django (только названия полей) -
+        # наш журнал: было -> стало по каждому полю.
+        content_type = ContentType.objects.get_for_model(self.model)
+        query = urlencode({"content_type__id__exact": content_type.pk, "object_id": object_id})
+        return redirect(f"{reverse('admin:audit_changelog_changelist')}?{query}")
+
+
+def field_label(entry):
+    """Название поля, как его видит сотрудник («МФО», а не mfo)."""
+    model = entry.content_type.model_class()
+    try:
+        return model._meta.get_field(entry.field).verbose_name
+    except (AttributeError, FieldDoesNotExist):
+        return entry.field  # поле уже удалено из модели - показываем как есть
+
+
+def value_text(entry, value):
+    """Значение для показа: да/нет, прочерк для пустого, название для ссылки."""
+    if value is None or value == "":
+        return "—"
+    if value is True:
+        return "да"
+    if value is False:
+        return "нет"
+    model = entry.content_type.model_class()
+    try:
+        field = model._meta.get_field(entry.field)
+    except (AttributeError, FieldDoesNotExist):
+        return str(value)
+    if isinstance(field, models.ForeignKey):
+        # В журнале хранится номер связанной записи; показываем и её название.
+        related = field.related_model._base_manager.filter(pk=value).first()
+        return f"{related} (№ {value})" if related else f"№ {value}"
+    if field.choices:
+        return dict(field.flatchoices).get(value, value)
+    return str(value)
+
+
+@admin.register(ChangeLog)
+class ChangeLogAdmin(admin.ModelAdmin):
+    list_display = [
+        "changed_at",
+        "who",
+        "source",
+        "table",
+        "object_repr",
+        "field_name",
+        "old",
+        "new",
+    ]
+    list_filter = ["source", "action", "content_type", "changed_at"]
+    search_fields = ["object_repr", "user__username"]
+    list_select_related = ["user", "content_type"]
+    date_hierarchy = "changed_at"
+    fields = [
+        "changed_at",
+        "who",
+        "source",
+        "action",
+        "table",
+        "object_id",
+        "object_repr",
+        "insurance_company",
+        "field_name",
+        "old",
+        "new",
+        "change_id",
+    ]
+    readonly_fields = fields
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    @admin.display(description="кто", ordering="user__username")
+    def who(self, entry):
+        return entry.user or "система"
+
+    @admin.display(description="таблица", ordering="content_type")
+    def table(self, entry):
+        model = entry.content_type.model_class()
+        return model._meta.verbose_name if model else entry.content_type.model
+
+    @admin.display(description="поле")
+    def field_name(self, entry):
+        return field_label(entry)
+
+    @admin.display(description="было")
+    def old(self, entry):
+        return value_text(entry, entry.old_value)
+
+    @admin.display(description="стало")
+    def new(self, entry):
+        return value_text(entry, entry.new_value)

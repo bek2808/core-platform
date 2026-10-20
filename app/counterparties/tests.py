@@ -79,12 +79,14 @@ class BankTests(TestCase):
 
     def test_database_rejects_wrong_mfo(self):
         # Проверка продублирована в базе: обход формы не помогает.
+        # _base_manager - намеренный обход запрета массовых операций (audit),
+        # чтобы проверить саму базу; в рабочем коде так делать нельзя.
         with self.assertRaises(IntegrityError), transaction.atomic():
-            Bank.objects.bulk_create([Bank(mfo="ABCDE", name="Банк")])
+            Bank._base_manager.bulk_create([Bank(mfo="ABCDE", name="Банк")])
 
     def test_database_rejects_wrong_inn(self):
         with self.assertRaises(IntegrityError), transaction.atomic():
-            Bank.objects.bulk_create([Bank(mfo="01095", name="Банк", inn="12345")])
+            Bank._base_manager.bulk_create([Bank(mfo="01095", name="Банк", inn="12345")])
 
 
 class StarterListsTests(TestCase):
