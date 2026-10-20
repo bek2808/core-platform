@@ -11,6 +11,7 @@
 и выбирает страховую при создании.
 """
 from django.contrib import admin
+from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
 from django import forms
 from django.core.exceptions import ValidationError
 from django.db.models import Q
@@ -68,6 +69,24 @@ class LegalEntityFormSet(BaseInlineFormSet):
         return form
 
 
+class NoRelatedLinks:
+    """
+    Убирает значки ✎ + 👁 у выпадающих списков (должность, банк, валюта...).
+    Справочники правятся в своих разделах админ-панели, а не мимоходом из
+    карточки клиента; к тому же значки сбивали выравнивание полей.
+    """
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        widget = getattr(formfield, "widget", None)
+        if isinstance(widget, RelatedFieldWidgetWrapper):
+            widget.can_add_related = False
+            widget.can_change_related = False
+            widget.can_view_related = False
+            widget.can_delete_related = False
+        return formfield
+
+
 class CardChildFormSet(BaseInlineFormSet):
     """
     Проверки по всем строкам вложенного блока сразу: «основной - только один»
@@ -109,7 +128,7 @@ class CardChildForm(forms.ModelForm):
         return exclude
 
 
-class LegalEntityInline(admin.StackedInline):
+class LegalEntityInline(NoRelatedLinks, admin.StackedInline):
     """Данные юрлица - блок внутри карточки контрагента."""
 
     model = LegalEntity
@@ -133,7 +152,7 @@ class LegalEntityInline(admin.StackedInline):
     ]
 
 
-class RepresentativeInline(admin.StackedInline):
+class RepresentativeInline(NoRelatedLinks, admin.StackedInline):
     """Представители организации - блок внутри карточки."""
 
     model = Representative
@@ -152,7 +171,7 @@ class RepresentativeInline(admin.StackedInline):
     ]
 
 
-class BankAccountInline(admin.TabularInline):
+class BankAccountInline(NoRelatedLinks, admin.TabularInline):
     """Банковские счета - блок внутри карточки."""
 
     model = BankAccount
@@ -165,7 +184,7 @@ class BankAccountInline(admin.TabularInline):
 
 
 @admin.register(Counterparty)
-class CounterpartyAdmin(TrackedAdmin):
+class CounterpartyAdmin(NoRelatedLinks, TrackedAdmin):
     inlines = [LegalEntityInline, RepresentativeInline, BankAccountInline]
     list_display = ["display_name", "inn", "is_foreign", "region", "status"]
     list_filter = ["status", "legal_entity__is_foreign", "region"]

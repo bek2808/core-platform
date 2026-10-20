@@ -577,10 +577,7 @@ class Representative(CardChild):
     power_basis_other = models.CharField(
         "основание (если «Иное»)", max_length=255, blank=True
     )
-    power_basis_number = models.CharField(
-        "номер документа-основания", max_length=100, blank=True,
-        help_text="Например, номер доверенности или приказа.",
-    )
+    power_basis_number = models.CharField("номер документа", max_length=100, blank=True)
     pinfl = models.CharField(
         "ПИНФЛ",
         max_length=14,
@@ -590,13 +587,10 @@ class Representative(CardChild):
     passport_series = models.CharField("серия паспорта", max_length=10, blank=True)
     passport_number = models.CharField("номер паспорта", max_length=20, blank=True)
     valid_from = models.DateField("действует с", null=True, blank=True)
-    valid_to = models.DateField(
-        "действует по", null=True, blank=True,
-        help_text="Пусто - действует сейчас, без срока.",
-    )
-    is_primary = models.BooleanField(
-        "основной", default=False, help_text="Его данные уходят в ЕРСП. Основной - только один."
-    )
+    # Пояснения к полям убраны из формы 20.10 - сдвигали поля в строке:
+    # «действует по» пусто - действует без срока; данные основного уходят в ЕРСП.
+    valid_to = models.DateField("действует по", null=True, blank=True)
+    is_primary = models.BooleanField("основной", default=False)
 
     class Meta:
         verbose_name = "представитель"

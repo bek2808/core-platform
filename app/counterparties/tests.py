@@ -737,6 +737,16 @@ class CounterpartyAdminTests(CounterpartyTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Номер указан дважды")
 
+    def test_card_has_no_links_to_edit_references(self):
+        # Справочники (должности, банки, валюты, ОКЭД) правятся в своих
+        # разделах, а не из карточки клиента: значков ✎ + 👁 в карточке нет.
+        counterparty, _ = self.make()
+        Representative(counterparty=counterparty, full_name="NIYAZMETOV ILXOMJON",
+                       position=self.director).save()
+        page = self.client.get(f"/admin/counterparties/counterparty/{counterparty.pk}/change/")
+        self.assertEqual(page.status_code, 200)
+        self.assertNotContains(page, "related-widget-wrapper-link")
+
     def test_closed_primary_account_shows_message(self):
         data = self.post_data(accounts=[{"bank": self.bank.pk, "number": "20216000004849419001",
                                          "is_primary": True, "is_closed": True}])

@@ -151,7 +151,11 @@ class ChangeLogAdmin(admin.ModelAdmin):
         "old",
         "new",
     ]
-    list_filter = [CardFilter, "source", "action", "content_type", "changed_at"]
+    # «таблица» - только те таблицы, по которым в журнале есть записи.
+    list_filter = [
+        CardFilter, "source", "action",
+        ("content_type", admin.RelatedOnlyFieldListFilter), "changed_at",
+    ]
     search_fields = ["object_repr", "user__username"]
     list_select_related = ["user", "content_type"]
     date_hierarchy = "changed_at"
