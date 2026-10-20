@@ -249,6 +249,37 @@ def write_journal(instance, fields, before, *, by, source):
     ChangeLog.objects.bulk_create(entries)
 
 
+def write_journal_value(instance, field_name, old, new, *, by, source=None):
+    """
+    Записать в журнал одно изменение, которое обычное сохранение не видит.
+
+    Нужна для связей «многие ко многим» (роли у прикрепления): они хранятся
+    в отдельной таблице и меняются не сохранением записи, а методом связи.
+    old и new - готовые для показа значения (например, названия ролей через
+    запятую); None - пусто. Если old == new, ничего не пишется.
+    """
+    if old == new:
+        return
+    if source is None:
+        source = Source.MANUAL if by is not None else Source.SYSTEM
+    root = instance.journal_root()
+    ChangeLog.objects.create(
+        change_id=uuid.uuid4(),
+        user=by,
+        source=source,
+        action=ChangeLog.Action.UPDATE,
+        content_type=ContentType.objects.get_for_model(type(instance)),
+        object_id=instance.pk,
+        object_repr=str(instance)[:255],
+        root_content_type=ContentType.objects.get_for_model(type(root)) if root is not None else None,
+        root_object_id=root.pk if root is not None else None,
+        insurance_company_id=getattr(instance, "insurance_company_id", None),
+        field=field_name,
+        old_value=old,
+        new_value=new,
+    )
+
+
 class ChangeLog(models.Model):
     """
     Журнал изменений: одна строка - одно изменённое поле одной записи.

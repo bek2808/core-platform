@@ -80,6 +80,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Возможности PostgreSQL в Django (часть самого Django, не отдельный пакет):
+    # ограничения исключения - «периоды прикреплений не пересекаются» (accounts).
+    "django.contrib.postgres",
     # Наши приложения
     "accounts",        # пользователи (сотрудники)
     "references",      # справочники ЕРСП

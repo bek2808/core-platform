@@ -18,6 +18,7 @@ from django.core.validators import RegexValidator
 from django.db import models, transaction
 from django.db.models import Q
 from django.db.models.functions import Lower
+from django.utils import timezone
 
 from audit.models import TrackedModel
 from references.models import ErspInsurer, ErspRegion
@@ -314,6 +315,16 @@ class Department(TrackedModel):
                 if open_children.exists():
                     names = ", ".join(open_children.values_list("name", flat=True)[:5])
                     errors["status"] = f"Сначала закройте отделы в нём: {names}."
+                else:
+                    # Люди, которые работают здесь сегодня или с будущей даты.
+                    today = timezone.localdate()
+                    working = self.assignments.filter(Q(valid_to__isnull=True) | Q(valid_to__gte=today))
+                    if working.exists():
+                        names = ", ".join(a.user.full_name() for a in working.select_related("user")[:5])
+                        errors["status"] = (
+                            f"Здесь работают люди: {names}. Сначала переведите их или закройте "
+                            "их прикрепления датой «по»."
+                        )
 
         if company_id is not None:
             others = type(self).objects.filter(insurance_company_id=company_id).exclude(pk=self.pk)
