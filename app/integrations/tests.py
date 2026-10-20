@@ -112,16 +112,19 @@ class SecretsMixin:
 
     def setUp(self):
         super().setUp()
-        ersp.forget_tokens()
-        self.addCleanup(ersp.forget_tokens)
         folder = tempfile.TemporaryDirectory()
         self.addCleanup(folder.cleanup)
         self.secrets = Path(folder.name)
         for name in ("ersp_prod_credentials", "ersp_sandbox_credentials"):
             (self.secrets / name).write_text(json.dumps(CREDENTIALS), encoding="utf-8")
-        settings_override = override_settings(SECRETS_DIR=self.secrets, ERSP_CREDENTIALS_COMPANY="mosaic")
+        self.token_dir = self.secrets / "tokens"
+        settings_override = override_settings(
+            SECRETS_DIR=self.secrets, ERSP_CREDENTIALS_COMPANY="mosaic", ERSP_TOKEN_DIR=self.token_dir,
+        )
         settings_override.enable()
         self.addCleanup(settings_override.disable)
+        ersp.forget_tokens()
+        self.addCleanup(ersp.forget_tokens)
 
 
 class HelperTests(SimpleTestCase):
@@ -349,6 +352,83 @@ class ClientTests(SecretsMixin, TestCase):
         self.assertEqual(login.request_body["username"], "mosaic_ins")  # логин не секрет
         self.assertEqual(login.response_body["result"]["access_token"], "***")
         self.assertEqual(login.response_body["result"]["expires_in"], 3600)
+
+
+class SharedTokenTests(SecretsMixin, TestCase):
+    """Один токен на всё приложение: файл в папке токенов (в контейнере - tmpfs)."""
+
+    def test_file_readable_only_by_application(self):
+        ErspClient("prod", transport=FakeErsp(token_answer())).token_info()
+        self.assertEqual(self.token_dir.stat().st_mode & 0o777, 0o700)
+        token_file = self.token_dir / "ersp_prod_credentials.json"
+        self.assertEqual(token_file.stat().st_mode & 0o777, 0o600)
+        content = token_file.read_text()
+        self.assertIn(TOKEN, content)
+        for value in (CREDENTIALS["password"], CREDENTIALS["client_secret"]):
+            self.assertNotIn(value, content)  # в файле только токен и срок
+
+    def test_another_process_uses_same_token(self):
+        # Каждый ErspClient читает общий файл - как соседний процесс gunicorn.
+        fake = FakeErsp(token_answer(), provider_answer(), provider_answer())
+        ErspClient("prod", transport=fake).provider_inn("207078596")
+        ersp._memory_store.clear()  # памяти процесса тут нет - только файл
+        ErspClient("prod", transport=fake).provider_inn("308143734")
+        self.assertEqual(fake.paths().count("/oauth/v2/token"), 1)
+
+    def test_environments_have_separate_tokens(self):
+        fake = FakeErsp(token_answer(token="prod-token"), provider_answer(),
+                        token_answer(token="sandbox-token"), provider_answer())
+        ErspClient("prod", transport=fake).provider_inn("207078596")
+        ErspClient("sandbox", transport=fake).provider_inn("207078596")
+        self.assertEqual(fake.calls[1]["headers"]["Authorization"], "Bearer prod-token")
+        self.assertEqual(fake.calls[3]["headers"]["Authorization"], "Bearer sandbox-token")
+
+    def test_login_holds_lock(self):
+        # Пока один процесс входит, другой ждёт: блокировка файлом занята.
+        import fcntl
+        import os
+
+        held = []
+
+        def transport(method, url, headers, body, timeout):
+            fd = os.open(self.token_dir / "ersp_prod_credentials.lock", os.O_RDWR)
+            try:
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                held.append(False)
+            except BlockingIOError:
+                held.append(True)
+            finally:
+                os.close(fd)
+            return FakeErsp(token_answer())(method, url, headers, body, timeout)
+
+        ErspClient("prod", transport=transport).token_info()
+        self.assertEqual(held, [True])
+
+    def test_rejected_token_does_not_erase_fresh_one(self):
+        store = ersp.token_store()
+        store.write("ersp_prod_credentials", "fresh-from-neighbour", None)
+        store.drop("ersp_prod_credentials", "old-rejected")
+        self.assertEqual(store.read("ersp_prod_credentials")[0], "fresh-from-neighbour")
+        store.drop("ersp_prod_credentials", "fresh-from-neighbour")
+        self.assertIsNone(store.read("ersp_prod_credentials"))
+
+    def test_expiry_shared_by_wall_clock(self):
+        clock = Clock()
+        fake = FakeErsp(token_answer(expires_in=3600), provider_answer(),
+                        token_answer(token="second-token"), provider_answer())
+        ErspClient("prod", transport=fake, clock=clock).provider_inn("207078596")
+        clock.now += 3600
+        ErspClient("prod", transport=fake, clock=clock).provider_inn("207078596")
+        self.assertEqual(fake.paths().count("/oauth/v2/token"), 2)
+
+    def test_unusable_folder_falls_back_to_memory(self):
+        blocker = self.secrets / "not-a-folder"
+        blocker.write_text("x")
+        with override_settings(ERSP_TOKEN_DIR=blocker / "tokens"), self.assertLogs("integrations.ersp", "WARNING"):
+            fake = FakeErsp(token_answer(), provider_answer(), provider_answer())
+            ErspClient("prod", transport=fake).provider_inn("207078596")
+            ErspClient("prod", transport=fake).provider_inn("207078596")
+        self.assertEqual(fake.paths().count("/oauth/v2/token"), 1)
 
 
 class AppendOnlyTests(SecretsMixin, TestCase):

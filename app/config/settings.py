@@ -208,6 +208,10 @@ ERSP_SEND_ENV = env("ERSP_SEND_ENV", "sandbox")
 for _name, _value in [("ERSP_READ_ENV", ERSP_READ_ENV), ("ERSP_SEND_ENV", ERSP_SEND_ENV)]:
     if _value not in ERSP_ENVIRONMENTS:
         raise ImproperlyConfigured(f"{_name}={_value!r}: нужно prod или sandbox")
+# Общий токен ЕРСП для всех процессов приложения (integrations/ersp.py).
+# В контейнере /tmp - tmpfs (оперативная память): Podman монтирует его сам,
+# потому что контейнер работает только для чтения. На диск токен не попадает.
+ERSP_TOKEN_DIR = env("ERSP_TOKEN_DIR", "/tmp/ersp-tokens")
 # Сколько ждать ответа ЕРСП, секунд.
 ERSP_TIMEOUT_S = int(env("ERSP_TIMEOUT_S", "15"))
 # Чьи общие данные для входа (секреты без кода страховой в имени):

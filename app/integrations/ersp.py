@@ -5,11 +5,19 @@
 - в секретах Podman лежат данные для входа, а не токен:
   ersp_prod_credentials и ersp_sandbox_credentials (JSON с client_id,
   client_secret, username, password; заводятся скриптом bin/ersp-secret);
-- токен клиент получает сам методом /oauth/v2/token и держит ТОЛЬКО в памяти
-  процесса: ни в базе, ни в журнале, ни в резервных копиях его нет;
+- токен клиент получает сам методом /oauth/v2/token. Он один на всё
+  приложение (решение Бекзода 20.10): процессы gunicorn делят его через файл
+  в /tmp контейнера. Контейнер работает «только для чтения», и Podman
+  монтирует /tmp как tmpfs - это оперативная память, а не диск. Поэтому
+  токена нет ни в базе, ни в журнале, ни в резервных копиях, а после
+  перезапуска контейнера он исчезает (первый запрос входит заново);
 - новый токен берётся, когда старый подходит к концу (expires_in минус
   запас) или когда ЕРСП ответил 401 «не авторизован» - тогда запрос
   повторяется один раз.
+- Наблюдение 20.10: ЕРСП не отзывает старые токены при выдаче новых и, похоже,
+  не проверяет срок (токен Бекзода из Swagger работает с июля). Значит,
+  любой выданный токен стоит считать бессрочным паролем - тем важнее, что
+  он не попадает на диск.
 
 Среда задаётся явно: environment = "prod" или "sandbox". Какая среда для
 чего - в настройках: ERSP_READ_ENV (чтение: провайдер, справочники)
@@ -34,12 +42,17 @@
     except ErspError as error:
         ... error.message - что показать сотруднику; error.exchange - строка журнала
 """
+import fcntl
 import json
+import logging
+import os
 import ssl
 import threading
 import time
 import urllib.error
 import urllib.request
+from contextlib import contextmanager
+from pathlib import Path
 
 from django.conf import settings
 
@@ -133,16 +146,109 @@ def read_credentials(secret_name):
     return data
 
 
-# --- Токены в памяти процесса ----------------------------------------------------
+# --- Общий токен для всех процессов ----------------------------------------------
 
-_tokens = {}           # имя секрета -> (токен, до какого момента действует или None)
-_tokens_lock = threading.Lock()
+logger = logging.getLogger(__name__)
+
+
+class FileTokenStore:
+    """
+    Токены в файлах папки settings.ERSP_TOKEN_DIR (в контейнере - /tmp,
+    оперативная память). Один файл на секрет: {"token": ..., "valid_until": ...}.
+    Права: папка 0700, файлы 0600 - читать может только пользователь приложения.
+
+    locked(name) - блокировка файлом (flock): пока один процесс входит в ЕРСП,
+    остальные ждут и потом берут уже полученный токен, а не входят сами.
+    """
+
+    def __init__(self, directory):
+        self.directory = Path(directory)
+        os.makedirs(self.directory, mode=0o700, exist_ok=True)
+        os.chmod(self.directory, 0o700)
+
+    def _file(self, name, suffix):
+        return self.directory / f"{name}{suffix}"
+
+    @contextmanager
+    def locked(self, name):
+        fd = os.open(self._file(name, ".lock"), os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX)
+            yield
+        finally:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+            os.close(fd)
+
+    def read(self, name):
+        try:
+            data = json.loads(self._file(name, ".json").read_text(encoding="utf-8"))
+            return data["token"], data.get("valid_until")
+        except (OSError, ValueError, KeyError, TypeError):
+            return None
+
+    def write(self, name, token, valid_until):
+        # Сначала во временный файл, потом подмена: соседний процесс никогда
+        # не прочитает наполовину записанный файл.
+        temp = self._file(name, f".{os.getpid()}.tmp")
+        fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as file:
+            json.dump({"token": token, "valid_until": valid_until}, file)
+        os.replace(temp, self._file(name, ".json"))
+
+    def drop(self, name, token):
+        """Стереть токен, но только если это тот, который отверг ЕРСП."""
+        current = self.read(name)
+        if current is not None and current[0] == token:
+            self._file(name, ".json").unlink(missing_ok=True)
+
+    def clear(self):
+        for path in self.directory.glob("*.json"):
+            path.unlink(missing_ok=True)
+
+
+class MemoryTokenStore:
+    """Запасной вариант, если папку для токенов создать нельзя: память процесса."""
+
+    def __init__(self):
+        self.tokens = {}
+        self.lock = threading.RLock()
+
+    @contextmanager
+    def locked(self, name):
+        with self.lock:
+            yield
+
+    def read(self, name):
+        return self.tokens.get(name)
+
+    def write(self, name, token, valid_until):
+        self.tokens[name] = (token, valid_until)
+
+    def drop(self, name, token):
+        if self.tokens.get(name, (None,))[0] == token:
+            self.tokens.pop(name, None)
+
+    def clear(self):
+        self.tokens.clear()
+
+
+_memory_store = MemoryTokenStore()
+
+
+def token_store():
+    """Общее хранилище; если папка недоступна - память процесса (с записью в журнал)."""
+    try:
+        return FileTokenStore(settings.ERSP_TOKEN_DIR)
+    except OSError as error:
+        logger.warning("Папка токенов ЕРСП недоступна (%s) - токен только в памяти процесса", error)
+        return _memory_store
 
 
 def forget_tokens():
     """Забыть все токены (для тестов и после замены секрета)."""
-    with _tokens_lock:
-        _tokens.clear()
+    _memory_store.clear()
+    store = token_store()
+    store.clear()
 
 
 # --- Отправка HTTP-запроса --------------------------------------------------------
@@ -164,7 +270,7 @@ def urllib_transport(method, url, headers, body, timeout):
 
 
 class ErspClient:
-    def __init__(self, environment, company=None, user=None, transport=None, clock=time.monotonic):
+    def __init__(self, environment, company=None, user=None, transport=None, clock=time.time):
         if environment not in Environment.values:
             raise ErspConfigError(f"Неизвестная среда ЕРСП: {environment!r} (нужно prod или sandbox).")
         self.environment = environment
@@ -172,7 +278,8 @@ class ErspClient:
         self.user = user
         self.base_url = settings.ERSP_URLS[environment].rstrip("/")
         self.transport = transport or urllib_transport
-        self.clock = clock
+        self.clock = clock  # обычные часы: срок токена сравнивают разные процессы
+        self.store = token_store()
         self.secret_name = credentials_secret(environment, company)
         # Последняя строка журнала обмена: по ней страница сверки находит
         # ответ, который видел сотрудник (и применяет именно его).
@@ -184,22 +291,24 @@ class ErspClient:
         """
         Войти в ЕРСП (всегда новый вход) и вернуть сведения о токене без самого
         токена: тип, срок жизни, область. Для проверки входа командой ersp_check.
+        Новый токен становится общим токеном приложения.
         """
-        result = self._login()
+        with self.store.locked(self.secret_name):
+            result = self._login()
         return {k: result.get(k) for k in ("token_type", "expires_in", "scope")}
 
     def _token(self):
-        with _tokens_lock:
-            cached = _tokens.get(self.secret_name)
-        if cached is not None:
-            token, valid_until = cached
-            if valid_until is None or self.clock() < valid_until:
-                return token
-        self._login()
-        with _tokens_lock:
-            return _tokens[self.secret_name][0]
+        """Общий токен; если его нет или срок вышел - войти (один процесс за раз)."""
+        with self.store.locked(self.secret_name):
+            cached = self.store.read(self.secret_name)
+            if cached is not None:
+                token, valid_until = cached
+                if valid_until is None or self.clock() < valid_until:
+                    return token
+            return self._login()["access_token"]
 
     def _login(self):
+        """Вход в ЕРСП. Вызывается под блокировкой store.locked()."""
         credentials = read_credentials(self.secret_name)
         body = {
             "client_id": credentials["client_id"],
@@ -215,8 +324,7 @@ class ErspClient:
         valid_until = None
         if isinstance(expires_in, (int, float)) and expires_in > 0:
             valid_until = self.clock() + max(expires_in - TOKEN_MARGIN_S, 0)
-        with _tokens_lock:
-            _tokens[self.secret_name] = (token, valid_until)
+        self.store.write(self.secret_name, token, valid_until)
         return result
 
     # --- Запросы к API --------------------------------------------------------------
@@ -232,11 +340,14 @@ class ErspClient:
 
     def _call(self, operation, path, body, subject=""):
         """Запрос с токеном; на 401 - новый вход и один повтор."""
+        token = self._token()
         try:
-            return self._send(operation, path, body, subject=subject, token=self._token())
+            return self._send(operation, path, body, subject=subject, token=token)
         except _Unauthorized:
-            with _tokens_lock:
-                _tokens.pop(self.secret_name, None)
+            with self.store.locked(self.secret_name):
+                # Стираем только отвергнутый токен: если соседний процесс уже
+                # вошёл заново, его свежий токен остаётся.
+                self.store.drop(self.secret_name, token)
             try:
                 return self._send(operation, path, body, subject=subject, token=self._token())
             except _Unauthorized as again:
