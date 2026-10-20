@@ -10,18 +10,23 @@
 Пользователь без страховой компании (администратор системы) видит всех
 и выбирает страховую при создании.
 """
-from urllib.parse import urlencode
-
 from django.contrib import admin
-from django.contrib.contenttypes.models import ContentType
+from django import forms
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.forms.models import BaseInlineFormSet
-from django.shortcuts import redirect
-from django.urls import reverse
 
 from audit.admin import TrackedAdmin
 
-from .models import Bank, Counterparty, LegalEntity, PowerBasis, Position
+from .models import (
+    Bank,
+    BankAccount,
+    Counterparty,
+    LegalEntity,
+    PowerBasis,
+    Position,
+    Representative,
+)
 from .normalize import remove_spaces, search_key
 
 
@@ -63,6 +68,47 @@ class LegalEntityFormSet(BaseInlineFormSet):
         return form
 
 
+class CardChildFormSet(BaseInlineFormSet):
+    """
+    Проверки по всем строкам вложенного блока сразу: «основной - только один»
+    и «номер не повторяется». В базе эти правила есть, но в них участвует
+    ссылка на карточку, которой нет в форме, - Django их в форме не проверяет
+    (ловушка из AGENTS.md), и без этой проверки была бы ошибка 500.
+    """
+
+    def clean(self):
+        # Наши проверки - раньше встроенных Django: у встроенной проверки
+        # повтора сообщение с техническим именем поля («number»).
+        model = self.model
+        rows = [
+            form.instance
+            for form in self.forms
+            if getattr(form, "cleaned_data", None) and not form.cleaned_data.get("DELETE")
+        ]
+        if sum(1 for row in rows if row.is_primary) > 1:
+            raise ValidationError(f"Основным может быть только один: {model._meta.verbose_name_plural}.")
+        numbers = [row.number for row in rows if getattr(row, "number", "")]
+        repeated = sorted({n for n in numbers if numbers.count(n) > 1})
+        if repeated:
+            raise ValidationError(f"Номер указан дважды: {', '.join(repeated)}.")
+        super().clean()
+
+
+class CardChildForm(forms.ModelForm):
+    """
+    Строка вложенного блока. Правило «основной - только один» проверяется не
+    построчно, а по всему блоку (CardChildFormSet): построчная проверка смотрит
+    в базу, где старый основной ещё основной, и не даёт сменить основного
+    в одной форме. При сохранении сначала снимается старый основной
+    (audit.admin.TrackedAdmin.save_formset), так что база правило не нарушит.
+    """
+
+    def _get_validation_exclusions(self):
+        exclude = super()._get_validation_exclusions()
+        exclude.add("is_primary")
+        return exclude
+
+
 class LegalEntityInline(admin.StackedInline):
     """Данные юрлица - блок внутри карточки контрагента."""
 
@@ -87,9 +133,40 @@ class LegalEntityInline(admin.StackedInline):
     ]
 
 
+class RepresentativeInline(admin.StackedInline):
+    """Представители организации - блок внутри карточки."""
+
+    model = Representative
+    form = CardChildForm
+    formset = CardChildFormSet
+    can_delete = False  # не удаляются: срок полномочий закрывается датой «действует по»
+    extra = 0
+    fieldsets = [
+        (None, {"fields": [
+            ("full_name", "is_primary"),
+            ("position", "position_other"),
+            ("power_basis", "power_basis_other", "power_basis_number"),
+            ("pinfl", "passport_series", "passport_number"),
+            ("valid_from", "valid_to"),
+        ]}),
+    ]
+
+
+class BankAccountInline(admin.TabularInline):
+    """Банковские счета - блок внутри карточки."""
+
+    model = BankAccount
+    form = CardChildForm
+    formset = CardChildFormSet
+    can_delete = False  # не удаляются: ставится отметка «закрыт»
+    extra = 0
+    fields = ["bank", "foreign_bank_name", "number", "currency", "is_primary", "is_closed"]
+    autocomplete_fields = ["bank", "currency"]
+
+
 @admin.register(Counterparty)
 class CounterpartyAdmin(TrackedAdmin):
-    inlines = [LegalEntityInline]
+    inlines = [LegalEntityInline, RepresentativeInline, BankAccountInline]
     list_display = ["display_name", "inn", "is_foreign", "region", "status"]
     list_filter = ["status", "legal_entity__is_foreign", "region"]
     list_select_related = ["legal_entity", "region", "insurance_company"]
@@ -156,15 +233,6 @@ class CounterpartyAdmin(TrackedAdmin):
             | Q(legal_entity__inn=remove_spaces(term).upper())
         )
         return found, False
-
-    def history_view(self, request, object_id, extra_context=None):
-        # История карточки - вместе с данными юрлица: у них общий номер записи.
-        types = ContentType.objects.get_for_models(Counterparty, LegalEntity).values()
-        query = urlencode({
-            "content_type__id__in": ",".join(str(t.pk) for t in types),
-            "object_id": object_id,
-        })
-        return redirect(f"{reverse('admin:audit_changelog_changelist')}?{query}")
 
     @admin.display(description="ИНН", ordering="legal_entity__inn")
     def inn(self, obj):

@@ -10,12 +10,12 @@ TrackedAdmin - основа для таблиц с аудитом (audit.models.
 
 ChangeLogAdmin - журнал изменений: только просмотр, даже у суперпользователя.
 """
-from urllib.parse import urlencode
-
+from django.apps import apps
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import FieldDoesNotExist, ValidationError
 from django.db import models
+from django.db.models import Q
 from django.shortcuts import redirect
 from django.urls import reverse
 
@@ -46,7 +46,11 @@ class TrackedAdmin(admin.ModelAdmin):
         # Вложенные блоки карточки (данные юрлица, позже представители
         # и счета) сохраняются по одной записи и с сотрудником - иначе
         # их изменения прошли бы мимо журнала.
-        for obj in formset.save(commit=False):
+        # Сначала записи, с которых снимается «основной», потом остальные:
+        # иначе при смене основного в одной форме база увидела бы на миг двух
+        # основных и отказала (правило «основной - только один»).
+        instances = sorted(formset.save(commit=False), key=lambda obj: bool(getattr(obj, "is_primary", False)))
+        for obj in instances:
             obj.save(by=request.user)
         formset.save_m2m()
 
@@ -55,10 +59,47 @@ class TrackedAdmin(admin.ModelAdmin):
 
     def history_view(self, request, object_id, extra_context=None):
         # Вместо стандартной истории Django (только названия полей) -
-        # наш журнал: было -> стало по каждому полю.
+        # наш журнал: было -> стало по каждому полю, вместе с вложенными
+        # записями карточки (см. CardFilter).
         content_type = ContentType.objects.get_for_model(self.model)
-        query = urlencode({"content_type__id__exact": content_type.pk, "object_id": object_id})
-        return redirect(f"{reverse('admin:audit_changelog_changelist')}?{query}")
+        card = f"{content_type.pk}-{int(object_id)}"
+        return redirect(f"{reverse('admin:audit_changelog_changelist')}?card={card}")
+
+
+class CardFilter(admin.SimpleListFilter):
+    """
+    Фильтр «карточка» (?card=<таблица>-<номер>) - для кнопки «История».
+
+    Показывает изменения самой карточки, таблиц с тем же номером записи
+    (journal_same_number у модели: данные юрлица делят номер с карточкой
+    контрагента) и вложенных записей, у которых эта карточка - хозяин
+    (представители, счета).
+    """
+
+    title = "карточка"
+    parameter_name = "card"
+
+    def lookups(self, request, model_admin):
+        value = self.value()
+        return [(value, "выбранная карточка")] if value else []
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        if not value:
+            return queryset
+        try:
+            type_id, object_id = (int(part) for part in value.split("-"))
+            model = ContentType.objects.get_for_id(type_id).model_class()
+        except (ValueError, ContentType.DoesNotExist):
+            return queryset.none()
+        same_number = [type_id] + [
+            ContentType.objects.get_for_model(apps.get_model(label)).pk
+            for label in getattr(model, "journal_same_number", ())
+        ]
+        return queryset.filter(
+            Q(content_type_id__in=same_number, object_id=object_id)
+            | Q(root_content_type_id=type_id, root_object_id=object_id)
+        )
 
 
 def field_label(entry):
@@ -110,7 +151,7 @@ class ChangeLogAdmin(admin.ModelAdmin):
         "old",
         "new",
     ]
-    list_filter = ["source", "action", "content_type", "changed_at"]
+    list_filter = [CardFilter, "source", "action", "content_type", "changed_at"]
     search_fields = ["object_repr", "user__username"]
     list_select_related = ["user", "content_type"]
     date_hierarchy = "changed_at"

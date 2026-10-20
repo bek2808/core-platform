@@ -17,11 +17,19 @@ from django.db import IntegrityError, transaction
 from django.test import SimpleTestCase, TestCase
 
 from accounts.models import User
-from audit.models import ChangeLog, Source
+from audit.models import ChangeLog, Source, UntrackedChangeError
 from companies.models import InsuranceCompany
 from references.loader import load_from_files
 
-from .models import Bank, Counterparty, LegalEntity, PowerBasis, Position
+from .models import (
+    Bank,
+    BankAccount,
+    Counterparty,
+    LegalEntity,
+    PowerBasis,
+    Position,
+    Representative,
+)
 from .normalize import digits_only, remove_spaces, search_key, squash_spaces
 
 STRONG_PASSWORD = "Kx7#mQ2v!pLr9zT"
@@ -525,8 +533,10 @@ class CounterpartyAdminTests(CounterpartyTestCase):
     def setUp(self):
         super().setUp()
         self.client.force_login(self.bekzod)
+        self.director = Position.objects.get(name="Директор")
+        self.bank = Bank.objects.create(mfo="01095", name="ASIA ALLIANCE BANK")
 
-    def post_data(self, counterparty=None, **legal):
+    def post_data(self, counterparty=None, representatives=None, accounts=None, **legal):
         """Данные формы карточки так, как их отправляет браузер."""
         values = {**INSON, **legal}
         data = {
@@ -552,6 +562,10 @@ class CounterpartyAdminTests(CounterpartyTestCase):
             data[f"legal_entity-0-{field}"] = str(value)
         if counterparty:
             data["legal_entity-0-counterparty"] = str(counterparty.pk)
+        # Вложенные блоки «представители» и «счета»: служебные поля формсета
+        # и строки. Уже сохранённые строки карточки браузер тоже отправляет.
+        data.update(inline_rows("representatives", representatives or [], counterparty))
+        data.update(inline_rows("accounts", accounts or [], counterparty))
         return data
 
     def test_pages_open(self):
@@ -684,3 +698,262 @@ class CounterpartyAdminTests(CounterpartyTestCase):
         )
         self.assertEqual(response.status_code, 403)
         self.assertTrue(Counterparty.objects.filter(pk=counterparty.pk).exists())
+
+    # --- Представители и счета через админ-панель ---------------------------------
+
+    def test_add_card_with_representative_and_account(self):
+        data = self.post_data(
+            representatives=[{"full_name": "NIYAZMETOV ILXOMJON IKRAMBAYEVICH",
+                              "position": self.director.pk, "is_primary": True}],
+            accounts=[{"bank": self.bank.pk, "number": "2021 6000 0048 4941 9001",
+                       "is_primary": True}],
+        )
+        response = self.client.post("/admin/counterparties/counterparty/add/", data)
+        self.assertEqual(response.status_code, 302)
+        counterparty = Counterparty.objects.get()
+        representative = counterparty.representatives.get()
+        self.assertTrue(representative.is_primary)
+        self.assertEqual(representative.created_by, self.bekzod)
+        account = counterparty.accounts.get()
+        self.assertEqual(account.number, "20216000004849419001")
+        self.assertEqual(account.currency_id, 860)  # сум по умолчанию
+
+    def test_two_primary_representatives_shows_message(self):
+        # Ловушка из AGENTS.md: ссылки на карточку нет в форме - без проверки
+        # всего блока сразу здесь была бы ошибка 500.
+        data = self.post_data(representatives=[
+            {"full_name": "Первый", "is_primary": True},
+            {"full_name": "Второй", "is_primary": True},
+        ])
+        response = self.client.post("/admin/counterparties/counterparty/add/", data)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Основным может быть только один")
+        self.assertFalse(Counterparty.objects.exists())
+
+    def test_same_account_twice_shows_message(self):
+        row = {"bank": self.bank.pk, "number": "20216000004849419001"}
+        data = self.post_data(accounts=[row, dict(row)])
+        response = self.client.post("/admin/counterparties/counterparty/add/", data)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Номер указан дважды")
+
+    def test_closed_primary_account_shows_message(self):
+        data = self.post_data(accounts=[{"bank": self.bank.pk, "number": "20216000004849419001",
+                                         "is_primary": True, "is_closed": True}])
+        response = self.client.post("/admin/counterparties/counterparty/add/", data)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Закрытый счёт не может быть основным")
+        self.assertFalse(Counterparty.objects.exists())
+
+    def test_switch_primary_in_one_save(self):
+        # Сняли «основной» с одного и поставили другому в одной форме -
+        # сохраняется без ошибки (сначала снимается, потом ставится).
+        counterparty, _ = self.make(by=self.bekzod)
+        first = Representative(counterparty=counterparty, full_name="Старый", is_primary=True)
+        first.save(by=self.bekzod)
+        second = Representative(counterparty=counterparty, full_name="Новый")
+        second.save(by=self.bekzod)
+        data = self.post_data(counterparty, representatives=[
+            {"id": first.pk, "full_name": "Старый", "is_primary": False,
+             "valid_to": "2026-10-19"},
+            {"id": second.pk, "full_name": "Новый", "is_primary": True},
+        ])
+        response = self.client.post(
+            f"/admin/counterparties/counterparty/{counterparty.pk}/change/", data
+        )
+        self.assertEqual(response.status_code, 302)
+        first.refresh_from_db()
+        second.refresh_from_db()
+        self.assertFalse(first.is_primary)
+        self.assertTrue(second.is_primary)
+
+    def test_history_shows_representatives_and_accounts(self):
+        counterparty, _ = self.make(by=self.bekzod)
+        Representative(counterparty=counterparty, full_name="NIYAZMETOV ILXOMJON").save(by=self.bekzod)
+        BankAccount(counterparty=counterparty, bank=self.bank,
+                    number="20216000004849419001").save(by=self.bekzod)
+        history = self.client.get(
+            f"/admin/counterparties/counterparty/{counterparty.pk}/history/", follow=True
+        )
+        self.assertContains(history, "NIYAZMETOV ILXOMJON")   # представитель
+        self.assertContains(history, "20216000004849419001")  # счёт
+        self.assertContains(history, "207078596")             # данные юрлица
+
+    def test_history_of_one_card_without_others(self):
+        mine, _ = self.make(by=self.bekzod)
+        other, _ = self.make(by=self.bekzod, inn="308143734", short_name="Mosaic")
+        Representative(counterparty=other, full_name="XALILOV OYBEK").save(by=self.bekzod)
+        history = self.client.get(
+            f"/admin/counterparties/counterparty/{mine.pk}/history/", follow=True
+        )
+        self.assertNotContains(history, "XALILOV OYBEK")
+        self.assertNotContains(history, "308143734")
+
+
+def inline_rows(prefix, rows, counterparty):
+    """Строки вложенного блока (формсета) так, как их отправляет браузер."""
+    data = {
+        f"{prefix}-TOTAL_FORMS": str(len(rows)),
+        f"{prefix}-INITIAL_FORMS": str(sum(1 for row in rows if "id" in row)),
+        f"{prefix}-MIN_NUM_FORMS": "0",
+        f"{prefix}-MAX_NUM_FORMS": "1000",
+    }
+    for i, row in enumerate(rows):
+        for field, value in row.items():
+            if isinstance(value, bool):
+                if value:
+                    data[f"{prefix}-{i}-{field}"] = "on"
+                continue
+            data[f"{prefix}-{i}-{field}"] = "" if value is None else str(value)
+        if counterparty:
+            data[f"{prefix}-{i}-counterparty"] = str(counterparty.pk)
+    return data
+
+
+class RepresentativeTests(CounterpartyTestCase):
+    def setUp(self):
+        super().setUp()
+        self.counterparty, _ = self.make()
+        self.director = Position.objects.get(name="Директор")
+        self.other_position = Position.objects.get(is_other=True)
+        self.charter = PowerBasis.objects.get(name="Устав")
+
+    def representative(self, **fields):
+        representative = Representative(
+            counterparty=self.counterparty, **{"full_name": "  NIYAZMETOV  ILXOMJON ", **fields}
+        )
+        representative.full_clean()
+        representative.save(by=self.bekzod)
+        return representative
+
+    def test_basic(self):
+        representative = self.representative(
+            position=self.director, power_basis=self.charter, power_basis_number="№ 1",
+            pinfl="3120 3876 5400 12", passport_series="aa", passport_number="12 34567",
+        )
+        self.assertEqual(representative.full_name, "NIYAZMETOV ILXOMJON")
+        self.assertEqual(representative.pinfl, "31203876540012")
+        self.assertEqual(representative.passport_series, "AA")
+        self.assertEqual(representative.passport_number, "1234567")
+        self.assertEqual(representative.position_text, "Директор")
+        self.assertEqual(representative.power_basis_text, "Устав")
+
+    def test_other_position_needs_text(self):
+        with self.assertRaises(ValidationError) as error:
+            self.representative(position=self.other_position)
+        self.assertIn("position_other", error.exception.message_dict)
+        representative = self.representative(
+            position=self.other_position, position_other="Управляющий партнёр"
+        )
+        self.assertEqual(representative.position_text, "Управляющий партнёр")
+
+    def test_other_text_dropped_for_ordinary_position(self):
+        representative = self.representative(position=self.director, position_other="лишнее")
+        self.assertEqual(representative.position_other, "")
+
+    def test_pinfl_format(self):
+        for wrong in ["3120387654001", "312038765400123", "3120387654001A"]:
+            with self.subTest(pinfl=wrong), self.assertRaises(ValidationError):
+                self.representative(pinfl=wrong)
+
+    def test_dates_order(self):
+        with self.assertRaises(ValidationError):
+            self.representative(valid_from=datetime.date(2026, 1, 10),
+                                valid_to=datetime.date(2026, 1, 9))
+
+    def test_several_current_one_primary(self):
+        # Решение 20.10: несколько действующих, основной - один.
+        self.representative(is_primary=True)
+        self.representative(full_name="Заместитель по доверенности")
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Representative(counterparty=self.counterparty, full_name="Третий",
+                           is_primary=True).save()
+
+    def test_expired_cannot_be_primary(self):
+        with self.assertRaises(ValidationError) as error:
+            self.representative(is_primary=True, valid_to=datetime.date(2020, 1, 1))
+        self.assertIn("is_primary", error.exception.message_dict)
+
+    def test_only_for_organizations(self):
+        person = Counterparty(insurance_company=self.mosaic, kind=Counterparty.Kind.INDIVIDUAL)
+        person.save()
+        with self.assertRaises(ValidationError):
+            Representative(counterparty=person, full_name="Кто-то").full_clean()
+
+    def test_journal_points_to_card(self):
+        representative = self.representative()
+        entry = ChangeLog.objects.filter(
+            content_type=ContentType.objects.get_for_model(Representative),
+            object_id=representative.pk,
+        ).first()
+        self.assertEqual(entry.root_object_id, self.counterparty.pk)
+        self.assertEqual(entry.insurance_company, self.mosaic)
+
+    def test_never_deleted(self):
+        representative = self.representative()
+        with self.assertRaises(UntrackedChangeError):
+            representative.delete()
+
+
+class BankAccountTests(CounterpartyTestCase):
+    def setUp(self):
+        super().setUp()
+        self.counterparty, _ = self.make()
+        self.bank = Bank.objects.create(mfo="01095", name="ASIA ALLIANCE BANK")
+
+    def account(self, **fields):
+        account = BankAccount(counterparty=self.counterparty, **fields)
+        account.full_clean()
+        account.save(by=self.bekzod)
+        return account
+
+    def test_local_account(self):
+        # Счёт Inson из ответа провайдера.
+        account = self.account(bank=self.bank, number="2021 6000 0048 4941 9001")
+        self.assertEqual(account.number, "20216000004849419001")
+        self.assertEqual(account.currency_id, 860)
+        self.assertEqual(str(account), "20216000004849419001 (01095)")
+
+    def test_local_account_20_digits(self):
+        for wrong in ["2021600000484941900", "202160000048494190011", "2021600000484941900A"]:
+            with self.subTest(number=wrong), self.assertRaises(ValidationError):
+                self.account(bank=self.bank, number=wrong)
+
+    def test_foreign_bank_account(self):
+        account = self.account(
+            foreign_bank_name="  Halyk  Bank ", number="kz86 125k zt50 0410 0100",
+            currency_id=398,
+        )
+        self.assertEqual(account.foreign_bank_name, "Halyk Bank")
+        self.assertEqual(account.number, "KZ86125KZT5004100100")
+
+    def test_bank_or_foreign_bank_required(self):
+        with self.assertRaises(ValidationError):
+            self.account(number="20216000004849419001")
+
+    def test_bank_wins_over_foreign_name(self):
+        account = self.account(bank=self.bank, foreign_bank_name="лишнее",
+                               number="20216000004849419001")
+        self.assertEqual(account.foreign_bank_name, "")
+
+    def test_one_primary(self):
+        self.account(bank=self.bank, number="20216000004849419001", is_primary=True)
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            BankAccount(counterparty=self.counterparty, bank=self.bank,
+                        number="20216000004849419002", is_primary=True).save()
+
+    def test_closed_cannot_be_primary(self):
+        with self.assertRaises(ValidationError):
+            self.account(bank=self.bank, number="20216000004849419001",
+                         is_primary=True, is_closed=True)
+
+    def test_number_unique_per_counterparty(self):
+        self.account(bank=self.bank, number="20216000004849419001")
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            BankAccount(counterparty=self.counterparty, bank=self.bank,
+                        number="20216000004849419001").save()
+
+    def test_never_deleted(self):
+        account = self.account(bank=self.bank, number="20216000004849419001")
+        with self.assertRaises(UntrackedChangeError):
+            account.delete()

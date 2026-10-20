@@ -5,7 +5,8 @@
 - справочники для ввода: банки, основания полномочий, должности представителей;
 - карточка контрагента (Counterparty) - общая часть для юрлиц и физлиц;
 - данные юрлица (LegalEntity) - одна строка на карточку юрлица.
-Представители и счета добавляются следующим шагом.
+- представители организации (Representative) и банковские счета (BankAccount)
+  - вложенные записи карточки.
 Полное описание модели - docs/counterparties-model.md.
 
 Общие правила:
@@ -22,6 +23,7 @@ from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
 from django.db.models import Q
 from django.db.models.functions import Lower
+from django.utils import timezone
 
 from audit.models import Source, TrackedModel
 from companies.models import UZBEKISTAN, InsuranceCompany
@@ -230,6 +232,9 @@ class Counterparty(TrackedModel):
     )
 
     audit_exclude = ("display_name", "search_text")
+    # У данных юрлица тот же номер записи, что у карточки: их изменения видны
+    # в «Истории» карточки (audit.admin.CardFilter).
+    journal_same_number = ("counterparties.LegalEntity",)
 
     class Meta:
         verbose_name = "контрагент"
@@ -449,6 +454,9 @@ class LegalEntity(TrackedModel):
             return counterparty
         return getattr(self, "card_in_form", None)
 
+    def journal_root(self):
+        return self.card()
+
     def normalize(self):
         # Страховая компания - всегда та же, что у карточки.
         counterparty = self.card()
@@ -509,3 +517,253 @@ class LegalEntity(TrackedModel):
             kwargs["update_fields"] = {*update_fields, "insurance_company"}
         super().save(*args, by=by, **kwargs)
         self.counterparty.refresh_from_legal_entity(self, by=by)
+
+
+# --- Представители и счета (вложенные записи карточки) -------------------------------
+
+PINFL_REGEX = r"^[0-9]{14}$"
+LOCAL_ACCOUNT_REGEX = r"^[0-9]{20}$"
+FOREIGN_ACCOUNT_REGEX = r"^[A-Z0-9]{5,34}$"  # IBAN - до 34 знаков
+
+
+class CardChild(TrackedModel):
+    """Общее для вложенных записей карточки: страховая и «История» - от карточки."""
+
+    class Meta:
+        abstract = True
+
+    @property
+    def insurance_company_id(self):
+        # Своей колонки нет: страховая берётся из карточки (для журнала).
+        counterparty = getattr(self, "counterparty", None)
+        return counterparty.insurance_company_id if counterparty is not None else None
+
+    def journal_root(self):
+        return getattr(self, "counterparty", None)
+
+
+class Representative(CardChild):
+    """
+    Представитель организации: кто подписывает от её имени.
+
+    Решение Бекзода 20.10: одновременно может действовать несколько
+    представителей (директор и заместитель по доверенности); один из них -
+    основной, его данные уходят в ЕРСП. Сменился руководитель - старой записи
+    ставится дата «действует по», заводится новая; записи не удаляются.
+
+    Формат серии и номера паспорта пока не проверяется: решим после разбора
+    физлиц (представитель может быть иностранцем). ПИНФЛ - 14 цифр;
+    контрольная цифра - после сверки с официальным источником.
+    """
+
+    counterparty = models.ForeignKey(
+        Counterparty,
+        on_delete=models.PROTECT,
+        related_name="representatives",
+        verbose_name="контрагент",
+    )
+    full_name = models.CharField("ФИО", max_length=255)
+    position = models.ForeignKey(
+        Position, on_delete=models.PROTECT, null=True, blank=True,
+        related_name="+", verbose_name="должность",
+    )
+    position_other = models.CharField(
+        "должность (если «Иное»)", max_length=255, blank=True
+    )
+    power_basis = models.ForeignKey(
+        PowerBasis, on_delete=models.PROTECT, null=True, blank=True,
+        related_name="+", verbose_name="основание полномочий",
+    )
+    power_basis_other = models.CharField(
+        "основание (если «Иное»)", max_length=255, blank=True
+    )
+    power_basis_number = models.CharField(
+        "номер документа-основания", max_length=100, blank=True,
+        help_text="Например, номер доверенности или приказа.",
+    )
+    pinfl = models.CharField(
+        "ПИНФЛ",
+        max_length=14,
+        blank=True,
+        validators=[RegexValidator(PINFL_REGEX, "ПИНФЛ - ровно 14 цифр.")],
+    )
+    passport_series = models.CharField("серия паспорта", max_length=10, blank=True)
+    passport_number = models.CharField("номер паспорта", max_length=20, blank=True)
+    valid_from = models.DateField("действует с", null=True, blank=True)
+    valid_to = models.DateField(
+        "действует по", null=True, blank=True,
+        help_text="Пусто - действует сейчас, без срока.",
+    )
+    is_primary = models.BooleanField(
+        "основной", default=False, help_text="Его данные уходят в ЕРСП. Основной - только один."
+    )
+
+    class Meta:
+        verbose_name = "представитель"
+        verbose_name_plural = "представители"
+        ordering = ["-is_primary", "valid_to", "full_name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["counterparty"],
+                condition=Q(is_primary=True),
+                name="counterparties_representative_one_primary",
+                violation_error_message="Основным может быть только один представитель.",
+            ),
+            models.CheckConstraint(
+                condition=Q(pinfl="") | Q(pinfl__regex=PINFL_REGEX),
+                name="counterparties_representative_pinfl",
+                violation_error_message="ПИНФЛ - ровно 14 цифр.",
+            ),
+            models.CheckConstraint(
+                condition=Q(valid_from__isnull=True)
+                | Q(valid_to__isnull=True)
+                | Q(valid_to__gte=models.F("valid_from")),
+                name="counterparties_representative_dates",
+                violation_error_message="«Действует по» не может быть раньше «действует с».",
+            ),
+        ]
+
+    def __str__(self):
+        return self.full_name
+
+    def normalize(self):
+        self.full_name = squash_spaces(self.full_name)
+        self.position_other = squash_spaces(self.position_other)
+        self.power_basis_other = squash_spaces(self.power_basis_other)
+        self.power_basis_number = squash_spaces(self.power_basis_number)
+        self.pinfl = remove_spaces(self.pinfl)
+        self.passport_series = remove_spaces(self.passport_series).upper()
+        self.passport_number = remove_spaces(self.passport_number).upper()
+        # Текст «Иное» хранится, только если выбран пункт «Иное».
+        if self.position_id is None or not self.position.is_other:
+            self.position_other = ""
+        if self.power_basis_id is None or not self.power_basis.is_other:
+            self.power_basis_other = ""
+
+    def clean(self):
+        errors = {}
+        counterparty = getattr(self, "counterparty", None)
+        if counterparty is not None and counterparty.kind != Counterparty.Kind.LEGAL_ENTITY:
+            errors["full_name"] = "Представители заводятся только у организаций."
+        if self.position_id and self.position.is_other and not self.position_other:
+            errors["position_other"] = "Выбрано «Иное» - напишите должность."
+        if self.power_basis_id and self.power_basis.is_other and not self.power_basis_other:
+            errors["power_basis_other"] = "Выбрано «Иное» - напишите основание."
+        if self.is_primary and self.valid_to and self.valid_to < timezone.localdate():
+            errors["is_primary"] = "Срок полномочий истёк - основным он быть не может."
+        if errors:
+            raise ValidationError(errors)
+
+    @property
+    def position_text(self):
+        """Должность текстом - как она уйдёт в ЕРСП (position)."""
+        if self.position_id is None:
+            return ""
+        return self.position_other if self.position.is_other else self.position.name
+
+    @property
+    def power_basis_text(self):
+        """Основание текстом - как оно уйдёт в ЕРСП (representativeDoc)."""
+        if self.power_basis_id is None:
+            return ""
+        return self.power_basis_other if self.power_basis.is_other else self.power_basis.name
+
+
+class BankAccount(CardChild):
+    """
+    Банковский счёт контрагента.
+
+    Банк - либо из справочника (банк Узбекистана, по МФО), либо, для
+    иностранного банка, название текстом. Местный счёт - ровно 20 цифр;
+    иностранный - от 5 до 34 латинских букв и цифр (IBAN и другие).
+    В ЕРСП уходит основной счёт; основной - только один и не закрытый.
+    Закрытый счёт не удаляется, а получает отметку «закрыт».
+
+    Проверка, что код валюты в номере счёта (6-8 знаки) совпадает с валютой
+    и контрольный ключ с МФО - после сверки с официальным источником.
+    """
+
+    counterparty = models.ForeignKey(
+        Counterparty, on_delete=models.PROTECT, related_name="accounts", verbose_name="контрагент"
+    )
+    bank = models.ForeignKey(
+        Bank, on_delete=models.PROTECT, null=True, blank=True,
+        related_name="accounts", verbose_name="банк (Узбекистан)",
+    )
+    foreign_bank_name = models.CharField(
+        "иностранный банк", max_length=255, blank=True,
+        help_text="Только если банка нет в справочнике (иностранный банк).",
+    )
+    number = models.CharField("номер счёта", max_length=34)
+    currency = models.ForeignKey(
+        ErspCurrency, on_delete=models.PROTECT, null=True, blank=True,
+        related_name="+", verbose_name="валюта",
+        help_text="Из справочника ЕРСП. Пусто - сум.",
+    )
+    is_primary = models.BooleanField(
+        "основной", default=False, help_text="Уходит в ЕРСП. Основной - только один."
+    )
+    is_closed = models.BooleanField("закрыт", default=False)
+
+    class Meta:
+        verbose_name = "банковский счёт"
+        verbose_name_plural = "банковские счета"
+        ordering = ["-is_primary", "is_closed", "number"]
+        constraints = [
+            models.CheckConstraint(
+                condition=(Q(bank__isnull=False) & Q(foreign_bank_name=""))
+                | (Q(bank__isnull=True) & ~Q(foreign_bank_name="")),
+                name="counterparties_bankaccount_one_bank",
+                violation_error_message="Укажите банк из справочника или иностранный банк - что-то одно.",
+            ),
+            models.CheckConstraint(
+                condition=Q(bank__isnull=True) | Q(number__regex=LOCAL_ACCOUNT_REGEX),
+                name="counterparties_bankaccount_local_number",
+                violation_error_message="Счёт в банке Узбекистана - ровно 20 цифр.",
+            ),
+            models.CheckConstraint(
+                condition=Q(bank__isnull=False) | Q(number__regex=FOREIGN_ACCOUNT_REGEX),
+                name="counterparties_bankaccount_foreign_number",
+                violation_error_message="Счёт в иностранном банке - от 5 до 34 латинских букв и цифр.",
+            ),
+            models.CheckConstraint(
+                condition=Q(is_primary=False) | Q(is_closed=False),
+                name="counterparties_bankaccount_primary_open",
+                violation_error_message="Закрытый счёт не может быть основным.",
+            ),
+            models.CheckConstraint(
+                condition=Q(currency__isnull=False),
+                name="counterparties_bankaccount_has_currency",
+                violation_error_message="Укажите валюту счёта.",
+            ),
+            models.UniqueConstraint(
+                fields=["counterparty"],
+                condition=Q(is_primary=True),
+                name="counterparties_bankaccount_one_primary",
+                violation_error_message="Основным может быть только один счёт.",
+            ),
+            models.UniqueConstraint(
+                fields=["counterparty", "number"],
+                name="counterparties_bankaccount_number_unique",
+                violation_error_message="Такой счёт у контрагента уже есть.",
+            ),
+        ]
+
+    def __str__(self):
+        bank = self.bank.mfo if self.bank_id else self.foreign_bank_name
+        return f"{self.number} ({bank})"
+
+    def clean(self):
+        # Правило есть в базе, но в форме админ-панели отметка «основной»
+        # проверяется по всему блоку, а не построчно (см. CardChildForm) -
+        # поэтому дублируем его здесь.
+        if self.is_primary and self.is_closed:
+            raise ValidationError({"is_primary": "Закрытый счёт не может быть основным."})
+
+    def normalize(self):
+        self.number = remove_spaces(self.number or "").upper()
+        self.foreign_bank_name = squash_spaces(self.foreign_bank_name)
+        if self.bank_id is not None:
+            self.foreign_bank_name = ""
+        if self.currency_id is None and ErspCurrency.objects.filter(pk=ErspCurrency.UZS).exists():
+            self.currency_id = ErspCurrency.UZS

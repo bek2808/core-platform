@@ -112,6 +112,16 @@ class TrackedModel(models.Model):
     def normalize(self):
         """Привести значения к единому виду. Своя у каждой таблицы."""
 
+    def journal_root(self):
+        """
+        Карточка, в «Истории» которой видны изменения этой записи.
+
+        По умолчанию - сама запись. Вложенные записи (представитель, счёт)
+        возвращают свою карточку контрагента: тогда «История» карточки
+        показывает и их изменения.
+        """
+        return None
+
     def clean_fields(self, exclude=None):
         # Сначала нормализуем, потом проверяем формат: « 01095 » - это МФО 01095.
         self.normalize()
@@ -181,6 +191,8 @@ def write_journal(instance, fields, before, *, by, source):
     """
     created = before is None
     content_type = ContentType.objects.get_for_model(type(instance))
+    root = instance.journal_root()
+    root_type = ContentType.objects.get_for_model(type(root)) if root is not None else None
     change_id = uuid.uuid4()
     entries = []
     for field in fields:
@@ -199,6 +211,8 @@ def write_journal(instance, fields, before, *, by, source):
                 content_type=content_type,
                 object_id=instance.pk,
                 object_repr=str(instance)[:255],
+                root_content_type=root_type,
+                root_object_id=root.pk if root is not None else None,
                 insurance_company_id=getattr(instance, "insurance_company_id", None),
                 field=field.name,
                 old_value=old,
@@ -250,6 +264,16 @@ class ChangeLog(models.Model):
         verbose_name="страховая компания",
         help_text="Пусто - общий справочник (банки, должности).",
     )
+    root_content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name="таблица карточки",
+        help_text="Для вложенных записей (представитель, счёт) - чья это карточка.",
+    )
+    root_object_id = models.PositiveBigIntegerField("номер карточки", null=True, blank=True)
     field = models.CharField("поле", max_length=64)
     old_value = models.JSONField("было", null=True, blank=True, encoder=DjangoJSONEncoder)
     new_value = models.JSONField("стало", null=True, blank=True, encoder=DjangoJSONEncoder)
@@ -260,6 +284,9 @@ class ChangeLog(models.Model):
         ordering = ["-changed_at", "-id"]
         indexes = [
             models.Index(fields=["content_type", "object_id"], name="audit_changelog_object"),
+            models.Index(
+                fields=["root_content_type", "root_object_id"], name="audit_changelog_root"
+            ),
         ]
 
     def __str__(self):
