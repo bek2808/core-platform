@@ -113,6 +113,12 @@ class TrackedModel(models.Model):
     # (задано впервые), «*** -> -» (стёрто). Для шифров паролей.
     audit_mask = ()
 
+    # Служебные сохранения: если система (by не задан) сохраняет ТОЛЬКО эти поля
+    # (update_fields), запись не попадает в журнал и не меняет «кто и когда
+    # изменил». Пример - время последнего входа пользователя: без этого каждый
+    # вход затирал бы в карточке «кто изменил» и засорял журнал.
+    audit_service_fields = ()
+
     objects = TrackedQuerySet.as_manager()
 
     class Meta:
@@ -146,11 +152,19 @@ class TrackedModel(models.Model):
             source = Source.MANUAL if by is not None else Source.SYSTEM
         self.normalize()
         adding = self._state.adding
+        update_fields = kwargs.get("update_fields")
+        if (
+            by is None
+            and not adding
+            and update_fields
+            and self.audit_service_fields
+            and set(update_fields) <= set(self.audit_service_fields)
+        ):
+            return super().save(*args, **kwargs)
         if adding:
             self.created_by = by
         self.updated_by = by
 
-        update_fields = kwargs.get("update_fields")
         fields = self._journal_fields()
         if update_fields is not None:
             fields = [f for f in fields if f.name in update_fields or f.attname in update_fields]
