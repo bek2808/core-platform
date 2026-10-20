@@ -359,6 +359,19 @@ class ProviderAdminTests(SecretsMixin, ProviderCase):
         self.assertEqual(card.representatives.get().full_name, DIRECTOR)
         self.assertEqual(LegalEntity.objects.get(pk=card.pk).oked_id, None)  # не отмечали
 
+    def test_nothing_to_apply(self):
+        card, _ = self.make(counterparty_fields={
+            "phone": "998998944440", "address": "Labzak MFY, Zulfiyaxonim ko'chasi, 12-uy",
+        })
+        Representative(counterparty=card, full_name=DIRECTOR, is_primary=True).save()
+        BankAccount(counterparty=card, bank=Bank.objects.create(mfo="01095", name="AAB"),
+                    number=ACCOUNT, is_primary=True).save()
+        self.answer()
+        page = self.client.get(f"/admin/counterparties/counterparty/{card.pk}/provider/", follow=True)
+        self.assertContains(page, "совпадает с провайдером - применять нечего")
+        self.assertNotContains(page, "Применить отмеченное")
+        self.assertContains(page, f"{ACCOUNT} (МФО 01095)", count=2)  # у нас и у провайдера - одинаково
+
     def test_other_company_answer_not_accepted(self):
         card = self.empty_card()
         stranger = Exchange.objects.create(

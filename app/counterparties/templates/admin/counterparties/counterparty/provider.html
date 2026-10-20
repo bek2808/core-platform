@@ -77,12 +77,15 @@
     </table>
     <p>Отмеченное запишется в журнал изменений с источником «провайдер ЕРСП».
        Пустое у провайдера наше значение не стирает.</p>
+    {% if not new and not can_apply %}
+      <p class="success">Карточка совпадает с провайдером - применять нечего.</p>
+    {% endif %}
     {% if new and not can_create %}
       <p class="errornote">У провайдера нет наименования организации - карточку по этому ответу
          не завести. Проверьте ИНН или заведите карточку вручную.</p>
     {% endif %}
     <div class="submit-row">
-      {% if not new or can_create %}
+      {% if new and can_create or not new and can_apply %}
       <input type="submit" class="default" value="{% if new %}Завести карточку{% else %}Применить отмеченное{% endif %}">
       {% endif %}
       <a href="{{ change_url }}" class="closelink">Отмена</a>

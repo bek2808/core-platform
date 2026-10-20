@@ -344,7 +344,10 @@ def compare(card, data):
     our_primary = None
     if card is not None and card.pk:
         our_primary = card.accounts.filter(is_primary=True).select_related("bank").first()
-    ours_text = str(our_primary) if our_primary else ""
+    ours_text = ""
+    if our_primary is not None:
+        bank = f"МФО {our_primary.bank.mfo}" if our_primary.bank_id else our_primary.foreign_bank_name
+        ours_text = f"{our_primary.number} ({bank})"
     if account.problem:
         rows.append(Row(ACCOUNT, label, ours_text, account.shown, INVALID, account.problem))
     elif not account.usable:

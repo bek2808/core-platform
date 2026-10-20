@@ -395,9 +395,10 @@ class CounterpartyAdmin(NoRelatedLinks, TrackedAdmin):
                 messages.info(request, "Ничего не отмечено - карточка не изменилась.")
             return redirect(change_url)
 
+        rows = provider.compare(card, data)
         return self._page(request, f"Сверка с провайдером ЕРСП: {card}", {
             "card": card, "inn": legal.inn, "exchange": exchange, "data": data,
-            "rows": provider.compare(card, data), "change_url": change_url,
+            "rows": rows, "can_apply": any(row.selectable for row in rows), "change_url": change_url,
         })
 
     def by_inn_view(self, request):
