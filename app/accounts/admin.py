@@ -28,7 +28,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Prefetch, Q
 from django.forms.models import BaseInlineFormSet
 
-from audit.admin import TrackedAdmin
+from audit.admin import NoRelatedLinks, TrackedAdmin
 from companies.models import Department
 
 from .models import Assignment, JobPosition, Role, User
@@ -130,7 +130,24 @@ class AssignmentFormSet(BaseInlineFormSet):
             periods.append(period)
 
 
-class AssignmentInline(admin.StackedInline):
+# Поля, которые стоят парами в одной строке. Пояснения под ними убраны:
+# пояснение есть не у каждого поля пары, и соседи съезжали по высоте
+# (так же в карточке контрагента, 20.10). Всё, что важно, - в подсказке блока.
+ASSIGNMENT_ROWS = [
+    ("valid_from", "valid_to"),
+    ("department", "position"),
+    ("visibility", "is_head"),
+    ("assistant_to", "assistant_scope"),
+]
+ASSIGNMENT_HINT = (
+    "«Действует по» - включительно; пусто - по сей день. На любую дату у человека одно "
+    "прикрепление: при переводе закройте прежнее датой «по» накануне нового и добавьте новое. "
+    "Руководитель видит данные своего подразделения; у подразделения на дату один руководитель. "
+    "«Ассистент для» - менеджер, за которого человек вводит договоры."
+)
+
+
+class AssignmentInline(NoRelatedLinks, admin.StackedInline):
     model = Assignment
     fk_name = "user"
     form = AssignmentForm
@@ -138,15 +155,19 @@ class AssignmentInline(admin.StackedInline):
     extra = 0
     can_delete = False  # не удаляются: закрываются датой «по»
     fieldsets = [
-        (None, {"fields": [
-            ("valid_from", "valid_to"),
-            ("department", "position"),
-            "roles",
-            ("is_head", "visibility"),
-            ("assistant_to", "assistant_scope"),
-            "basis",
-        ]}),
+        (None, {
+            "description": ASSIGNMENT_HINT,
+            "fields": [*ASSIGNMENT_ROWS[:2], "roles", *ASSIGNMENT_ROWS[2:], "basis"],
+        }),
     ]
+
+    class Media:
+        css = {"all": ["accounts/assignments.css"]}  # колонки одной ширины
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if any(db_field.name in row for row in ASSIGNMENT_ROWS):
+            kwargs["help_text"] = ""
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         if db_field.name == "roles":

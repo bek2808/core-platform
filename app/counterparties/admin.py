@@ -14,7 +14,6 @@ import re
 
 from django.contrib import admin, messages
 from django.contrib.admin.utils import unquote
-from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
 from django import forms
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q
@@ -24,7 +23,7 @@ from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils.html import format_html, format_html_join
 
-from audit.admin import TrackedAdmin
+from audit.admin import NoRelatedLinks, TrackedAdmin
 from audit.models import Source
 from integrations.ersp import PROVIDER, ErspClient, ErspError
 from integrations.models import Exchange
@@ -117,24 +116,6 @@ class LegalEntityFormSet(BaseInlineFormSet):
         form = super()._construct_form(i, **kwargs)
         form.instance.card_in_form = self.instance
         return form
-
-
-class NoRelatedLinks:
-    """
-    Убирает значки ✎ + 👁 у выпадающих списков (должность, банк, валюта...).
-    Справочники правятся в своих разделах админ-панели, а не мимоходом из
-    карточки клиента; к тому же значки сбивали выравнивание полей.
-    """
-
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
-        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
-        widget = getattr(formfield, "widget", None)
-        if isinstance(widget, RelatedFieldWidgetWrapper):
-            widget.can_add_related = False
-            widget.can_change_related = False
-            widget.can_view_related = False
-            widget.can_delete_related = False
-        return formfield
 
 
 class CardChildFormSet(BaseInlineFormSet):

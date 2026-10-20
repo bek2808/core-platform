@@ -1,0 +1,22 @@
+/*
+ * Блок «Прикрепления» в карточке пользователя: колонки одной ширины,
+ * чтобы вторая колонка начиналась в одном месте во всех строках, а списки
+ * не сжимались до ширины своего текста (у «Ассистент для» оставался
+ * только «—»).
+ */
+#assignments-group .form-row .fieldBox {
+    flex: 0 0 26em;
+    box-sizing: border-box;
+}
+#assignments-group .form-row .fieldBox select {
+    width: 24em;
+}
+/* Подпись галочки «Руководитель подразделения» - в одну строку. */
+#assignments-group .fieldBox .vCheckboxLabel {
+    white-space: nowrap;
+}
+/* «Основание» - той же ширины, что и списки. */
+#assignments-group input[name$="-basis"] {
+    width: 24em;
+    box-sizing: border-box;
+}

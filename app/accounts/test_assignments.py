@@ -393,6 +393,17 @@ class AssignmentAdminTests(AssignmentCase):
         ])
         self.assertContains(page, "уже есть руководитель")
 
+    def test_block_layout(self):
+        # Ровные строки: без пояснений под полями пары, без значков ✎ + 👁,
+        # пустой пункт списка - по-русски (в Django 6.1 он «- Select an option -»).
+        page = self.client.get(f"{USER_URL}{self.bekzod.pk}/change/").content.decode()
+        self.assertNotIn("Select an option", page)
+        self.assertNotIn("Включительно. Пусто", page)  # пояснение поля «по» - в подсказке блока
+        self.assertIn("«Действует по» - включительно", page)
+        for field in ("department", "position", "assistant_to"):
+            self.assertNotIn(f'id="add_id_assignments-__prefix__-{field}"', page)
+            self.assertNotIn(f'id="change_id_assignments-__prefix__-{field}"', page)
+
     def test_list_shows_current_place(self):
         self.assign(department=self.accounting, valid_from=D(2020, 1, 1))
         self.assertContains(self.client.get(USER_URL), "Головной офис › Бухгалтерия, Бизнес-аналитик")

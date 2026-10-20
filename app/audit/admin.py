@@ -12,6 +12,7 @@ ChangeLogAdmin - журнал изменений: только просмотр,
 """
 from django.apps import apps
 from django.contrib import admin
+from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import FieldDoesNotExist, ValidationError
 from django.db import models
@@ -22,6 +23,24 @@ from django.urls import reverse
 from .models import ChangeLog
 
 AUDIT_FIELDS = ["created_at", "created_by", "updated_at", "updated_by"]
+
+
+class NoRelatedLinks:
+    """
+    Убирает значки ✎ + 👁 у выпадающих списков (должность, банк, подразделение...).
+    Справочники правятся в своих разделах админ-панели, а не мимоходом из
+    карточки клиента или сотрудника; к тому же значки сбивали выравнивание полей.
+    """
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        widget = getattr(formfield, "widget", None)
+        if isinstance(widget, RelatedFieldWidgetWrapper):
+            widget.can_add_related = False
+            widget.can_change_related = False
+            widget.can_view_related = False
+            widget.can_delete_related = False
+        return formfield
 
 
 class TrackedAdmin(admin.ModelAdmin):
