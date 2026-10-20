@@ -155,6 +155,10 @@ DATABASES = {
 # позже поменять модель пользователя очень трудно.
 AUTH_USER_MODEL = "accounts.User"
 
+# Права - из ролей действующего прикрепления (accounts/backends.py), а не из
+# групп в учётной записи (у тех - только администратор платформы).
+AUTHENTICATION_BACKENDS = ["accounts.backends.AssignmentBackend"]
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 

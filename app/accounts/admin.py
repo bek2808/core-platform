@@ -240,17 +240,22 @@ class UserAdmin(TrackedAdmin, BaseUserAdmin):
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = super().get_fieldsets(request, obj)
-        if request.user.is_superuser:
-            return fieldsets
-        # Страховая у не суперпользователя - его собственная, выбирать нечего.
+        hidden = set()
+        if not request.user.is_superuser:
+            # Страховая у не суперпользователя - его собственная, выбирать нечего.
+            hidden.add("insurance_company")
+        if obj is not None and obj.kind != User.Kind.PLATFORM:
+            # Права человека страховой - роли его прикрепления; группы
+            # в учётной записи у него не действуют, показывать их - путать.
+            hidden.add("groups")
         return [
-            (name, {**options, "fields": [f for f in options["fields"] if f != "insurance_company"]})
+            (name, {**options, "fields": [f for f in options["fields"] if f not in hidden]})
             for name, options in fieldsets
         ]
 
     def get_readonly_fields(self, request, obj=None):
         readonly = list(super().get_readonly_fields(request, obj))
-        readonly += ["last_login", "date_joined"]
+        readonly += ["last_login", "date_joined", "is_staff"]  # «статус персонала» - от системы
         if not request.user.is_superuser:
             readonly += PRIVILEGE_FIELDS
         if obj is not None:

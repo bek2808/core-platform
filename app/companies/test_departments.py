@@ -12,12 +12,12 @@
 
 Запуск на сервере: bin/test companies
 """
-from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.test import TestCase
 
 from accounts.models import User
+from accounts.testing import give_roles
 from audit.models import ChangeLog, UntrackedChangeError
 from config.testing import refusal_expected
 from references.loader import load_from_files
@@ -250,7 +250,7 @@ class DepartmentAdminTests(DepartmentCase):
             insurance_company=self.mosaic if company is None else (company or None),
         )
         if group:
-            user.groups.add(Group.objects.get(name=group))
+            give_roles(user, group)
         self.client.force_login(user)
         return user
 

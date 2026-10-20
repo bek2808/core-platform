@@ -34,12 +34,15 @@ class UserModelTests(TestCase):
         self.assertTrue(user.check_password(STRONG_PASSWORD))
         self.assertFalse(user.check_password("wrong-password-123"))
 
-    def test_new_user_has_no_admin_rights(self):
-        # Обычный сотрудник по умолчанию не попадает в админ-панель.
+    def test_new_user_has_no_rights(self):
+        # С части A2.3 «статус персонала» ставит система (у всех, кроме агентов),
+        # а права - только роли действующего прикрепления. У нового
+        # сотрудника прикрепления нет - прав нет.
         user = User.objects.create_user("ivanov", password=STRONG_PASSWORD)
         self.assertTrue(user.is_active)
-        self.assertFalse(user.is_staff)
+        self.assertTrue(user.is_staff)
         self.assertFalse(user.is_superuser)
+        self.assertEqual(user.get_all_permissions(), set())
 
 
 class PasswordRulesTests(SimpleTestCase):
@@ -93,7 +96,7 @@ class AdminAccessTests(TestCase):
         cls.admin = User.objects.create_superuser(
             "admin_test", "admin@example.uz", STRONG_PASSWORD
         )
-        cls.clerk = User.objects.create_user("clerk_test", password=STRONG_PASSWORD)
+        cls.clerk = User.objects.create_user("clerk_test", password=STRONG_PASSWORD, kind=User.Kind.AGENT)
 
     def login(self, username, password):
         return self.client.post(
@@ -122,8 +125,9 @@ class AdminAccessTests(TestCase):
         self.assertEqual(response.status_code, 200)   # снова форма входа
         self.assertFalse(self.is_logged_in())
 
-    def test_regular_user_cannot_enter_admin(self):
-        # Пароль верный, но у сотрудника нет флага is_staff - в админ-панель не пускаем.
+    def test_agent_cannot_enter_admin(self):
+        # Пароль верный, но агент работает не в админ-панели (у него будет свой
+        # кабинет): «статус персонала» у агента система не ставит.
         response = self.login("clerk_test", STRONG_PASSWORD)
         self.assertEqual(response.status_code, 200)
         self.assertFalse(self.is_logged_in())

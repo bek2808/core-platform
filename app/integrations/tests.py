@@ -21,6 +21,7 @@ from django.db import DatabaseError, connection, transaction
 from django.test import SimpleTestCase, TestCase, override_settings
 
 from accounts.models import User
+from accounts.testing import give_roles
 from companies.models import InsuranceCompany
 from config.test_crypto import write_key
 from config.testing import refusal_expected
@@ -556,7 +557,7 @@ class ExchangeAdminTests(ErspMixin, TestCase):
         user = User.objects.create_user(
             "ivanov", password=STRONG_PASSWORD, is_staff=True, insurance_company=self.mosaic
         )
-        user.groups.add(Group.objects.get(name=group))
+        give_roles(user, group)
         self.client.force_login(user)
         return user
 

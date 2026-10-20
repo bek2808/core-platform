@@ -11,11 +11,12 @@
 import datetime
 import io
 
-from django.contrib.auth.models import Group
 from django.test import SimpleTestCase, TestCase
 from openpyxl import Workbook
 
 from accounts.models import User
+from accounts.testing import give_roles
+from companies.models import InsuranceCompany
 from config.testing import refusal_expected
 
 from . import cbu
@@ -216,8 +217,9 @@ class AdminTests(TestCase):
         cbu.sync(cbu.read_rows(cbu_xlsx()))
 
     def test_employee_may_view(self):
-        user = User.objects.create_user("ivanov", password=STRONG_PASSWORD, is_staff=True)
-        user.groups.add(Group.objects.get(name="Сотрудник"))
+        company = InsuranceCompany.objects.create(name="Test Insurance KZ", code="test-kz", country="KZ")
+        user = User.objects.create_user("ivanov", password=STRONG_PASSWORD, insurance_company=company)
+        give_roles(user, "Сотрудник")
         self.client.force_login(user)
         response = self.client.get("/admin/references/cbubank/")
         self.assertContains(response, "200829053")

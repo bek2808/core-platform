@@ -14,11 +14,11 @@ import copy
 import datetime
 from decimal import Decimal
 
-from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 
 from accounts.models import User
+from accounts.testing import give_roles
 from audit.models import ChangeLog, Source
 from config.testing import refusal_expected
 from integrations import ersp
@@ -321,7 +321,7 @@ class ProviderAdminTests(ErspMixin, ProviderCase):
     def login_staff(self, group):
         user = User.objects.create_user("ivanov", password=STRONG_PASSWORD, is_staff=True,
                                         insurance_company=self.mosaic)
-        user.groups.add(Group.objects.get(name=group))
+        give_roles(user, group)
         self.client.force_login(user)
         return user
 

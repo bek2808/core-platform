@@ -18,6 +18,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 
 from accounts.models import User
+from accounts.testing import give_roles
 from audit.models import ChangeLog
 from companies.models import InsuranceCompany
 from config.testing import refusal_expected
@@ -52,7 +53,7 @@ class ScreenCase(ErspMixin, TestCase):
             insurance_company=self.mosaic if company == "mosaic" else company,
         )
         if group:
-            user.groups.add(Group.objects.get(name=group))
+            give_roles(user, group)
         self.client.force_login(user)
         return user
 
@@ -96,7 +97,7 @@ class AccessTests(ScreenCase):
     def test_card_created_on_first_open(self):
         new = InsuranceCompany.objects.create(name="New Insurance", code="new", country="KZ")
         user = User.objects.create_user("newadmin", password=STRONG_PASSWORD, is_staff=True, insurance_company=new)
-        user.groups.add(Group.objects.get(name=GROUP))
+        give_roles(user, GROUP)
         self.client.force_login(user)
         response = self.client.get(LIST_URL)
         connection = ErspConnection.objects.get(insurance_company=new)

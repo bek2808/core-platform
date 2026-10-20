@@ -18,6 +18,7 @@ from django.db import IntegrityError, transaction
 from django.test import SimpleTestCase, TestCase
 
 from accounts.models import User
+from accounts.testing import give_roles
 from audit.models import ChangeLog, Source, UntrackedChangeError
 from companies.models import InsuranceCompany
 from config.testing import refusal_expected
@@ -1008,7 +1009,7 @@ class AccessTests(CounterpartyTestCase):
             insurance_company=company or self.mosaic,
         )
         if group:
-            user.groups.add(Group.objects.get(name=group))
+            give_roles(user, group)
         self.client.force_login(user)
         return user
 
