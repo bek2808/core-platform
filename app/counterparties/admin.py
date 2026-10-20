@@ -16,6 +16,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.forms.models import BaseInlineFormSet
+from django.utils.html import format_html, format_html_join
 
 from audit.admin import TrackedAdmin
 
@@ -28,6 +29,7 @@ from .models import (
     Position,
     Representative,
 )
+from .ersp import Role, ersp_gaps
 from .normalize import remove_spaces, search_key
 
 
@@ -229,7 +231,7 @@ class CounterpartyAdmin(NoRelatedLinks, TrackedAdmin):
     def get_fields(self, request, obj=None):
         fields = ["phone", "email", "region", "address", "status"]
         if obj is not None:
-            fields = ["display_name", *fields]
+            fields = ["display_name", "ersp_readiness", *fields]
         if not request.user.insurance_company_id:
             fields = ["insurance_company", *fields]
         return fields
@@ -238,7 +240,7 @@ class CounterpartyAdmin(NoRelatedLinks, TrackedAdmin):
         readonly = list(super().get_readonly_fields(request, obj))
         if obj is not None:
             # Страховая задаётся один раз; наименование собирает система.
-            readonly += ["insurance_company", "display_name"]
+            readonly += ["insurance_company", "display_name", "ersp_readiness"]
         return readonly
 
     def get_list_display(self, request):
@@ -275,6 +277,25 @@ class CounterpartyAdmin(NoRelatedLinks, TrackedAdmin):
             | Q(legal_entity__inn=remove_spaces(term).upper())
         )
         return found, False
+
+    @admin.display(description="готовность к ЕРСП")
+    def ersp_readiness(self, obj):
+        """
+        Чего не хватает для отправки в ЕРСП - по сохранённой карточке
+        (после правки нажмите «Сохранить и продолжить редактирование»).
+        """
+        blocks = []
+        for role, title in [
+            (Role.INSURANT, "Как страхователь"),
+            (Role.OTHER, "Как выгодоприобретатель, застрахованный, владелец объекта"),
+        ]:
+            gaps = ersp_gaps(obj, role)
+            if gaps:
+                items = format_html_join("", "<li>{}</li>", ((gap,) for gap in gaps))
+                blocks.append(format_html("<p><strong>{}</strong> - не хватает:</p><ul>{}</ul>", title, items))
+            else:
+                blocks.append(format_html("<p><strong>{}</strong> - готов ✓</p>", title))
+        return format_html_join("", "{}", ((block,) for block in blocks))
 
     @admin.display(description="ИНН", ordering="legal_entity__inn")
     def inn(self, obj):

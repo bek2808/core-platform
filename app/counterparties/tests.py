@@ -32,6 +32,7 @@ from .models import (
     Position,
     Representative,
 )
+from .ersp import Role, ersp_gaps
 from .normalize import digits_only, remove_spaces, search_key, squash_spaces
 
 STRONG_PASSWORD = "Kx7#mQ2v!pLr9zT"
@@ -1084,3 +1085,162 @@ class AccessTests(CounterpartyTestCase):
         self.assertEqual(journal.status_code, 200)
         self.assertNotContains(journal, "Клиент Mosaic")
         self.assertContains(journal, "KDB BANK")  # изменения общих справочников видны всем
+
+
+# --- Готовность к ЕРСП -------------------------------------------------------------
+
+class ErspReadinessTests(CounterpartyTestCase):
+    """Чего не хватает для отправки в ЕРСП (counterparties/ersp.py)."""
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.director = Position.objects.get(name="Директор")
+        cls.charter = PowerBasis.objects.get(name="Устав")
+        cls.bank = Bank(mfo="01095", name="ASIA ALLIANCE BANK", inn="123456789")
+        cls.bank.save()
+
+    def local_ready(self):
+        """Inson со всем, что нужно ЕРСП (регион ставится по СОАТО)."""
+        counterparty, _ = self.make(
+            counterparty_fields={"phone": "998998944440", "address": "Labzak MFY"},
+            ownership_form_id=120,  # акционерное общество
+        )
+        Representative(
+            counterparty=counterparty, full_name="NIYAZMETOV ILXOMJON IKRAMBAYEVICH",
+            position=self.director, power_basis=self.charter, power_basis_number="1",
+            pinfl="31203876540012", passport_series="AA", passport_number="1234567",
+            is_primary=True,
+        ).save()
+        BankAccount(counterparty=counterparty, bank=self.bank,
+                    number="20216000004849419001", is_primary=True).save()
+        return Counterparty.objects.get(pk=counterparty.pk)
+
+    def foreign_ready(self, **counterparty_fields):
+        """Иностранная организация: без региона, ОКЭД, телефона, ПИНФЛ, паспорта."""
+        counterparty, _ = self.make(
+            inn="KZ1234567890", is_foreign=True, country="KZ", oked_id=None, soato_code="",
+            ownership_form_id=130,
+            counterparty_fields={"address": "Almaty, Abai 1", "email": "info@example.kz",
+                                 **counterparty_fields},
+        )
+        Representative(counterparty=counterparty, full_name="Иванов Иван", is_primary=True).save()
+        BankAccount(counterparty=counterparty, foreign_bank_name="Halyk Bank",
+                    number="KZ86125KZT5004100100", currency_id=398, is_primary=True).save()
+        return Counterparty.objects.get(pk=counterparty.pk)
+
+    def gaps(self, counterparty, role=Role.INSURANT):
+        return ersp_gaps(Counterparty.objects.get(pk=counterparty.pk), role)
+
+    def assertGap(self, counterparty, text, role=Role.INSURANT):
+        gaps = self.gaps(counterparty, role)
+        self.assertTrue(any(text in gap for gap in gaps), f"нет «{text}» в {gaps}")
+
+    def test_complete_local_is_ready_in_every_role(self):
+        counterparty = self.local_ready()
+        self.assertEqual(self.gaps(counterparty, Role.INSURANT), [])
+        self.assertEqual(self.gaps(counterparty, Role.OTHER), [])
+
+    def test_ownership_form_required_only_for_insurant(self):
+        # Решение Бекзода 20.10: обязательна только страхователю.
+        counterparty = self.local_ready()
+        legal = counterparty.legal_entity
+        legal.ownership_form = None
+        legal.save()
+        self.assertGap(counterparty, "формы собственности")
+        self.assertEqual(self.gaps(counterparty, Role.OTHER), [])
+
+    def test_each_local_gap_reported(self):
+        # Полностью готовая карточка без одной вещи - ровно одно сообщение.
+        cases = [
+            ("phone", lambda c: setattr(c, "phone", ""), c_save, "нет телефона"),
+            ("region", lambda c: setattr(c, "region", None), c_save, "нет региона"),
+            ("address", lambda c: setattr(c, "address", ""), c_save, "нет адреса"),
+            ("oked", lambda c: setattr(c.legal_entity, "oked", None), le_save, "нет ОКЭД"),
+            ("pinfl", lambda c: setattr(rep(c), "pinfl", ""), None, "нет ПИНФЛ"),
+            ("passport", lambda c: setattr(rep(c), "passport_number", ""), None, "серии или номера паспорта"),
+            ("basis", lambda c: setattr(rep(c), "power_basis", None), None, "нет основания"),
+            ("basis number", lambda c: setattr(rep(c), "power_basis_number", ""), None, "номера документа"),
+        ]
+        for name, change, save, text in cases:
+            with self.subTest(name=name), transaction.atomic():
+                counterparty = self.local_ready()
+                change(counterparty)
+                if save:
+                    save(counterparty)
+                else:
+                    counterparty._rep.save()
+                gaps = self.gaps(counterparty)
+                self.assertEqual(len(gaps), 1, gaps)
+                self.assertIn(text, gaps[0])
+                transaction.set_rollback(True)
+
+    def test_no_primary_representative(self):
+        counterparty = self.local_ready()
+        representative = counterparty.representatives.get()
+        representative.is_primary = False
+        representative.save()
+        self.assertGap(counterparty, "нет основного представителя")
+
+    def test_expired_primary_representative(self):
+        # Срок истёк уже после того, как его сделали основным.
+        counterparty = self.local_ready()
+        representative = counterparty.representatives.get()
+        representative.valid_to = datetime.date(2020, 1, 1)
+        representative.save()
+        self.assertGap(counterparty, "срок полномочий основного представителя истёк 01.01.2020")
+
+    def test_no_primary_account(self):
+        counterparty = self.local_ready()
+        account = counterparty.accounts.get()
+        account.is_primary = False
+        account.save()
+        self.assertGap(counterparty, "нет основного счёта")
+
+    def test_bank_without_inn(self):
+        counterparty = self.local_ready()
+        self.bank.inn = ""
+        self.bank.save()
+        self.assertGap(counterparty, "у банка 01095 не заполнен ИНН")
+
+    def test_local_with_foreign_bank_account(self):
+        counterparty = self.local_ready()
+        account = counterparty.accounts.get()
+        account.bank = None
+        account.foreign_bank_name = "Halyk Bank"
+        account.number = "KZ86125KZT5004100100"
+        account.save()
+        self.assertGap(counterparty, "нужны МФО и ИНН банка")
+
+    def test_foreign_ready_without_local_requirements(self):
+        counterparty = self.foreign_ready()
+        self.assertEqual(self.gaps(counterparty), [])
+
+    def test_foreign_needs_email(self):
+        counterparty = self.foreign_ready(email="")
+        self.assertGap(counterparty, "нет эл. почты")
+
+    def test_card_shows_readiness(self):
+        self.client.force_login(self.bekzod)
+        ready = self.local_ready()
+        page = self.client.get(f"/admin/counterparties/counterparty/{ready.pk}/change/")
+        self.assertContains(page, "Как страхователь</strong> - готов")
+        incomplete, _ = self.make(inn="308143734", short_name="Mosaic")
+        page = self.client.get(f"/admin/counterparties/counterparty/{incomplete.pk}/change/")
+        self.assertContains(page, "не хватает")
+        self.assertContains(page, "нет основного представителя")
+
+
+def c_save(counterparty):
+    counterparty.save()
+
+
+def le_save(counterparty):
+    counterparty.legal_entity.save()
+
+
+def rep(counterparty):
+    """Основной представитель (запоминается, чтобы сохранить после правки)."""
+    if not hasattr(counterparty, "_rep"):
+        counterparty._rep = counterparty.representatives.get(is_primary=True)
+    return counterparty._rep
