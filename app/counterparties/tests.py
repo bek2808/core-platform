@@ -593,6 +593,22 @@ class CounterpartyAdminTests(CounterpartyTestCase):
         self.assertEqual(counterparty.legal_entity.created_by, self.bekzod)
         self.assertTrue(ChangeLog.objects.filter(field="inn", user=self.bekzod).exists())
 
+    def test_phone_with_spaces_and_brackets_accepted_by_form(self):
+        # Подсказка в карточке обещает: «пробелы, скобки и дефисы уберутся сами».
+        # Форма не должна отклонять такой ввод по длине до того, как они убраны.
+        data = {**self.post_data(), "phone": "+998 (99) 894-44-40"}
+        response = self.client.post("/admin/counterparties/counterparty/add/", data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Counterparty.objects.get().phone, "998998944440")
+
+    def test_representative_pinfl_with_spaces_accepted_by_form(self):
+        data = self.post_data(representatives=[
+            {"full_name": "Директор", "is_primary": True, "pinfl": "3120 3876 5400 12"},
+        ])
+        response = self.client.post("/admin/counterparties/counterparty/add/", data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Representative.objects.get().pinfl, "31203876540012")
+
     def test_duplicate_inn_shows_message(self):
         # Ловушка из AGENTS.md: страховой нет в форме, но повтор ИНН должен
         # показаться сообщением, а не ошибкой 500.

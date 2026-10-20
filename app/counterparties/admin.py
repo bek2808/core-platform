@@ -202,10 +202,22 @@ class LegalEntityInline(NoRelatedLinks, admin.StackedInline):
     ]
 
 
+# Длина поля в форме при вводе: человек пишет «+998 (99) 894-44-40» или
+# «3010 5780 1234 56»; лишние знаки система убирает сама (normalize модели),
+# а длину модель проверяет уже по цифрам. Форма не должна резать ввод раньше.
+FORM_INPUT_MAX_LENGTH = 40
+
+
 class RepresentativeInline(NoRelatedLinks, admin.StackedInline):
     """Представители организации - блок внутри карточки."""
 
     model = Representative
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == "pinfl":
+            kwargs["max_length"] = FORM_INPUT_MAX_LENGTH
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
     form = CardChildForm
     formset = CardChildFormSet
     can_delete = False  # не удаляются: срок полномочий закрывается датой «действует по»
@@ -245,6 +257,11 @@ class CounterpartyAdmin(NoRelatedLinks, TrackedAdmin):
     search_help_text = "Наименование (любой частью, кириллицей или латиницей) или ИНН."
 
     actions = ["archive", "restore"]
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == "phone":
+            kwargs["max_length"] = FORM_INPUT_MAX_LENGTH
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     @admin.action(description="В архив", permissions=["change"])
     def archive(self, request, queryset):
