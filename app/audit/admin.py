@@ -14,7 +14,7 @@ from urllib.parse import urlencode
 
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist, ValidationError
 from django.db import models
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -85,7 +85,13 @@ def value_text(entry, value):
         return str(value)
     if isinstance(field, models.ForeignKey):
         # В журнале хранится номер связанной записи; показываем и её название.
-        related = field.related_model._base_manager.filter(pk=value).first()
+        try:
+            related = field.related_model._base_manager.filter(pk=value).first()
+        except (ValueError, TypeError, ValidationError):
+            # Строка записана, когда поле было другого типа (например, валюта
+            # капитала до миграции counterparties/0004 хранилась текстом «UZS»).
+            # Журнал не переписывается - показываем значение как было.
+            return str(value)
         return f"{related} (№ {value})" if related else f"№ {value}"
     if field.choices:
         return dict(field.flatchoices).get(value, value)

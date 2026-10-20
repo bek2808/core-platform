@@ -8,6 +8,7 @@
 Запуск на сервере: bin/test counterparties
 """
 import datetime
+import uuid
 from decimal import Decimal
 
 from django.contrib.contenttypes.models import ContentType
@@ -651,6 +652,30 @@ class CounterpartyAdminTests(CounterpartyTestCase):
             .values_list("source", "old_value", "new_value")
         )
         self.assertEqual(changes[-2:], [(Source.MANUAL, 10, None), (Source.SYSTEM, None, 10)])
+
+    def test_history_shows_entries_from_before_field_change(self):
+        # Найдено Бекзодом 20.10: после перехода валюты с текста на справочник
+        # (миграция 0004) в журнале остались старые строки вида «UZS», и
+        # страница истории падала с ошибкой 500. Старые строки должны
+        # показываться как есть.
+        counterparty, legal = self.make(by=self.bekzod)
+        ChangeLog.objects.create(
+            change_id=uuid.uuid4(),
+            user=self.bekzod,
+            source=Source.MANUAL,
+            action=ChangeLog.Action.CREATE,
+            content_type=ContentType.objects.get_for_model(LegalEntity),
+            object_id=legal.pk,
+            object_repr=str(legal),
+            field="charter_capital_currency",
+            old_value=None,
+            new_value="UZS",  # так поле хранилось до миграции 0004
+        )
+        history = self.client.get(
+            f"/admin/counterparties/counterparty/{counterparty.pk}/history/", follow=True
+        )
+        self.assertEqual(history.status_code, 200)
+        self.assertContains(history, "UZS")
 
     def test_no_delete(self):
         counterparty, _ = self.make()
