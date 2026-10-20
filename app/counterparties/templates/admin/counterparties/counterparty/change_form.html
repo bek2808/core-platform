@@ -1,0 +1,11 @@
+{% extends "admin/change_form.html" %}
+{% comment %}
+Карточка контрагента: кнопка «Сверить с провайдером» - у местных организаций,
+для тех, кто может править карточку. Запрос к ЕРСП уходит только по ней.
+{% endcomment %}
+{% block object-tools-items %}
+  {% if original and has_change_permission and original.legal_entity and not original.legal_entity.is_foreign %}
+    <li><a href="{% url 'admin:counterparties_counterparty_provider' original.pk %}">Сверить с провайдером ЕРСП</a></li>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}

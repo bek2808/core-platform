@@ -174,6 +174,9 @@ class ErspClient:
         self.transport = transport or urllib_transport
         self.clock = clock
         self.secret_name = credentials_secret(environment, company)
+        # Последняя строка журнала обмена: по ней страница сверки находит
+        # ответ, который видел сотрудник (и применяет именно его).
+        self.last_exchange = None
 
     # --- Вход ---------------------------------------------------------------------
 
@@ -266,6 +269,7 @@ class ErspClient:
             url=url,
             request_body=mask(body),
         )
+        self.last_exchange = log
         started = time.monotonic()
         try:
             status, raw = self.transport("POST", url, headers, json.dumps(body).encode("utf-8"), settings.ERSP_TIMEOUT_S)

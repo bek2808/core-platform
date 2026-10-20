@@ -1,0 +1,93 @@
+{% extends "admin/base_site.html" %}
+{% comment %}
+Сверка карточки с провайдером ЕРСП и заведение нового контрагента по ИНН
+(CounterpartyAdmin.provider_view и by_inn_view; правила - counterparties/provider.py).
+{% endcomment %}
+{% block extrastyle %}{{ block.super }}
+<style>
+  .provider-table { width: 100%; }
+  .provider-table td, .provider-table th { vertical-align: top; }
+  .provider-table tr.same td { color: var(--body-quiet-color); }
+  .provider-table tr.invalid td.theirs { color: var(--error-fg); }
+  .provider-table .note { display: block; font-size: 0.85em; color: var(--body-quiet-color); }
+  .provider-status { white-space: nowrap; }
+  .provider-source { color: var(--body-quiet-color); margin-bottom: 1em; }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">Начало</a>
+  &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+  &rsaquo; <a href="{% url 'admin:counterparties_counterparty_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+  {% if card %}&rsaquo; <a href="{{ change_url }}">{{ card }}</a>{% endif %}
+  &rsaquo; {% if card %}Сверка с провайдером{% else %}Новый по ИНН{% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+
+{% if ask_inn %}
+  <form method="post">{% csrf_token %}
+    <input type="hidden" name="action" value="query">
+    <p>Введите ИНН организации Узбекистана - система запросит её данные у провайдера ЕРСП
+       (боевая среда). Если такой контрагент уже есть, откроется сверка его карточки.</p>
+    {% if inn_error %}<p class="errornote">{{ inn_error }}</p>{% endif %}
+    <p><label for="id_inn">ИНН:</label>
+       <input type="text" name="inn" id="id_inn" value="{{ inn|default:'' }}" maxlength="20" autofocus required></p>
+    <div class="submit-row"><input type="submit" class="default" value="Запросить у провайдера"></div>
+  </form>
+
+{% else %}
+  <p class="provider-source">
+    Ответ провайдера ЕРСП ({{ exchange.get_environment_display }} среда) по ИНН <strong>{{ inn }}</strong>
+    от {{ exchange.started_at|date:"d.m.Y H:i" }} -
+    <a href="{% url 'admin:integrations_exchange_change' exchange.pk %}">журнал обмена № {{ exchange.pk }}</a>.
+    <a href="{{ request.path }}">{% if new %}Другой ИНН{% else %}Запросить заново{% endif %}</a>
+  </p>
+
+  {% for warning in data.warnings %}<p class="warning">{{ warning }}</p>{% endfor %}
+
+  <form method="post">{% csrf_token %}
+    <input type="hidden" name="exchange" value="{{ exchange.pk }}">
+    {% if new %}<input type="hidden" name="action" value="create">{% endif %}
+    <table class="provider-table">
+      <thead><tr>
+        <th>применить</th><th>поле</th>{% if not new %}<th>у нас</th>{% endif %}<th>у провайдера</th><th>что будет</th>
+      </tr></thead>
+      <tbody>
+      {% for row in rows %}
+        <tr class="{{ row.status }}">
+          <td>{% if row.selectable %}<input type="checkbox" name="apply" value="{{ row.key }}" id="apply_{{ row.key }}"{% if row.preselected %} checked{% endif %}>{% endif %}</td>
+          <td><label for="apply_{{ row.key }}">{{ row.label }}</label></td>
+          {% if not new %}<td>{{ row.ours|default:"—" }}</td>{% endif %}
+          <td class="theirs">{{ row.theirs|default:"—" }}</td>
+          <td class="provider-status">
+            {% if row.status == "same" %}совпадает
+            {% elif row.status == "fill" %}{% if new %}заполнить{% else %}у нас пусто - заполнить{% endif %}
+            {% elif row.status == "diff" %}отличается - заменить, если отметить
+            {% elif row.status == "no_data" %}{% if new %}у провайдера нет{% else %}у провайдера пусто - не трогаем{% endif %}
+            {% elif row.status == "invalid" %}не применяется{% endif %}
+            {% if row.note %}<span class="note">{{ row.note }}</span>{% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <p>Отмеченное запишется в журнал изменений с источником «провайдер ЕРСП».
+       Пустое у провайдера наше значение не стирает.</p>
+    {% if new and not can_create %}
+      <p class="errornote">У провайдера нет наименования организации - карточку по этому ответу
+         не завести. Проверьте ИНН или заведите карточку вручную.</p>
+    {% endif %}
+    <div class="submit-row">
+      {% if not new or can_create %}
+      <input type="submit" class="default" value="{% if new %}Завести карточку{% else %}Применить отмеченное{% endif %}">
+      {% endif %}
+      <a href="{{ change_url }}" class="closelink">Отмена</a>
+    </div>
+  </form>
+{% endif %}
+</div>
+{% endblock %}

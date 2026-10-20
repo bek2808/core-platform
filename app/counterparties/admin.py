@@ -10,15 +10,26 @@
 Пользователь без страховой компании (администратор системы) видит всех
 и выбирает страховую при создании.
 """
-from django.contrib import admin
+import re
+
+from django.conf import settings
+from django.contrib import admin, messages
+from django.contrib.admin.utils import unquote
 from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
 from django import forms
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q
 from django.forms.models import BaseInlineFormSet
+from django.shortcuts import redirect
+from django.template.response import TemplateResponse
+from django.urls import path, reverse
 from django.utils.html import format_html, format_html_join
 
 from audit.admin import TrackedAdmin
+from integrations.ersp import ErspClient, ErspError
+from integrations.models import Exchange
+
+from . import provider
 
 from .models import (
     Bank,
@@ -296,6 +307,165 @@ class CounterpartyAdmin(NoRelatedLinks, TrackedAdmin):
             else:
                 blocks.append(format_html("<p><strong>{}</strong> - готов ✓</p>", title))
         return format_html_join("", "{}", ((block,) for block in blocks))
+
+    # --- Заполнение по ИНН от провайдера ЕРСП (counterparties/provider.py) ---------
+    #
+    # Запрос к ЕРСП - только по кнопке. Ответ ложится в журнал обмена, и
+    # страница сверки дальше работает с этой строкой журнала (?exchange=<номер>):
+    # сотрудник применяет ровно тот ответ, который видел, а обновление страницы
+    # не шлёт в ЕРСП новый запрос.
+
+    def get_urls(self):
+        own = [
+            path("by-inn/", self.admin_site.admin_view(self.by_inn_view),
+                 name="counterparties_counterparty_by_inn"),
+            path("<path:object_id>/provider/", self.admin_site.admin_view(self.provider_view),
+                 name="counterparties_counterparty_provider"),
+        ]
+        return own + super().get_urls()  # свои - раньше: иначе by-inn/ примут за номер карточки
+
+    def _ask_provider(self, request, company, inn):
+        """Запрос к провайдеру. Возвращает строку журнала или None (ошибка уже показана)."""
+        client = ErspClient(settings.ERSP_READ_ENV, company=company, user=request.user)
+        try:
+            client.provider_inn(inn)
+        except ErspError as error:
+            messages.error(request, f"Провайдер ЕРСП: {error.message}")
+            return None
+        return client.last_exchange
+
+    @staticmethod
+    def _stored_answer(exchange_id, company, inn=None):
+        """Успешный ответ провайдера из журнала обмена - только своей страховой."""
+        try:
+            pk = int(exchange_id)
+        except (TypeError, ValueError):
+            return None
+        found = Exchange.objects.filter(
+            pk=pk, operation=Exchange.Operation.PROVIDER_INN,
+            outcome=Exchange.Outcome.OK, insurance_company=company,
+        )
+        if inn is not None:
+            found = found.filter(subject=inn)
+        return found.first()
+
+    def _page(self, request, title, context):
+        return TemplateResponse(
+            request,
+            "admin/counterparties/counterparty/provider.html",
+            {**self.admin_site.each_context(request), "opts": self.model._meta, "title": title, **context},
+        )
+
+    def provider_view(self, request, object_id):
+        """Сверка карточки с провайдером: у нас | у провайдера | применить."""
+        card = self.get_object(request, unquote(object_id))  # только своей страховой
+        if card is None:
+            return self._get_obj_does_not_exist_redirect(request, self.model._meta, object_id)
+        if not self.has_change_permission(request, card):
+            raise PermissionDenied
+        change_url = reverse("admin:counterparties_counterparty_change", args=[card.pk])
+        legal = getattr(card, "legal_entity", None)
+        if legal is None or legal.is_foreign:
+            messages.error(request, "Провайдер ЕРСП знает только организации Узбекистана.")
+            return redirect(change_url)
+
+        company = card.insurance_company
+        exchange_id = request.POST.get("exchange") or request.GET.get("exchange")
+        if not exchange_id:
+            exchange = self._ask_provider(request, company, legal.inn)
+            if exchange is None:
+                return redirect(change_url)
+            return redirect(f"{request.path}?exchange={exchange.pk}")
+
+        exchange = self._stored_answer(exchange_id, company, inn=legal.inn)
+        if exchange is None:
+            messages.error(request, "Ответ провайдера не найден - запросите заново.")
+            return redirect(change_url)
+        data = provider.parse(legal.inn, exchange.response_body["result"])
+
+        if request.method == "POST":
+            try:
+                done = provider.apply(card, data, request.POST.getlist("apply"), request.user)
+            except ValidationError as error:
+                messages.error(request, "Не применено: " + " ".join(error.messages))
+                return redirect(f"{request.path}?exchange={exchange.pk}")
+            if done:
+                messages.success(request, "Применено от провайдера: " + "; ".join(done) + ".")
+            else:
+                messages.info(request, "Ничего не отмечено - карточка не изменилась.")
+            return redirect(change_url)
+
+        return self._page(request, f"Сверка с провайдером ЕРСП: {card}", {
+            "card": card, "inn": legal.inn, "exchange": exchange, "data": data,
+            "rows": provider.compare(card, data), "change_url": change_url,
+        })
+
+    def by_inn_view(self, request):
+        """Новый контрагент по ИНН: ввод ИНН -> ответ провайдера -> создать."""
+        if not self.has_add_permission(request):
+            raise PermissionDenied
+        list_url = reverse("admin:counterparties_counterparty_changelist")
+        company = request.user.insurance_company
+        if company is None:
+            messages.error(request, "Заведение по ИНН - для сотрудника страховой компании "
+                                    "(в учётной записи не указана страховая).")
+            return redirect(list_url)
+
+        def existing_card(inn):
+            legal = LegalEntity.objects.filter(
+                insurance_company=company, inn=inn, is_foreign=False
+            ).select_related("counterparty").first()
+            return legal.counterparty if legal else None
+
+        def go_to_existing(card):
+            messages.info(request, f"Контрагент с этим ИНН уже есть: {card}. Вот сверка с провайдером.")
+            if self.has_change_permission(request, card):
+                return redirect(reverse("admin:counterparties_counterparty_provider", args=[card.pk]))
+            return redirect(reverse("admin:counterparties_counterparty_change", args=[card.pk]))
+
+        action = request.POST.get("action")
+        if request.method == "POST" and action == "query":
+            inn = re.sub(r"\s", "", request.POST.get("inn", ""))
+            if not re.fullmatch(r"[0-9]{9}", inn):
+                return self._page(request, "Новый контрагент по ИНН", {
+                    "ask_inn": True, "inn": inn, "inn_error": "ИНН организации Узбекистана - ровно 9 цифр.",
+                })
+            card = existing_card(inn)
+            if card is not None:
+                return go_to_existing(card)
+            exchange = self._ask_provider(request, company, inn)
+            if exchange is None:
+                return self._page(request, "Новый контрагент по ИНН", {"ask_inn": True, "inn": inn})
+            return redirect(f"{request.path}?exchange={exchange.pk}")
+
+        exchange_id = request.POST.get("exchange") or request.GET.get("exchange")
+        if not exchange_id:
+            return self._page(request, "Новый контрагент по ИНН", {"ask_inn": True})
+        exchange = self._stored_answer(exchange_id, company)
+        if exchange is None:
+            messages.error(request, "Ответ провайдера не найден - запросите заново.")
+            return redirect(request.path)
+        inn = exchange.subject
+        card = existing_card(inn)
+        if card is not None:
+            return go_to_existing(card)
+        data = provider.parse(inn, exchange.response_body["result"])
+
+        if request.method == "POST" and action == "create":
+            try:
+                card = provider.create(company, data, request.POST.getlist("apply"), request.user)
+            except (provider.ProviderError, ValidationError) as error:
+                text = error.messages if isinstance(error, ValidationError) else [str(error)]
+                messages.error(request, "Карточка не заведена: " + " ".join(text))
+                return redirect(f"{request.path}?exchange={exchange.pk}")
+            messages.success(request, f"Заведён контрагент по данным провайдера: {card}.")
+            return redirect(reverse("admin:counterparties_counterparty_change", args=[card.pk]))
+
+        return self._page(request, f"Новый контрагент по ИНН {inn}", {
+            "new": True, "inn": inn, "exchange": exchange, "data": data,
+            "can_create": data.values["full_name"].usable,
+            "rows": provider.compare(None, data), "change_url": list_url,
+        })
 
     @admin.display(description="ИНН", ordering="legal_entity__inn")
     def inn(self, obj):
