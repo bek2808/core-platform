@@ -74,9 +74,11 @@ class LegalEntityInline(admin.StackedInline):
     extra = 0
     verbose_name = "данные юрлица"
     verbose_name_plural = "данные юрлица"
+    # ОКЭД (696 кодов) и валюты (164) - поиском, а не длинным списком.
+    autocomplete_fields = ["oked", "charter_capital_currency"]
     fieldsets = [
         (None, {"fields": ["is_foreign", "country", "inn", "full_name", "short_name"]}),
-        ("Деятельность", {"fields": ["oked", "oked_title", "okpo", "ownership_form"]}),
+        ("Деятельность", {"fields": ["oked", "okpo", "ownership_form"]}),
         ("Регистрация", {"fields": [
             "reg_certificate_number", "reg_certificate_date",
             "charter_capital", "charter_capital_currency",
@@ -138,6 +140,12 @@ class CounterpartyAdmin(TrackedAdmin):
 
             return FormWithCompany
         return form
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        # Регион по СОАТО - после сохранения всей карточки: и когда изменили
+        # СОАТО, и когда сотрудник очистил регион, не трогая данные юрлица.
+        form.instance.fill_region_from_soato(by=request.user)
 
     def get_search_results(self, request, queryset, search_term):
         term = search_term.strip()

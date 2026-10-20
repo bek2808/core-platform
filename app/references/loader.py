@@ -6,7 +6,7 @@
 - каждую строку сверяем с базой по id ЕРСП: новой записи - создаём, изменённой -
   обновляем, неизменённую не трогаем;
 - записи, которых нет в ответе, не удаляем, а помечаем is_present = False;
-- все три справочника загружаются в одной транзакции: если хоть один файл
+- все справочники загружаются в одной транзакции: если хоть один файл
   с ошибкой, в базе не меняется ничего.
 
 Загрузку можно запускать сколько угодно раз: повторный запуск с теми же
@@ -14,13 +14,21 @@
 """
 import datetime
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
 from django.db import transaction
 from django.utils import timezone
 
-from .models import ErspInsurer, ErspOwnershipForm, ErspRegion
+from .models import (
+    ErspCurrency,
+    ErspDistrict,
+    ErspInsurer,
+    ErspOked,
+    ErspOwnershipForm,
+    ErspRegion,
+)
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
 
@@ -92,6 +100,23 @@ def _row_id(row):
     return row_id
 
 
+def _oked_id(row):
+    """
+    У ОКЭД id - код строкой: обычно 5 цифр, с ведущим нулём (01452).
+    В ЕРСП есть и коды верхних уровней классификатора - 2-4 цифры
+    (73, 682, 9411: группа или класс, а 94110 - его подкласс). Храним как есть.
+    """
+    row_id = row.get("id") if isinstance(row, dict) else None
+    if not isinstance(row_id, str) or not re.fullmatch(r"[0-9]{2,5}", row_id.strip()):
+        raise LoadError(f"ОКЭД: строка без правильного кода: {row!r}")
+    return row_id.strip()
+
+
+def _clean(row, key, required=False):
+    """Как _text, но без пробелов и переводов строк по краям (в ОКЭД бывает \\r)."""
+    return _text(row, key, required).strip()
+
+
 def region_fields(row, soato_regions):
     return {
         "name": _text(row, "name", required=True),
@@ -122,17 +147,41 @@ def insurer_fields(row):
     }
 
 
+def district_fields(row, region_ids):
+    region_id = row.get("regionId")
+    if region_id not in region_ids:
+        raise LoadError(f"район id={row.get('id')}: регион {region_id!r} не найден в регионах ЕРСП")
+    return {"name": _clean(row, "name", required=True), "region_id": region_id}
+
+
+def currency_fields(row):
+    return {
+        "ticker": _clean(row, "ticker"),
+        "name": _clean(row, "name", required=True),
+        "name_uz": _clean(row, "nameUz"),
+        "name_uzc": _clean(row, "nameUzc"),
+    }
+
+
+def oked_fields(row):
+    return {
+        "name": _clean(row, "name", required=True),
+        "name_uz": _clean(row, "nameUz"),
+        "name_uzc": _clean(row, "nameUzc"),
+    }
+
+
 # --- Сверка с базой ----------------------------------------------------------------
 
-def sync_reference(model, rows, to_fields, now=None):
+def sync_reference(model, rows, to_fields, now=None, id_of=_row_id):
     """
-    Сверить один справочник с ответом ЕРСП. to_fields(row) -> поля модели.
-    Вызывается внутри транзакции (см. sync_all).
+    Сверить один справочник с ответом ЕРСП. to_fields(row) -> поля модели,
+    id_of(row) -> id записи. Вызывается внутри транзакции (см. sync_all).
     """
     now = now or timezone.now()
     parsed = {}
     for row in rows:
-        row_id = _row_id(row)
+        row_id = id_of(row)
         if row_id in parsed:
             raise LoadError(f"{model._meta.verbose_name_plural}: id {row_id} повторяется")
         parsed[row_id] = (row, to_fields(row))
@@ -167,8 +216,10 @@ def sync_reference(model, rows, to_fields, now=None):
     return result
 
 
-def sync_all(regions, ownership_forms, insurers, soato_regions, now=None):
-    """Загрузить три справочника ЕРСП одной транзакцией: всё или ничего."""
+def sync_all(
+    regions, ownership_forms, insurers, soato_regions, districts, currencies, okeds, now=None
+):
+    """Загрузить справочники ЕРСП одной транзакцией: всё или ничего."""
     now = now or timezone.now()
     # ИНН страховщика в базе уникален; повтор в ответе ЕРСП покажем понятной
     # ошибкой, а не падением базы посреди загрузки.
@@ -177,7 +228,7 @@ def sync_all(regions, ownership_forms, insurers, soato_regions, now=None):
     if repeated:
         raise LoadError(f"страховщики: ИНН повторяется: {', '.join(repeated)}")
     with transaction.atomic():
-        return {
+        results = {
             "регионы": sync_reference(
                 ErspRegion, regions, lambda row: region_fields(row, soato_regions), now
             ),
@@ -186,6 +237,21 @@ def sync_all(regions, ownership_forms, insurers, soato_regions, now=None):
             ),
             "страховщики": sync_reference(ErspInsurer, insurers, insurer_fields, now),
         }
+        known_regions = set(ErspRegion.objects.values_list("id", flat=True))
+        results |= {
+            # Районы - после регионов: каждый район ссылается на свой регион.
+            # Сверяем с регионами в базе (а не только в этом ответе): регион,
+            # пропавший из ЕРСП, остаётся в базе с отметкой и может быть у района.
+            "районы": sync_reference(
+                ErspDistrict,
+                districts,
+                lambda row: district_fields(row, known_regions),
+                now,
+            ),
+            "валюты": sync_reference(ErspCurrency, currencies, currency_fields, now),
+            "ОКЭД": sync_reference(ErspOked, okeds, oked_fields, now, id_of=_oked_id),
+        }
+        return results
 
 
 def load_from_files(data_dir=DATA_DIR):
@@ -196,4 +262,7 @@ def load_from_files(data_dir=DATA_DIR):
         ownership_forms=read_ersp_response(ersp_dir / "ownership_forms.json"),
         insurers=read_ersp_response(ersp_dir / "insurers.json"),
         soato_regions=read_soato_regions(Path(data_dir) / "soato_regions.json"),
+        districts=read_ersp_response(ersp_dir / "districts.json"),
+        currencies=read_ersp_response(ersp_dir / "currencies.json"),
+        okeds=read_ersp_response(ersp_dir / "okeds.json"),
     )

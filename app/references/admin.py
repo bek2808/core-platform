@@ -9,7 +9,14 @@ import json
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import ErspInsurer, ErspOwnershipForm, ErspRegion
+from .models import (
+    ErspCurrency,
+    ErspDistrict,
+    ErspInsurer,
+    ErspOked,
+    ErspOwnershipForm,
+    ErspRegion,
+)
 
 
 class ErspReferenceAdmin(admin.ModelAdmin):
@@ -51,3 +58,22 @@ class ErspInsurerAdmin(ErspReferenceAdmin):
     list_display = ["id", "name", "tin", "industry", "license_stopped_date", "is_present"]
     list_filter = ["is_present", "industry"]
     search_fields = ["name", "tin"]
+
+
+@admin.register(ErspDistrict)
+class ErspDistrictAdmin(ErspReferenceAdmin):
+    list_display = ["id", "name", "region", "is_present"]
+    list_filter = ["is_present", "region"]
+    search_fields = ["name"]
+
+
+@admin.register(ErspCurrency)
+class ErspCurrencyAdmin(ErspReferenceAdmin):
+    list_display = ["id", "ticker", "name", "is_present"]
+    search_fields = ["id", "ticker", "name", "name_uz"]
+
+
+@admin.register(ErspOked)
+class ErspOkedAdmin(ErspReferenceAdmin):
+    list_display = ["id", "name_uz", "name", "is_present"]
+    search_fields = ["id", "name", "name_uz", "name_uzc"]

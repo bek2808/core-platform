@@ -1,0 +1,1154 @@
+{
+  "error": 0,
+  "error_message": "",
+  "result": [
+    {
+      "id": 418,
+      "ticker": "LAK",
+      "name": "Кип",
+      "nameUz": "Kip",
+      "nameUzc": "Кип"
+    },
+    {
+      "id": 943,
+      "ticker": "MZN",
+      "name": "Метикал",
+      "nameUz": "Metikal",
+      "nameUzc": "Метикал"
+    },
+    {
+      "id": 975,
+      "ticker": "BGN",
+      "name": "Болгарский лев",
+      "nameUz": "Bolgariya levi",
+      "nameUzc": "Болгария леви"
+    },
+    {
+      "id": 703,
+      "ticker": "SKK",
+      "name": "Словацкая крона",
+      "nameUz": "Slovakiya kronasi",
+      "nameUzc": "Словакия кронаси"
+    },
+    {
+      "id": 233,
+      "ticker": "EEK",
+      "name": "Крона",
+      "nameUz": "Krona",
+      "nameUzc": "Крона"
+    },
+    {
+      "id": 203,
+      "ticker": "CZK",
+      "name": "Чешская крона",
+      "nameUz": "Chexiya kronasi",
+      "nameUzc": "Чехия кронаси"
+    },
+    {
+      "id": 116,
+      "ticker": "KHR",
+      "name": "Риель",
+      "nameUz": "Riyel",
+      "nameUzc": "Риель"
+    },
+    {
+      "id": 352,
+      "ticker": "ISK",
+      "name": "Исландская крона",
+      "nameUz": "Island kronasi",
+      "nameUzc": "Исланд кронаси"
+    },
+    {
+      "id": 428,
+      "ticker": "LVL",
+      "name": "Латвийский лат",
+      "nameUz": "Latviya lati",
+      "nameUzc": "Латвия лати"
+    },
+    {
+      "id": 788,
+      "ticker": "TND",
+      "name": "Тунисский динар",
+      "nameUz": "Tunis dinori",
+      "nameUzc": "Тунис динори"
+    },
+    {
+      "id": 968,
+      "ticker": "SRD",
+      "name": "Суринамский доллар",
+      "nameUz": "Surinam dollari",
+      "nameUzc": "Суринам доллари"
+    },
+    {
+      "id": 818,
+      "ticker": "EGP",
+      "name": "Египетский фунт",
+      "nameUz": "Misr funti",
+      "nameUzc": "Миср фунти"
+    },
+    {
+      "id": 232,
+      "ticker": "ERN",
+      "name": "Накфа",
+      "nameUz": "Nakfa",
+      "nameUzc": "Накфа"
+    },
+    {
+      "id": 192,
+      "ticker": "CUP",
+      "name": "Кубинское песо",
+      "nameUz": "Kuba pesosi",
+      "nameUzc": "Куба песоси"
+    },
+    {
+      "id": 498,
+      "ticker": "MDL",
+      "name": "Молдавский лей",
+      "nameUz": "Moldova leyi",
+      "nameUzc": "Молдова лейи"
+    },
+    {
+      "id": 214,
+      "ticker": "DOP",
+      "name": "Доминиканское песо",
+      "nameUz": "Dominika pesosi",
+      "nameUzc": "Доминика песоси"
+    },
+    {
+      "id": 780,
+      "ticker": "TTD",
+      "name": "Доллар Тринидада и Тобаго",
+      "nameUz": "Trinidad va Tobago dollari",
+      "nameUzc": "Тринидад ва Тобаго доллари"
+    },
+    {
+      "id": 174,
+      "ticker": "KMF",
+      "name": "Франк Комор",
+      "nameUz": "Komor franki",
+      "nameUzc": "Комор франки"
+    },
+    {
+      "id": 50,
+      "ticker": "BDT",
+      "name": "Така",
+      "nameUz": "Taka",
+      "nameUzc": "Така"
+    },
+    {
+      "id": 156,
+      "ticker": "CNY",
+      "name": "Юань Жэньминьби",
+      "nameUz": "Jenminbi Yuani",
+      "nameUzc": "Жэньминьби Юани"
+    },
+    {
+      "id": 72,
+      "ticker": "BWP",
+      "name": "Пула",
+      "nameUz": "Pula",
+      "nameUzc": "Пула"
+    },
+    {
+      "id": 108,
+      "ticker": "BIF",
+      "name": "Бурундийский франк",
+      "nameUz": "Burundi franki",
+      "nameUzc": "Бурунди франки"
+    },
+    {
+      "id": 188,
+      "ticker": "CRC",
+      "name": "Костариканский колон",
+      "nameUz": "Kosta Rika koloni",
+      "nameUzc": "Коста Рика колони"
+    },
+    {
+      "id": 969,
+      "ticker": "MGA",
+      "name": "Малагасийский ариари ",
+      "nameUz": "Malagasiya ariarisi",
+      "nameUzc": "Малагасия ариариси"
+    },
+    {
+      "id": 752,
+      "ticker": "SEK",
+      "name": "Шведская крона",
+      "nameUz": "Shved kronasi",
+      "nameUzc": "Швед кронаси"
+    },
+    {
+      "id": 222,
+      "ticker": "SVC",
+      "name": "Сальвадорский колон",
+      "nameUz": "Salvador koloni",
+      "nameUzc": "Сальвадор колони"
+    },
+    {
+      "id": 760,
+      "ticker": "SYP",
+      "name": "Сирийский фунт",
+      "nameUz": "Suriya funti",
+      "nameUzc": "Сурия фунти"
+    },
+    {
+      "id": 404,
+      "ticker": "KES",
+      "name": "Кенийский шиллинг",
+      "nameUz": "Keniya shillingi",
+      "nameUzc": "Кения шиллинги"
+    },
+    {
+      "id": 940,
+      "ticker": "UYI",
+      "name": "Уругвайское песо ",
+      "nameUz": "Urugvay pesosi",
+      "nameUzc": "Уругвай песоси"
+    },
+    {
+      "id": 512,
+      "ticker": "OMR",
+      "name": "Оманский риал",
+      "nameUz": "Ummon riali",
+      "nameUzc": "Уммон риали"
+    },
+    {
+      "id": 470,
+      "ticker": "MTL",
+      "name": "Мальтийская лира",
+      "nameUz": "Malta lirasi",
+      "nameUzc": "Мальта лираси"
+    },
+    {
+      "id": 946,
+      "ticker": "RON",
+      "name": "Новый румынский лей",
+      "nameUz": "Yangi ruminiya leyi",
+      "nameUzc": "Янги руминия лейи"
+    },
+    {
+      "id": 937,
+      "ticker": "VEF",
+      "name": "Боливар фуэрте",
+      "nameUz": "Bolivar fuerte",
+      "nameUzc": "Боливар фуэрте"
+    },
+    {
+      "id": 776,
+      "ticker": "TOP",
+      "name": "Паанга",
+      "nameUz": "Paanga",
+      "nameUzc": "Паанга"
+    },
+    {
+      "id": 986,
+      "ticker": "BRL",
+      "name": "Бразильский реал",
+      "nameUz": "Braziliya reali",
+      "nameUzc": "Бразилия реали"
+    },
+    {
+      "id": 973,
+      "ticker": "AOA",
+      "name": "Кванза ",
+      "nameUz": "Kvanza",
+      "nameUzc": "Кванза"
+    },
+    {
+      "id": 324,
+      "ticker": "GNF",
+      "name": "Гвинейский франк",
+      "nameUz": "Gvineya franki",
+      "nameUzc": "Гвинея франки"
+    },
+    {
+      "id": 96,
+      "ticker": "BND",
+      "name": "Брунейский доллар",
+      "nameUz": "Bruney dollari",
+      "nameUzc": "Бруней доллари"
+    },
+    {
+      "id": 410,
+      "ticker": "KRW",
+      "name": "Вона",
+      "nameUz": "Vona",
+      "nameUzc": "Вона"
+    },
+    {
+      "id": 414,
+      "ticker": "KWD",
+      "name": "Кувейтский динар",
+      "nameUz": "Quvayt dinori",
+      "nameUzc": "Қувайт динори"
+    },
+    {
+      "id": 480,
+      "ticker": "MUR",
+      "name": "Маврикийская рупия",
+      "nameUz": "Mavrikiya rupiyasi",
+      "nameUzc": "Маврикия рупияси"
+    },
+    {
+      "id": 398,
+      "ticker": "KZT",
+      "name": "Тенге",
+      "nameUz": "Tenge",
+      "nameUzc": "Тенге"
+    },
+    {
+      "id": 960,
+      "ticker": "XDR",
+      "name": "СДР (специальные права заимствования)",
+      "nameUz": "SDR (maxsus qarz olish huquqlari)",
+      "nameUzc": "СДР (махсус қарз олиш ҳуқуқлари)"
+    },
+    {
+      "id": 604,
+      "ticker": "PEN",
+      "name": "Новый соль",
+      "nameUz": "Yangi sol",
+      "nameUzc": "Янги соль"
+    },
+    {
+      "id": 484,
+      "ticker": "MXN",
+      "name": "Мексиканское песо",
+      "nameUz": "Meksika pesosi",
+      "nameUzc": "Мексика песоси"
+    },
+    {
+      "id": 590,
+      "ticker": "PAB",
+      "name": "Бальбоа",
+      "nameUz": "Balboa",
+      "nameUzc": "Бальбоа"
+    },
+    {
+      "id": 834,
+      "ticker": "TZS",
+      "name": "Танзанийский шиллинг",
+      "nameUz": "Tanzaniya shillingi",
+      "nameUzc": "Танзания шиллинги"
+    },
+    {
+      "id": 462,
+      "ticker": "MVR",
+      "name": "Руфия",
+      "nameUz": "Rufiya",
+      "nameUzc": "Руфия"
+    },
+    {
+      "id": 152,
+      "ticker": "CLP",
+      "name": "Чилийское песо",
+      "nameUz": "Chili pesosi",
+      "nameUzc": "Чили песоси"
+    },
+    {
+      "id": 376,
+      "ticker": "ILS",
+      "name": "Новый израильский шекель",
+      "nameUz": "Yangi Isroil shekeli",
+      "nameUzc": "Янги Исроил шекели"
+    },
+    {
+      "id": 600,
+      "ticker": "PYG",
+      "name": "Гуарани",
+      "nameUz": "Guarani",
+      "nameUzc": "Гуарани"
+    },
+    {
+      "id": 364,
+      "ticker": "IRR",
+      "name": "Иранский риал",
+      "nameUz": "Eron riali",
+      "nameUzc": "Эрон риали"
+    },
+    {
+      "id": 978,
+      "ticker": "EVR",
+      "name": "Евро (единицы европейской валюты)",
+      "nameUz": "Yevro (Yevropa Ittifoqi valyutasi birligi)",
+      "nameUzc": "Евро (Европа Иттифоқи валютаси бирлиги)"
+    },
+    {
+      "id": 800,
+      "ticker": "UGS",
+      "name": "Угандийский шиллинг",
+      "nameUz": "Uganda shillingi",
+      "nameUzc": "Уганда шиллинги"
+    },
+    {
+      "id": 784,
+      "ticker": "AED",
+      "name": "Дирхам (ОАЭ)",
+      "nameUz": "Dirham (BAA)",
+      "nameUzc": "Дирҳам (БАА)"
+    },
+    {
+      "id": 795,
+      "ticker": "TMM",
+      "name": "Манат",
+      "nameUz": "Manat",
+      "nameUzc": "Манат"
+    },
+    {
+      "id": 694,
+      "ticker": "SLL",
+      "name": "Леоне",
+      "nameUz": "Leone",
+      "nameUzc": "Леоне"
+    },
+    {
+      "id": 64,
+      "ticker": "BTN",
+      "name": "Нгултрум",
+      "nameUz": "Ngultrum",
+      "nameUzc": "Нгултрум"
+    },
+    {
+      "id": 360,
+      "ticker": "IDR",
+      "name": "Рупия",
+      "nameUz": "Rupiya",
+      "nameUzc": "Рупия"
+    },
+    {
+      "id": 756,
+      "ticker": "CHF",
+      "name": "Швейцарский франк",
+      "nameUz": "Shveysariya franki",
+      "nameUzc": "Швейцария франки"
+    },
+    {
+      "id": 44,
+      "ticker": "BSD",
+      "name": "Багамский доллар",
+      "nameUz": "Bagam dollari",
+      "nameUzc": "Багам доллари"
+    },
+    {
+      "id": 643,
+      "ticker": "RUB",
+      "name": "Российский рубль",
+      "nameUz": "Rossiya rubli",
+      "nameUzc": "Россия рубли"
+    },
+    {
+      "id": 52,
+      "ticker": "BBD",
+      "name": "Барбадосский доллар",
+      "nameUz": "Barbados dollari",
+      "nameUzc": "Барбадос доллари"
+    },
+    {
+      "id": 430,
+      "ticker": "LRD",
+      "name": "Либерийский доллар",
+      "nameUz": "Liberiya dollari",
+      "nameUzc": "Либерия доллари"
+    },
+    {
+      "id": 238,
+      "ticker": "FKP",
+      "name": "Фунт Фолклендских островов",
+      "nameUz": "Folklend orollari funti",
+      "nameUzc": "Фолкленд ороллари фунти"
+    },
+    {
+      "id": 12,
+      "ticker": "DZD",
+      "name": "Алжирский динар",
+      "nameUz": "Jazoir dinori",
+      "nameUzc": "Жазоир динори"
+    },
+    {
+      "id": 974,
+      "ticker": "BYR",
+      "name": "Белорусский рубль",
+      "nameUz": "Belorussiya rubli",
+      "nameUzc": "Белоруссия рубли"
+    },
+    {
+      "id": 678,
+      "ticker": "STD",
+      "name": "Добра",
+      "nameUz": "Dobra",
+      "nameUzc": "Добра"
+    },
+    {
+      "id": 586,
+      "ticker": "PKR",
+      "name": "Пакистанская рупия",
+      "nameUz": "Pokiston rupiyasi",
+      "nameUzc": "Покистон рупияси"
+    },
+    {
+      "id": 90,
+      "ticker": "SBD",
+      "name": "Доллар Соломоновых островов",
+      "nameUz": "Solomon orollari dollari",
+      "nameUzc": "Соломон ороллари доллари"
+    },
+    {
+      "id": 191,
+      "ticker": "HRD",
+      "name": "Хорватский куна",
+      "nameUz": "Xorvatiya kunasi",
+      "nameUzc": "Хорватия кунаси"
+    },
+    {
+      "id": 368,
+      "ticker": "IQD",
+      "name": "Иракский динар",
+      "nameUz": "Iroq dinori",
+      "nameUzc": "Ироқ динори"
+    },
+    {
+      "id": 454,
+      "ticker": "MWK",
+      "name": "Квача",
+      "nameUz": "Kvacha",
+      "nameUzc": "Квача"
+    },
+    {
+      "id": 976,
+      "ticker": "CDF",
+      "name": "Конголезский франк",
+      "nameUz": "Kongo franki",
+      "nameUzc": "Конго франки"
+    },
+    {
+      "id": 710,
+      "ticker": "ZAR",
+      "name": "Рэнд",
+      "nameUz": "Rend",
+      "nameUzc": "Рэнд"
+    },
+    {
+      "id": 981,
+      "ticker": "GEL",
+      "name": "Лари ",
+      "nameUz": "Lari",
+      "nameUzc": "Лари"
+    },
+    {
+      "id": 348,
+      "ticker": "HUF",
+      "name": "Форинт",
+      "nameUz": "Forint",
+      "nameUzc": "Форинт"
+    },
+    {
+      "id": 985,
+      "ticker": "PLN",
+      "name": "Злотый",
+      "nameUz": "Zlotiy",
+      "nameUzc": "Злотий"
+    },
+    {
+      "id": 886,
+      "ticker": "YER",
+      "name": "Йеменский риал",
+      "nameUz": "Yaman riali",
+      "nameUzc": "Яман риали"
+    },
+    {
+      "id": 440,
+      "ticker": "LTL",
+      "name": "Литовский лит",
+      "nameUz": "Litva liti",
+      "nameUzc": "Литва лити"
+    },
+    {
+      "id": 524,
+      "ticker": "NPR",
+      "name": "Непальская рупия",
+      "nameUz": "Nepal rupiyasi",
+      "nameUzc": "Непал рупияси"
+    },
+    {
+      "id": 328,
+      "ticker": "GYD",
+      "name": "Гайанский доллар",
+      "nameUz": "Gayana dollari",
+      "nameUzc": "Гайана доллари"
+    },
+    {
+      "id": 8,
+      "ticker": "ALL",
+      "name": "Лек",
+      "nameUz": "Lek",
+      "nameUzc": "Лек"
+    },
+    {
+      "id": 144,
+      "ticker": "LKR",
+      "name": "Шриланкийская рупия",
+      "nameUz": "Shri Lanka rupiyasi",
+      "nameUzc": "Шри Ланка рупияси"
+    },
+    {
+      "id": 944,
+      "ticker": "AZN",
+      "name": "Азербайджанский манат",
+      "nameUz": "Ozarbayjon manati",
+      "nameUzc": "Озарбайжон манати"
+    },
+    {
+      "id": 826,
+      "ticker": "GBP",
+      "name": "Фунт стерлингов",
+      "nameUz": "Funt sterling",
+      "nameUzc": "Фунт стерлинг"
+    },
+    {
+      "id": 702,
+      "ticker": "SGD",
+      "name": "Сингапурский доллар",
+      "nameUz": "Singapur dollari",
+      "nameUzc": "Сингапур доллари"
+    },
+    {
+      "id": 292,
+      "ticker": "GIP",
+      "name": "Гибралтарский фунт",
+      "nameUz": "Gibraltar funti",
+      "nameUzc": "Гибралтар фунти"
+    },
+    {
+      "id": 356,
+      "ticker": "INR",
+      "name": "Индийская рупия",
+      "nameUz": "Hind rupiyasi",
+      "nameUzc": "Ҳинд рупияси"
+    },
+    {
+      "id": 558,
+      "ticker": "NIO",
+      "name": "Золотая кордоба",
+      "nameUz": "Oltin kordoba",
+      "nameUzc": "Олтин кордоба"
+    },
+    {
+      "id": 764,
+      "ticker": "THB",
+      "name": "Бат",
+      "nameUz": "Bat",
+      "nameUzc": "Бат"
+    },
+    {
+      "id": 690,
+      "ticker": "SCR",
+      "name": "Сейшельская рупия",
+      "nameUz": "Seyshel rupiyasi",
+      "nameUzc": "Сейшел рупияси"
+    },
+    {
+      "id": 624,
+      "ticker": "GWP",
+      "name": "Песо Гвинеи-Бисау",
+      "nameUz": "Gvinei-Bisau pesosi",
+      "nameUzc": "Гвинеи-Бисау песоси"
+    },
+    {
+      "id": 408,
+      "ticker": "KPW",
+      "name": "Северо-Корейская вона",
+      "nameUz": "Shimoliy Koreya vonasi",
+      "nameUzc": "Шимолий Корея вонаси"
+    },
+    {
+      "id": 936,
+      "ticker": "GHS",
+      "name": "Седи Ганы",
+      "nameUz": "Gana sedisi",
+      "nameUzc": "Гана седиси"
+    },
+    {
+      "id": 860,
+      "ticker": "UZS",
+      "name": "Узбекский сум",
+      "nameUz": "O‘zbek so‘mi",
+      "nameUzc": "Ўзбек сўми"
+    },
+    {
+      "id": 458,
+      "ticker": "MYR",
+      "name": "Малайзийский ринггит",
+      "nameUz": "Malayziya ringgit",
+      "nameUzc": "Малайзия ринггит"
+    },
+    {
+      "id": 434,
+      "ticker": "LYD",
+      "name": "Ливийский динар",
+      "nameUz": "Liviya dinori",
+      "nameUzc": "Ливия динори"
+    },
+    {
+      "id": 682,
+      "ticker": "SAR",
+      "name": "Саудовский риал",
+      "nameUz": "Saudiya riali",
+      "nameUzc": "Саудия риали"
+    },
+    {
+      "id": 532,
+      "ticker": "ANG",
+      "name": "Нидерландский антильский гульден",
+      "nameUz": "Niderlandiya Antiliyasi guldeni",
+      "nameUzc": "Нидерландия Антилияси гульдени"
+    },
+    {
+      "id": 646,
+      "ticker": "RWF",
+      "name": "Франк Руанды",
+      "nameUz": "Ruanda franki",
+      "nameUzc": "Руанда франки"
+    },
+    {
+      "id": 344,
+      "ticker": "HKD",
+      "name": "Гонконгский доллар",
+      "nameUz": "Gonkong dollari",
+      "nameUzc": "Гонконг доллари"
+    },
+    {
+      "id": 950,
+      "ticker": "XAF",
+      "name": "Франк КФА ВЕАС*",
+      "nameUz": "KFA VEAS franki *",
+      "nameUzc": "КФА ВЕАС франки *"
+    },
+    {
+      "id": 882,
+      "ticker": "WST",
+      "name": "Тала",
+      "nameUz": "Tala",
+      "nameUzc": "Тала"
+    },
+    {
+      "id": 716,
+      "ticker": "ZWD",
+      "name": "Доллар Зимбабве",
+      "nameUz": "Zimbabve dollari",
+      "nameUzc": "Зимбабве доллари"
+    },
+    {
+      "id": 136,
+      "ticker": "KYD",
+      "name": "Доллар островов Кайман",
+      "nameUz": "Kayman orollari dollari",
+      "nameUzc": "Кайман ороллари доллари"
+    },
+    {
+      "id": 496,
+      "ticker": "MNT",
+      "name": "Тугрик",
+      "nameUz": "Tugrik",
+      "nameUzc": "Тугрик"
+    },
+    {
+      "id": 196,
+      "ticker": "CYP",
+      "name": "Кипрский фунт",
+      "nameUz": "Kipr funti",
+      "nameUzc": "Кипр фунти"
+    },
+    {
+      "id": 598,
+      "ticker": "PGK",
+      "name": "Кина",
+      "nameUz": "Kina",
+      "nameUzc": "Кина"
+    },
+    {
+      "id": 124,
+      "ticker": "CAD",
+      "name": "Канадский доллар",
+      "nameUz": "Kanada dollari",
+      "nameUzc": "Канада доллари"
+    },
+    {
+      "id": 48,
+      "ticker": "BHD",
+      "name": "Бахрейнский динар",
+      "nameUz": "Bahrayn dinori",
+      "nameUzc": "Баҳрайн динори"
+    },
+    {
+      "id": 104,
+      "ticker": "MMK",
+      "name": "Кьят",
+      "nameUz": "Kyat",
+      "nameUzc": "Кьят"
+    },
+    {
+      "id": 951,
+      "ticker": "XCD",
+      "name": "Восточно-Карибский доллар",
+      "nameUz": "Sharqiy-Karib dollari",
+      "nameUzc": "Шарқий-Кариб доллари"
+    },
+    {
+      "id": 170,
+      "ticker": "COP",
+      "name": "Колумбийское песо",
+      "nameUz": "Kolumbiya pesosi",
+      "nameUzc": "Колумбия песоси"
+    },
+    {
+      "id": 426,
+      "ticker": "LSL",
+      "name": "Лоти",
+      "nameUz": "Loti",
+      "nameUzc": "Лоти"
+    },
+    {
+      "id": 953,
+      "ticker": "XPF",
+      "name": "Франк КФП",
+      "nameUz": "KFP franki",
+      "nameUzc": "КФП франки"
+    },
+    {
+      "id": 262,
+      "ticker": "DJF",
+      "name": "Франк Джибути",
+      "nameUz": "Jibuti franki",
+      "nameUzc": "Жибути франки"
+    },
+    {
+      "id": 208,
+      "ticker": "DKK",
+      "name": "Датская крона",
+      "nameUz": "Daniya kronasi",
+      "nameUzc": "Дания кронаси"
+    },
+    {
+      "id": 478,
+      "ticker": "MRO",
+      "name": "Угия",
+      "nameUz": "Ugiya",
+      "nameUzc": "Угия"
+    },
+    {
+      "id": 971,
+      "ticker": "AFN",
+      "name": "Афгани",
+      "nameUz": "Afg‘oniy",
+      "nameUzc": "Афғоний"
+    },
+    {
+      "id": 32,
+      "ticker": "ARS",
+      "name": "Аргентинское песо",
+      "nameUz": "Argentina pesosi",
+      "nameUzc": "Аргентина песоси"
+    },
+    {
+      "id": 608,
+      "ticker": "PHP",
+      "name": "Филиппинское песо",
+      "nameUz": "Filippin pesosi",
+      "nameUzc": "Филиппин песоси"
+    },
+    {
+      "id": 634,
+      "ticker": "QAR",
+      "name": "Катарский риал",
+      "nameUz": "Qatar riali",
+      "nameUzc": "Қатар риали"
+    },
+    {
+      "id": 422,
+      "ticker": "LBP",
+      "name": "Ливанский фунт",
+      "nameUz": "Livan funti",
+      "nameUzc": "Ливан фунти"
+    },
+    {
+      "id": 952,
+      "ticker": "XOF",
+      "name": "Франк КФА ВСЕАО*",
+      "nameUz": "KFA VSEAO franki **",
+      "nameUzc": "КФА ВСЕАО франки **"
+    },
+    {
+      "id": 446,
+      "ticker": "MOP",
+      "name": "Патака",
+      "nameUz": "Pataka",
+      "nameUzc": "Патака"
+    },
+    {
+      "id": 807,
+      "ticker": "MKD",
+      "name": "Динар",
+      "nameUz": "Dinor",
+      "nameUzc": "Динор"
+    },
+    {
+      "id": 270,
+      "ticker": "GMD",
+      "name": "Даласи",
+      "nameUz": "Dalasi",
+      "nameUzc": "Даласи"
+    },
+    {
+      "id": 840,
+      "ticker": "USD",
+      "name": "Доллар США",
+      "nameUz": "AQSh dollari",
+      "nameUzc": "АҚШ доллари"
+    },
+    {
+      "id": 748,
+      "ticker": "SZL",
+      "name": "Лилангени",
+      "nameUz": "Lilangeni",
+      "nameUzc": "Лилангени"
+    },
+    {
+      "id": 60,
+      "ticker": "BMD",
+      "name": "Бермудский доллар",
+      "nameUz": "Bermud dollari",
+      "nameUzc": "Бермуд доллари"
+    },
+    {
+      "id": 400,
+      "ticker": "JOD",
+      "name": "Иорданский динар",
+      "nameUz": "Iordaniya dinori",
+      "nameUzc": "Иордания динори"
+    },
+    {
+      "id": 938,
+      "ticker": "SDG",
+      "name": "Суданский фунт ",
+      "nameUz": "Sudan funti",
+      "nameUzc": "Судан фунти"
+    },
+    {
+      "id": 901,
+      "ticker": "TWD",
+      "name": "Новый тайваньский доллар",
+      "nameUz": "Yangi Tayvan dollari",
+      "nameUzc": "Янги Тайвань доллари"
+    },
+    {
+      "id": 706,
+      "ticker": "SOS",
+      "name": "Сомалийский шиллинг",
+      "nameUz": "Somali shillingi",
+      "nameUzc": "Сомали шиллинги"
+    },
+    {
+      "id": 704,
+      "ticker": "VND",
+      "name": "Донг",
+      "nameUz": "Dong",
+      "nameUzc": "Донг"
+    },
+    {
+      "id": 242,
+      "ticker": "FJD",
+      "name": "Доллар Фиджи",
+      "nameUz": "Fiji dollari",
+      "nameUzc": "Фижи доллари"
+    },
+    {
+      "id": 999,
+      "ticker": "OTH",
+      "name": "Другая валюта не указанная в данном списке",
+      "nameUz": "Mazkur ro‘yxatda ko‘rsatilmagan boshqa valyuta turi",
+      "nameUzc": "Мазкур рўйхатда кўрсатилмаган бошқа валюта тури"
+    },
+    {
+      "id": 504,
+      "ticker": "MAD",
+      "name": "Марокканский дирхам",
+      "nameUz": "Marokash dirxami",
+      "nameUzc": "Марокаш дирхами"
+    },
+    {
+      "id": 388,
+      "ticker": "JMD",
+      "name": "Ямайский доллар",
+      "nameUz": "Yamayka dollari",
+      "nameUzc": "Ямайка доллари"
+    },
+    {
+      "id": 320,
+      "ticker": "GTQ",
+      "name": "Кетсаль",
+      "nameUz": "Ketsal",
+      "nameUzc": "Кетсаль"
+    },
+    {
+      "id": 654,
+      "ticker": "SHP",
+      "name": "Фунт Святой Елены",
+      "nameUz": "Avliyo Elena funti",
+      "nameUzc": "Авлиё Елена фунти"
+    },
+    {
+      "id": 548,
+      "ticker": "VUV",
+      "name": "Вату",
+      "nameUz": "Vatu",
+      "nameUzc": "Вату"
+    },
+    {
+      "id": 977,
+      "ticker": "BAM",
+      "name": "Конвертируемая марка",
+      "nameUz": "Konvertatsiyalanadigan marka",
+      "nameUzc": "Конвертацияланадиган марка"
+    },
+    {
+      "id": 332,
+      "ticker": "HTG",
+      "name": "Гурд",
+      "nameUz": "Gurd",
+      "nameUzc": "Гурд"
+    },
+    {
+      "id": 36,
+      "ticker": "AUD",
+      "name": "Австралийский доллар",
+      "nameUz": "Avstraliya dollari",
+      "nameUzc": "Австралия доллари"
+    },
+    {
+      "id": 417,
+      "ticker": "KGS",
+      "name": "Сом",
+      "nameUz": "Som",
+      "nameUzc": "Сом"
+    },
+    {
+      "id": 230,
+      "ticker": "ETB",
+      "name": "Эфиопский быр",
+      "nameUz": "Efiopiya biri",
+      "nameUzc": "Эфиопия бири"
+    },
+    {
+      "id": 340,
+      "ticker": "HNL",
+      "name": "Лемпира",
+      "nameUz": "Lempira",
+      "nameUzc": "Лемпира"
+    },
+    {
+      "id": 578,
+      "ticker": "NOK",
+      "name": "Норвежская крона",
+      "nameUz": "Norvegiya kronasi",
+      "nameUzc": "Норвегия кронаси"
+    },
+    {
+      "id": 392,
+      "ticker": "JPY",
+      "name": "Йена",
+      "nameUz": "Iyena",
+      "nameUzc": "Иена"
+    },
+    {
+      "id": 516,
+      "ticker": "NAD",
+      "name": "Доллар Намибии",
+      "nameUz": "Namibiya dollari",
+      "nameUzc": "Намибия доллари"
+    },
+    {
+      "id": 949,
+      "ticker": "TRY",
+      "name": "Новая турецкая лира",
+      "nameUz": "Yangi turk lirasi",
+      "nameUzc": "Янги турк лираси"
+    },
+    {
+      "id": 533,
+      "ticker": "AWG",
+      "name": "Арубанский гульден",
+      "nameUz": "Aruba guldeni",
+      "nameUzc": "Аруба гульдени"
+    },
+    {
+      "id": 84,
+      "ticker": "BZD",
+      "name": "Белизский доллар",
+      "nameUz": "Beliz dollari",
+      "nameUzc": "Белиз доллари"
+    },
+    {
+      "id": 941,
+      "ticker": "RSD",
+      "name": "Сербский динар",
+      "nameUz": "Serb dinori",
+      "nameUzc": "Серб динори"
+    },
+    {
+      "id": 566,
+      "ticker": "NGN",
+      "name": "Найра",
+      "nameUz": "Nayra",
+      "nameUzc": "Найра"
+    },
+    {
+      "id": 51,
+      "ticker": "AMD",
+      "name": "Армянский драм",
+      "nameUz": "Arman drami",
+      "nameUzc": "Арман драми"
+    },
+    {
+      "id": 972,
+      "ticker": "TJS ",
+      "name": "Сомони",
+      "nameUz": "Somoniy",
+      "nameUzc": "Сомоний"
+    },
+    {
+      "id": 554,
+      "ticker": "NZD",
+      "name": "Новозеландский доллар",
+      "nameUz": "Yangi Zellandiya dollari",
+      "nameUzc": "Янги Зелландия доллари"
+    },
+    {
+      "id": 132,
+      "ticker": "CVE",
+      "name": "Эскудо Кабо-Верде",
+      "nameUz": "Kabo-Verde eskudosi",
+      "nameUzc": "Кабо-Верде эскудоси"
+    },
+    {
+      "id": 894,
+      "ticker": "ZMK",
+      "name": "Квача",
+      "nameUz": "Kvacha",
+      "nameUzc": "Квача"
+    },
+    {
+      "id": 68,
+      "ticker": "BOB",
+      "name": "Боливиано",
+      "nameUz": "Boliviano",
+      "nameUzc": "Боливиано"
+    },
+    {
+      "id": 980,
+      "ticker": "UAН",
+      "name": "Гривна",
+      "nameUz": "Grivna",
+      "nameUzc": "Гривна"
+    }
+  ]
+}

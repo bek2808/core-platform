@@ -1,0 +1,4182 @@
+{
+  "error": 0,
+  "error_message": "",
+  "result": [
+    {
+      "id": "26600",
+      "name": "Производство облучающего",
+      "nameUz": "Nurlantiruvchi, elektr meditsina va elektr terapiya uskunalari ishlab chiqarish",
+      "nameUzc": "Нурлантирувчи"
+    },
+    {
+      "id": "01452",
+      "name": "Разведение овец",
+      "nameUz": "Qorako‘l zotlilardan tashqari qo‘ylarni ko‘paytirish",
+      "nameUzc": "Қоракўл зотлилардан ташқари қўйларни кўпайтириш\r"
+    },
+    {
+      "id": "35300",
+      "name": "Системы подачи пара и кондиционирования воздуха\r",
+      "nameUz": "Bug‘ uzatish va havoni konditsiyalash tizimlari",
+      "nameUzc": "Буғ узатиш ва ҳавони кондитсиялаш тизимлари\r"
+    },
+    {
+      "id": "01133",
+      "name": "Выращивание корнеплодов и клубнеплодов с высоким содержанием крахмала и инулина и их семян\r",
+      "nameUz": "Kraxmal va inulinga boy ildizmevali ekinlar va ularning urug‘larini yetishtirish",
+      "nameUzc": "Крахмал ва инулинга бой илдизмевали экинлар ва уларнинг уруғларини етиштириш\r"
+    },
+    {
+      "id": "69102",
+      "name": "Деятельность нотариусов\r",
+      "nameUz": "Notariuslar faoliyati",
+      "nameUzc": "Нотариуслар фаолияти\r"
+    },
+    {
+      "id": "23410",
+      "name": "Производство керамических бытовых и декоративных изделий\r",
+      "nameUz": "Maishiy va dekorativ keramik buyumlar ishlab chiqarish",
+      "nameUzc": "Маиший ва декоратив керамик буюмлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "02400",
+      "name": "Технические услуги в области лесоводства\r",
+      "nameUz": "O‘rmonchilik sohasidagi texnik xizmatlar",
+      "nameUzc": "Ўрмончилик соҳасидаги техник хизматлар\r"
+    },
+    {
+      "id": "62020",
+      "name": "Консультационные услуги в области компьютерных технологий\r",
+      "nameUz": "Kompyuter texnologiyalari sohasidagi maslahat xizmatlari",
+      "nameUzc": "Компютер технологиялари соҳасидаги маслаҳат хизматлари\r"
+    },
+    {
+      "id": "49310",
+      "name": "Городской и пригородный сухопутный пассажирский транспорт\r",
+      "nameUz": "Shahar va shahar atrofiga qatnaydigan quruqlikdagi yo‘lovchi transporti",
+      "nameUzc": "Шаҳар ва шаҳар атрофига қатнайдиган қуруқликдаги ё‘ловчи транспорти\r"
+    },
+    {
+      "id": "26300",
+      "name": "Производство коммуникационного оборудования\r",
+      "nameUz": "Kommunikatsiya uskunalari ishlab chiqarish",
+      "nameUzc": "Коммуникатсия ускуналари ишлаб чиқариш\r"
+    },
+    {
+      "id": "88990",
+      "name": "Прочие социальные услуги без обеспечения проживания",
+      "nameUz": "Boshqa toifalarga kiritilmagan, yashash uchun joy bilan ta’minlamagan holda boshqa ijtimoiy xizmatlar ko‘rsatish",
+      "nameUzc": "Бошқа тоифаларга киритилмаган"
+    },
+    {
+      "id": "47260",
+      "name": "Розничная торговля в специализированных магазинах табачными изделиями\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda tamaki mahsulotlari chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда тамаки маҳсулотлари чакана савдоси\r"
+    },
+    {
+      "id": "08920",
+      "name": "Добыча торфа\r",
+      "nameUz": "Torf qazib olish",
+      "nameUzc": "Торф қазиб олиш\r"
+    },
+    {
+      "id": "23910",
+      "name": "Производство абразивных изделий\r",
+      "nameUz": "Abraziv buyumlar ishlab chiqarish",
+      "nameUzc": "Абразив буюмлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "14200",
+      "name": "Производство меховых изделий\r",
+      "nameUz": "Mo‘ynali mahsulotlar ishlab chiqarish",
+      "nameUzc": "Мўйнали маҳсулотлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "23700",
+      "name": "Резка",
+      "nameUz": "Toshni kesish, ishlov berish va pardozlash",
+      "nameUzc": "Тошни кесиш"
+    },
+    {
+      "id": "31030",
+      "name": "Производство матрасов\r",
+      "nameUz": "To‘shaklar ishlab chiqarish",
+      "nameUzc": "Тўшаклар ишлаб чиқариш\r"
+    },
+    {
+      "id": "23320",
+      "name": "Производство кирпича",
+      "nameUz": "G‘isht, cherepitsa va pishirilgan loydan boshqa qurilish materiallari ishlab chiqarish",
+      "nameUzc": "Ғишт"
+    },
+    {
+      "id": "23430",
+      "name": "Производство керамических изоляционных материалов и гарнитуры\r",
+      "nameUz": "Keramik izolyatsiyalovchi materiallar va garnituralar ishlab chiqarish",
+      "nameUzc": "Керамик изолятсияловчи материаллар ва гарнитуралар ишлаб чиқариш\r"
+    },
+    {
+      "id": "47110",
+      "name": "Розничная торговля в неспециализированных магазинах преимущественно продуктами питания",
+      "nameUz": "Ixtisoslashmagan do‘konlarda asosan oziq-ovqat mahsulotlari, jumladan ichimliklar, va tamaki mahsulotlari chakana savdosi",
+      "nameUzc": "Ихтисослашмаган дўконларда асосан озиқ-овқат маҳсулотлари"
+    },
+    {
+      "id": "18130",
+      "name": "Изготовление печатных форм и информационная деятельность\r",
+      "nameUz": "Bosma shakllarni tayyorlash va informatsion faoliyat",
+      "nameUzc": "Босма шаклларни тайёрлаш ва информатсион фаолият\r"
+    },
+    {
+      "id": "26700",
+      "name": "Производство оптических приборов и фотографического оборудования\r",
+      "nameUz": "Optika asboblari va fotografiya uskunalari ishlab chiqarish",
+      "nameUzc": "Оптика асбоблари ва фотография ускуналари ишлаб чиқариш\r"
+    },
+    {
+      "id": "10890",
+      "name": "Производство прочих продуктов питания",
+      "nameUz": "Boshqa toifalarga kiritilmagan oziq-ovqat mahsulotlari ishlab chiqarish",
+      "nameUzc": "Бошқа тоифаларга киритилмаган озиқ-овқат маҳсулотлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "24530",
+      "name": "Литье легких металлов\r",
+      "nameUz": "Yengil metallar quyish",
+      "nameUzc": "Енгил металлар қуйиш\r"
+    },
+    {
+      "id": "46750",
+      "name": "Оптовая торговля химическими продуктами\r",
+      "nameUz": "Kimyoviy mahsulotlar ulgurji savdosi",
+      "nameUzc": "Кимёвий маҳсулотлар улгуржи савдоси\r"
+    },
+    {
+      "id": "02300",
+      "name": "Сбор не древесных лесопродуктов\r",
+      "nameUz": "Yog‘ochdan tashqari o‘rmon mahsulotlarini yig‘ish",
+      "nameUzc": "Ёғочдан ташқари ўрмон маҳсулотларини йиғиш\r"
+    },
+    {
+      "id": "46460",
+      "name": "Оптовая торговля фармацевтическими товарами\r",
+      "nameUz": "Farmatsevtika tovarlari ulgurji savdosi",
+      "nameUzc": "Фарматсевтика товарлари улгуржи савдоси\r"
+    },
+    {
+      "id": "78200",
+      "name": "Деятельность агентств по временному трудоустройству\r",
+      "nameUz": "Vaqtincha ishga joylashtirish bo‘yicha agentliklar faoliyati",
+      "nameUzc": "Вақтинча ишга жойлаштириш бўйича агентликлар фаолияти\r"
+    },
+    {
+      "id": "45112",
+      "name": "Розничная торговля автомобилями и легкими автотранспортными средствами\r",
+      "nameUz": "Avtomobillar va yengil motorli transport vositalarining chakana savdosi",
+      "nameUzc": "Автомобиллар ва енгил моторли транспорт воситаларининг чакана савдоси\r"
+    },
+    {
+      "id": "01250",
+      "name": "Выращивание прочих видов плодовых деревьев",
+      "nameUz": "Mevali daraxtlar, butalar va yong‘oqlarning boshqa turlarini yetishtirish",
+      "nameUzc": "Мевали дарахтлар"
+    },
+    {
+      "id": "62010",
+      "name": "Деятельность в области компьютерного программирования\r",
+      "nameUz": "Kompyuter dasturlashtirish sohasidagi faoliyat",
+      "nameUzc": "Компютер дастурлаштириш соҳасидаги фаолият\r"
+    },
+    {
+      "id": "13209",
+      "name": "Производство прочих тканей\r",
+      "nameUz": "Boshqa gazlamalar ishlab chiqarish",
+      "nameUzc": "Бошқа газламалар ишлаб чиқариш\r"
+    },
+    {
+      "id": "66210",
+      "name": "Деятельность по оценке страхового риска и ущерба\r",
+      "nameUz": "Sug‘urta tavakkali va zararini baholash bo‘yicha faoliyat",
+      "nameUzc": "Суғурта таваккали ва зарарини баҳолаш бўйича фаолият\r"
+    },
+    {
+      "id": "47599",
+      "name": "Розничная торговля в специализированных магазинах осветительным оборудованием и прочими бытовыми товарами\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda yoritish uskunalari va boshqa maishiy jihozlar chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда ёритиш ускуналари ва бошқа маиший жиҳозлар чакана савдоси\r"
+    },
+    {
+      "id": "10820",
+      "name": "Производство какао",
+      "nameUz": "Kakao, shokolad va sershakar qandolat mahsulotlari ishlab chiqarish",
+      "nameUzc": "Какао"
+    },
+    {
+      "id": "77210",
+      "name": "Аренда и лизинг развлекательного и спортивного инвентаря\r",
+      "nameUz": "Ko‘ngil ochish va sport uchun jihozlar ijarasi va lizingi",
+      "nameUzc": "Кўнгил очиш ва спорт учун жиҳозлар ижараси ва лизинги\r"
+    },
+    {
+      "id": "31090",
+      "name": "Производство прочей мебели\r",
+      "nameUz": "Boshqa mebellar ishlab chiqarish",
+      "nameUzc": "Бошқа мебеллар ишлаб чиқариш\r"
+    },
+    {
+      "id": "32500",
+      "name": "Производство медицинских и стоматологических инструментов и принадлежностей\r",
+      "nameUz": "Meditsina va stomatologiya asboblari va jihozlari ishlab chiqarish",
+      "nameUzc": "Медитсина ва стоматология асбоблари ва жиҳозлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "55900",
+      "name": "Услуги прочих мест для проживания\r",
+      "nameUz": "Yashash uchun boshqa joylar xizmatlari",
+      "nameUzc": "Яшаш учун бошқа жойлар хизматлари\r"
+    },
+    {
+      "id": "84220",
+      "name": "Оборонная деятельность\r",
+      "nameUz": "Mudofaa faoliyati",
+      "nameUzc": "Мудофаа фаолияти\r"
+    },
+    {
+      "id": "46432",
+      "name": "Оптовая торговля аудио и видео пленками",
+      "nameUz": "Audio va video tasmalar, yozuvli SD va DVD disklari ulgurji savdosi",
+      "nameUzc": "Аудио ва видео тасмалар"
+    },
+    {
+      "id": "46380",
+      "name": "Оптовая торговля прочими продуктами питания",
+      "nameUz": "Boshqa oziq-ovqat mahsulotlari, jumladan baliq, qisqichbaqasimonlar va mollyuskalar ulgurji savdosi",
+      "nameUzc": "Бошқа озиқ-овқат маҳсулотлари"
+    },
+    {
+      "id": "55300",
+      "name": "Туристические лагеря",
+      "nameUz": "Turistik oromgohlar, dam olish va ko‘ngilochar parklar va shaharchalar",
+      "nameUzc": "Туристик оромгоҳлар"
+    },
+    {
+      "id": "38110",
+      "name": "Сбор неопасных отходов\r",
+      "nameUz": "Zararsiz chiqindilarni yig‘ish",
+      "nameUzc": "Зарарсиз чиқиндиларни йиғиш\r"
+    },
+    {
+      "id": "78300",
+      "name": "Деятельность прочих организаций по работе с персоналом\r",
+      "nameUz": "Xodimlar bilan ishlash bo‘yicha boshqa tashkilotlar faoliyati",
+      "nameUzc": "Ходимлар билан ишлаш бўйича бошқа ташкилотлар фаолияти\r"
+    },
+    {
+      "id": "47410",
+      "name": "Розничная торговля компьютерами",
+      "nameUz": "Ixtisoslashgan do‘konlarda kompyuterlar, periferik uskunalar va dasturiy ta’minot chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда компютерлар"
+    },
+    {
+      "id": "45401",
+      "name": "Оптовая торговля мотоциклами",
+      "nameUz": "Mototsikllar, ularning detallari, uzellari va jihozlarining ulgurji savdosi",
+      "nameUzc": "Мототсикллар"
+    },
+    {
+      "id": "77390",
+      "name": "Аренда и лизинг прочих машин",
+      "nameUz": "Boshqa toifalarga kiritilmagan, boshqa mashina, uskuna va moddiy mablag‘lar ijarasi va lizingi",
+      "nameUzc": "Бошқа тоифаларга киритилмаган"
+    },
+    {
+      "id": "23110",
+      "name": "Производство листового стекла\r",
+      "nameUz": "Listlangan shisha ishlab chiqarish",
+      "nameUzc": "Листланган шиша ишлаб чиқариш\r"
+    },
+    {
+      "id": "49390",
+      "name": "Прочие виды сухопутных пассажирских перевозок",
+      "nameUz": "Boshqa toifalarga kiritilmagan quruqlikdagi yo‘lovchi tashishning boshqa turlari",
+      "nameUzc": "Бошқа тоифаларга киритилмаган қуруқликдаги ё‘ловчи ташишнинг бошқа турлари\r"
+    },
+    {
+      "id": "20520",
+      "name": "Производство клея\r",
+      "nameUz": "Yelim ishlab chiqarish",
+      "nameUzc": "Елим ишлаб чиқариш\r"
+    },
+    {
+      "id": "85320",
+      "name": "Техническое и профессиональное среднее образование\r",
+      "nameUz": "Texnik va professional o‘rta ta’lim",
+      "nameUzc": "Техник ва профессионал ўрта та’лим\r"
+    },
+    {
+      "id": "07100",
+      "name": "Добыча железной руды\r",
+      "nameUz": "Temir rudasini qazib olish",
+      "nameUzc": "Темир рудасини қазиб олиш\r"
+    },
+    {
+      "id": "68310",
+      "name": "Деятельность агентств по операциям с недвижимым имуществом\r",
+      "nameUz": "Ko‘chmas mulk bilan operatsiyalar bo‘yicha agentliklar faoliyati",
+      "nameUzc": "Кўчмас мулк билан операциялар бўйича агентликлар фаолияти\r"
+    },
+    {
+      "id": "46212",
+      "name": "Оптовая торговля необработанным табаком\r",
+      "nameUz": "Ishlov berilmagan tamakining ulgurji savdosi",
+      "nameUzc": "Ишлов берилмаган тамакининг улгуржи савдоси\r"
+    },
+    {
+      "id": "26110",
+      "name": "Производство электронных деталей\r",
+      "nameUz": "Elektron qismlar ishlab chiqarish",
+      "nameUzc": "Электрон қисмлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "05100",
+      "name": "Добыча каменного угля\r",
+      "nameUz": "Toshko‘mir qazib olish",
+      "nameUzc": "Тошкўмир қазиб олиш\r"
+    },
+    {
+      "id": "27510",
+      "name": "Производство электробытовых приборов\r",
+      "nameUz": "Maishiy elektr asboblar ishlab chiqarish",
+      "nameUzc": "Маиший электр асбоблар ишлаб чиқариш\r"
+    },
+    {
+      "id": "46310",
+      "name": "Оптовая торговля фруктами и овощами\r",
+      "nameUz": "Mevalar va sabzavotlar ulgurji savdosi",
+      "nameUzc": "Мевалар ва сабзавотлар улгуржи савдоси\r"
+    },
+    {
+      "id": "93290",
+      "name": "Прочая деятельность по организации отдыха и развлечений\r",
+      "nameUz": "Dam olish va ko‘ngil ochishni tashkil etish bo‘yicha boshqa faoliyat",
+      "nameUzc": "Дам олиш ва кўнгил очишни ташкил этиш бўйича бошқа фаолият\r"
+    },
+    {
+      "id": "13920",
+      "name": "Производство готовых текстильных изделий",
+      "nameUz": "Kiyimdan tashqari tayyor to‘qimachilik mahsulotlari ishlab chiqarish",
+      "nameUzc": "Кийимдан ташқари тайёр тўқимачилик маҳсулотлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "01431",
+      "name": "Разведение лошадей\r",
+      "nameUz": "Otlarni ko‘paytirish",
+      "nameUzc": "Отларни кўпайтириш\r"
+    },
+    {
+      "id": "85590",
+      "name": "Прочие виды образования",
+      "nameUz": "Boshqa toifalarga kiritilmagan ta’limning boshqa turlari",
+      "nameUzc": "Бошқа тоифаларга киритилмаган та’лимнинг бошқа турлари\r"
+    },
+    {
+      "id": "59110",
+      "name": "Производство кино- видеофильмов и телевизионных программ\r",
+      "nameUz": "Kino- videofilmlar va televizion dasturlar ishlab chiqarish",
+      "nameUzc": "Кино- видеофилмлар ва телевизион дастурлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "46370",
+      "name": "Оптовая торговля кофе",
+      "nameUz": "Qahva, choy, kakao va ziravorlar ulgurji savdosi",
+      "nameUzc": "Қаҳва"
+    },
+    {
+      "id": "28930",
+      "name": "Производство оборудования для производства и переработки продуктов питания",
+      "nameUz": "Oziq-ovqat mahsulotlari, ichimliklar va tamaki mahsulotlarini ishlab chiqarish va qayta ishlash uchun uskunalar ishlab chiqarish",
+      "nameUzc": "Озиқ-овқат маҳсулотлари"
+    },
+    {
+      "id": "63110",
+      "name": "Услуги по размещению и обработке данных\r",
+      "nameUz": "Ma’lumotlarni joylashtirish va ishlov berish bo‘yicha xizmatlar",
+      "nameUzc": "Ма’лумотларни жойлаштириш ва ишлов бериш бўйича хизматлар\r"
+    },
+    {
+      "id": "46120",
+      "name": "Деятельность агентов по оптовой торговле топливом",
+      "nameUz": "Yoqilg‘i, rudalar, metallar va kimyoviy moddalar ulgurji savdosi bo‘yicha agentlar faoliyati",
+      "nameUzc": "Ёқилғи"
+    },
+    {
+      "id": "43110",
+      "name": "Разборка и снос зданий\r",
+      "nameUz": "Binolarni qismlarga ajratish va buzish",
+      "nameUzc": "Биноларни қисмларга ажратиш ва бузиш\r"
+    },
+    {
+      "id": "46900",
+      "name": "Оптовая неспециализированная торговля\r",
+      "nameUz": "Ixtisoslashmagan ulgurji savdo",
+      "nameUzc": "Ихтисослашмаган улгуржи савдо\r"
+    },
+    {
+      "id": "74900",
+      "name": "Прочая профессиональная",
+      "nameUz": "Boshqa toifalarga kiritilmagan professional, ilmiy va texnik faoliyat",
+      "nameUzc": "Бошқа тоифаларга киритилмаган профессионал"
+    },
+    {
+      "id": "17210",
+      "name": "Производство гофрированной бумаги и картона",
+      "nameUz": "Gofrirovka qilingan qog‘oz va karton, qog‘oz va karton tara (idish)lar ishlab chiqarish",
+      "nameUzc": "Гофрировка қилинган қоғоз ва картон"
+    },
+    {
+      "id": "47540",
+      "name": "Розничная торговля в специализированных магазинах бытовыми электротоварами\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda maishiy elektr tovarlari chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда маиший электр товарлари чакана савдоси\r"
+    },
+    {
+      "id": "27330",
+      "name": "Производство электроприборов\r",
+      "nameUz": "Elektr asboblar ishlab chiqarish",
+      "nameUzc": "Электр асбоблар ишлаб чиқариш\r"
+    },
+    {
+      "id": "93190",
+      "name": "Прочая деятельность в области спорта\r",
+      "nameUz": "Sport sohasidagi boshqa faoliyat",
+      "nameUzc": "Спорт соҳасидаги бошқа фаолият\r"
+    },
+    {
+      "id": "50100",
+      "name": "Морской и прибрежный пассажирский транспорт\r",
+      "nameUz": "Dengiz va qirg‘oqbo‘yi yo‘lovchi transporti",
+      "nameUzc": "Денгиз ва қирғоқбўйи ё‘ловчи транспорти\r"
+    },
+    {
+      "id": "10320",
+      "name": "Производство фруктовых и овощных соков\r",
+      "nameUz": "Meva va sabzavot sharbatlarini ishlab chiqarish",
+      "nameUzc": "Мева ва сабзавот шарбатларини ишлаб чиқариш\r"
+    },
+    {
+      "id": "10111",
+      "name": "Забой скота на скотобойне",
+      "nameUz": "Qushxonalarda mol so‘yish, go‘shtga ishlov berish yoki qadoqlash",
+      "nameUzc": "Қушхоналарда мол сўйиш"
+    },
+    {
+      "id": "18140",
+      "name": "Брошюровочно-переплетная и отделочная деятельность и сопутствующие услуги\r",
+      "nameUz": "Broshyuralash-muqovalash va pardozlash faoliyati va ular bilan bog‘liq xizmatlar",
+      "nameUzc": "Брошюралаш-муқовалаш ва пардозлаш фаолияти ва улар билан боғлиқ хизматлар\r"
+    },
+    {
+      "id": "47750",
+      "name": "Розничная торговля в специализированных магазинах косметическими товарами и предметами гигиены\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda pardoz tovarlari va gigiena predmetlari chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда пардоз товарлари ва гигиена предметлари чакана савдоси\r"
+    },
+    {
+      "id": "59200",
+      "name": "Деятельность по изданию фонограмм и музыкальных записей\r",
+      "nameUz": "Fonogrammalar va musiqali yozuvlarni nashr qilish bo‘yicha faoliyat",
+      "nameUzc": "Фонограммалар ва мусиқали ёзувларни нашр қилиш бўйича фаолият\r"
+    },
+    {
+      "id": "23610",
+      "name": "Производство строительных изделий из бетона\r",
+      "nameUz": "Betondan qurilish uchun buyumlar ishlab chiqarish",
+      "nameUzc": "Бетондан қурилиш учун буюмлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "85200",
+      "name": "Начальное образование\r",
+      "nameUz": "Boshlang‘ich ta’lim",
+      "nameUzc": "Бошланғич та’лим\r"
+    },
+    {
+      "id": "19100",
+      "name": "Производство продукции коксовых печей\r",
+      "nameUz": "Koks pechlari mahsulotlari ishlab chiqarish",
+      "nameUzc": "Кокс печлари маҳсулотлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "46422",
+      "name": "Оптовая торговля обувью\r",
+      "nameUz": "Poyafzallar ulgurji savdosi",
+      "nameUzc": "Пояфзаллар улгуржи савдоси\r"
+    },
+    {
+      "id": "23310",
+      "name": "Производство керамических покрытий и плит\r",
+      "nameUz": "Keramik qoplama va plitalar ishlab chiqarish",
+      "nameUzc": "Керамик қоплама ва плиталар ишлаб чиқариш\r"
+    },
+    {
+      "id": "66300",
+      "name": "Управление фондами\r",
+      "nameUz": "Jamg‘armalarni boshqarish",
+      "nameUzc": "Жамғармаларни бошқариш\r"
+    },
+    {
+      "id": "68322",
+      "name": "Деятельность товариществ частных собственников жилья\r",
+      "nameUz": "Xususiy uy-joy mulkdorlari shirkatlari faoliyati",
+      "nameUzc": "Хусусий уй-жой мулкдорлари ширкатлари фаолияти\r"
+    },
+    {
+      "id": "43320",
+      "name": "Столярные и плотницкие работы\r",
+      "nameUz": "Duradgorlik ishlari",
+      "nameUzc": "Дурадгорлик ишлари\r"
+    },
+    {
+      "id": "30300",
+      "name": "Производство летательных аппаратов",
+      "nameUz": "Uchish apparatlari, jumladan kosmik apparatlar, ishlab chiqarish",
+      "nameUzc": "Учиш аппаратлари"
+    },
+    {
+      "id": "45403",
+      "name": "Техническое обслуживание и ремонт мотоциклов\r",
+      "nameUz": "Mototsikllarga texnik xizmat ko‘rsatish va ta’mirlash",
+      "nameUzc": "Мототсиклларга техник хизмат кўрсатиш ва та’мирлаш\r"
+    },
+    {
+      "id": "08110",
+      "name": "Добыча отделочного и строительного камня",
+      "nameUz": "Qurilish va pardozlash uchun tosh, ohaktosh, gips, bo‘r va slanetslar qazib olish",
+      "nameUzc": "Қурилиш ва пардозлаш учун тош"
+    },
+    {
+      "id": "28940",
+      "name": "Производство машин и оборудования для изготовления текстильных",
+      "nameUz": "To‘qimachilik, tikuvchilik, mo‘ynali va charm buyumlarni tayyorlash uchun mashina va uskunalar ishlab chiqarish",
+      "nameUzc": "Тўқимачилик"
+    },
+    {
+      "id": "74300",
+      "name": "Письменный и устный перевод\r",
+      "nameUz": "Yozma va og‘zaki tarjima",
+      "nameUzc": "Ёзма ва оғзаки таржима\r"
+    },
+    {
+      "id": "61200",
+      "name": "Предоставление услуг беспроводной связи\r",
+      "nameUz": "Simsiz aloqa xizmatlari ko‘rsatish",
+      "nameUzc": "Симсиз алоқа хизматлари кўрсатиш\r"
+    },
+    {
+      "id": "01230",
+      "name": "Выращивание цитрусовых фруктов\r",
+      "nameUz": "Sitrus mevalar yetishtirish",
+      "nameUzc": "Ситрус мевалар етиштириш\r"
+    },
+    {
+      "id": "65110",
+      "name": "Страхование жизни\r",
+      "nameUz": "Hayotni sug‘urtalash",
+      "nameUzc": "Ҳаётни суғурталаш\r"
+    },
+    {
+      "id": "28140",
+      "name": "Производство прочих кранов и вентилей\r",
+      "nameUz": "Boshqa jo‘mrak va ventillar ishlab chiqarish",
+      "nameUzc": "Бошқа жўмрак ва вентиллар ишлаб чиқариш\r"
+    },
+    {
+      "id": "93110",
+      "name": "Деятельность спортивных объектов\r",
+      "nameUz": "Sport ob’ektlari faoliyati",
+      "nameUzc": "Спорт об’ектлари фаолияти\r"
+    },
+    {
+      "id": "53100",
+      "name": "Почтовые услуги в соответствии с обязательствами по предоставлению услуг в зоне всеобщего охвата\r",
+      "nameUz": "Ommaviy qamrov zonasida xizmat ko‘rsatish bo‘yicha majburiyatlar asosidagi pochta xizmati",
+      "nameUzc": "Оммавий қамров зонасида хизмат кўрсатиш бўйича мажбуриятлар асосидаги почта хизмати\r"
+    },
+    {
+      "id": "01492",
+      "name": "Разведение пчел\r",
+      "nameUz": "Asalarilarni ko‘paytirish",
+      "nameUzc": "Асалариларни кўпайтириш\r"
+    },
+    {
+      "id": "28910",
+      "name": "Производство машин и оборудования для металлургии\r",
+      "nameUz": "Metallurgiya uchun mashina va uskunalar ishlab chiqarish",
+      "nameUzc": "Металлургия учун машина ва ускуналар ишлаб чиқариш\r"
+    },
+    {
+      "id": "38120",
+      "name": "Сбор опасных отходов\r",
+      "nameUz": "Zararli chiqindilarni yig‘ish",
+      "nameUzc": "Зарарли чиқиндиларни йиғиш\r"
+    },
+    {
+      "id": "60100",
+      "name": "Радиовещание\r",
+      "nameUz": "Radioeshittirish",
+      "nameUzc": "Радиоешиттириш\r"
+    },
+    {
+      "id": "81290",
+      "name": "Прочие виды услуг по уборке\r",
+      "nameUz": "Yig‘ishtirish bo‘yicha xizmatlarning boshqa turlari",
+      "nameUzc": "Йиғиштириш бўйича хизматларнинг бошқа турлари\r"
+    },
+    {
+      "id": "32200",
+      "name": "Производство музыкальных инструментов\r",
+      "nameUz": "Musiqa asboblari ishlab chiqarish",
+      "nameUzc": "Мусиқа асбоблари ишлаб чиқариш\r"
+    },
+    {
+      "id": "47252",
+      "name": "Розничная торговля безалкогольными напитками и пивом\r",
+      "nameUz": "Spirtsiz ichimliklar va pivoning chakana savdosi",
+      "nameUzc": "Спиртсиз ичимликлар ва пивонинг чакана савдоси\r"
+    },
+    {
+      "id": "46360",
+      "name": "Оптовая торговля сахаром",
+      "nameUz": "Shakar, shokolad va shakarli qandolat mahsulotlari ulgurji savdosi",
+      "nameUzc": "Шакар"
+    },
+    {
+      "id": "01111",
+      "name": "Выращивание зерновых культур (кроме риса)\r",
+      "nameUz": "Donli ekinlar (sholidan tashqari) yetishtirish",
+      "nameUzc": "Донли экинлар (шолидан ташқари) етиштириш\r"
+    },
+    {
+      "id": "14390",
+      "name": "Производство прочих вязаных и трикотажных изделий\r",
+      "nameUz": "Boshqa to‘qilgan va trikotaj mahsulotlar ishlab chiqarish",
+      "nameUzc": "Бошқа тўқилган ва трикотаж маҳсулотлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "18120",
+      "name": "Прочие виды полиграфической деятельности\r",
+      "nameUz": "Matbaa faoliyatining boshqa turlari",
+      "nameUzc": "Матбаа фаолиятининг бошқа турлари\r"
+    },
+    {
+      "id": "13950",
+      "name": "Производство нетканых изделий",
+      "nameUz": "Kiyimdan tashqari noto‘qima mahsulotlar ishlab chiqarish",
+      "nameUzc": "Кийимдан ташқари нотўқима маҳсулотлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "58140",
+      "name": "Издание журналов и периодических публикаций\r",
+      "nameUz": "Jurnallar va davriy nashrlar nashr qilish",
+      "nameUzc": "Журналлар ва даврий нашрлар нашр қилиш\r"
+    },
+    {
+      "id": "47539",
+      "name": "Розничная торговля в специализированных магазинах прочими настенными и напольными покрытиями\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda boshqa devor va pol qoplamalari chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда бошқа девор ва пол қопламалари чакана савдоси\r"
+    },
+    {
+      "id": "23120",
+      "name": "Формование и обработка листового стекла\r",
+      "nameUz": "Listlangan shishani qoliplash va ishlov berish",
+      "nameUzc": "Листланган шишани қолиплаш ва ишлов бериш\r"
+    },
+    {
+      "id": "50300",
+      "name": "Речной пассажирский транспорт\r",
+      "nameUz": "Daryo yo‘lovchi transporti",
+      "nameUzc": "Дарё ё‘ловчи транспорти\r"
+    },
+    {
+      "id": "43130",
+      "name": "Разведочное бурение\r",
+      "nameUz": "Qidiruv burg‘ulash",
+      "nameUzc": "Қидирув бурғулаш\r"
+    },
+    {
+      "id": "30200",
+      "name": "Производство железнодорожных локомотивов и подвижного состава\r",
+      "nameUz": "Temir yo‘l lokomotivlari va harakatdagi sostavlar ishlab chiqarish",
+      "nameUzc": "Темир ё‘л локомотивлари ва ҳаракатдаги составлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "59120",
+      "name": "Постпроизводственный этап изготовления кино-видеофильмов",
+      "nameUz": "Kino- videofilmlar va televizion dasturlarni ishlab chiqarishdan keyingi bosqich",
+      "nameUzc": "Кино- видеофилмлар ва телевизион дастурларни ишлаб чиқаришдан кейинги босқич\r"
+    },
+    {
+      "id": "82300",
+      "name": "Организация конференций и торговых выставок\r",
+      "nameUz": "Konferentsiyalar va savdo ko‘rgazmalari tashkil qilish",
+      "nameUzc": "Конферентсиялар ва савдо кўргазмалари ташкил қилиш\r"
+    },
+    {
+      "id": "17220",
+      "name": "Производство бумажных изделий хозяйственно-бытового и санитарно-гигиенического назначения\r",
+      "nameUz": "Xo‘jalik-maishiy va sanitariya-gigienaga mo‘ljallangan qog‘oz buyumlar ishlab chiqarish",
+      "nameUzc": "Хўжалик-маиший ва санитария-гигиенага мўлжалланган қоғоз буюмлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "42220",
+      "name": "Строительство распределительных объектов для обеспечения электроэнергией и телекоммуникациями\r",
+      "nameUz": "Elektr energiyasi va telekommunikatsiya bilan ta’minlash uchun taqsimlovchi ob’ektlar qurish",
+      "nameUzc": "Электр энергияси ва телекоммуникатсия билан та’минлаш учун тақсимловчи об’ектлар қуриш\r"
+    },
+    {
+      "id": "86900",
+      "name": "Прочая деятельность в области здравоохранения\r",
+      "nameUz": "Sog‘liqni saqlash sohasidagi boshqa faoliyat",
+      "nameUzc": "Соғлиқни сақлаш соҳасидаги бошқа фаолият\r"
+    },
+    {
+      "id": "42910",
+      "name": "Строительство водных сооружений\r",
+      "nameUz": "Suv inshootlari qurish",
+      "nameUzc": "Сув иншоотлари қуриш\r"
+    },
+    {
+      "id": "47610",
+      "name": "Розничная торговля в специализированных магазинах книгами\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda kitoblar chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда китоблар чакана савдоси\r"
+    },
+    {
+      "id": "80200",
+      "name": "Деятельность в области систем охраны\r",
+      "nameUz": "Qo‘riqlash tizimlari sohasidagi faoliyat",
+      "nameUzc": "Қўриқлаш тизимлари соҳасидаги фаолият\r"
+    },
+    {
+      "id": "01700",
+      "name": "Охота и отлов диких животных",
+      "nameUz": "Ovchilik va yovvoyi hayvonlarni tutish, bu sohalarda xizmat ko‘rsatish",
+      "nameUzc": "Овчилик ва ёввойи ҳайвонларни тутиш"
+    },
+    {
+      "id": "23130",
+      "name": "Производство полых стеклянных изделий\r",
+      "nameUz": "Kovak shisha buyumlar ishlab chiqarish",
+      "nameUzc": "Ковак шиша буюмлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "38210",
+      "name": "Обработка и удаление неопасных отходов\r",
+      "nameUz": "Zararsiz chiqindilarga ishlov berish va yo‘qotish",
+      "nameUzc": "Зарарсиз чиқиндиларга ишлов бериш ва ё‘қотиш\r"
+    },
+    {
+      "id": "01169",
+      "name": "Выращивание прочих прядильных (лубяных) культур\r",
+      "nameUz": "Boshqa yigiriluvchi (tolali) ekinlarni yetishtirish",
+      "nameUzc": "Бошқа йигирилувчи (толали) экинларни етиштириш\r"
+    },
+    {
+      "id": "11070",
+      "name": "Производство безалкогольных напитков; производство минеральных вод и других вод в бутылках\r",
+      "nameUz": "Spirtsiz ichimliklar ishlab chiqarish; butilkada mineral suvlar va boshqa suvlar ishlab chiqarish",
+      "nameUzc": "Спиртсиз ичимликлар ишлаб чиқариш; бутилкада минерал сувлар ва бошқа сувлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "16100",
+      "name": "Лесопильное и строгальное производство\r",
+      "nameUz": "Taxta tilish va randalash sanoati",
+      "nameUzc": "Тахта тилиш ва рандалаш саноати\r"
+    },
+    {
+      "id": "01630",
+      "name": "Сельскохозяйственная деятельность после сбора урожая\r",
+      "nameUz": "Hosil yig‘ilgandan keyingi qishloq xo‘jalik faoliyati",
+      "nameUzc": "Ҳосил йиғилгандан кейинги қишлоқ хўжалик фаолияти\r"
+    },
+    {
+      "id": "02100",
+      "name": "Лесоводство и прочая лесохозяйственная деятельность\r",
+      "nameUz": "O‘rmonchilik va boshqa o‘rmon xo‘jaligi faoliyati",
+      "nameUzc": "Ўрмончилик ва бошқа ўрмон хўжалиги фаолияти\r"
+    },
+    {
+      "id": "24330",
+      "name": "Холодная формовка или фальцовка\r",
+      "nameUz": "Sovuq holda qoliplash va faltsovka qilish",
+      "nameUzc": "Совуқ ҳолда қолиплаш ва фалтсовка қилиш\r"
+    },
+    {
+      "id": "38220",
+      "name": "Обработка и удаление опасных отходов\r",
+      "nameUz": "Zararli chiqindilarga ishlov berish va yo‘qotish",
+      "nameUzc": "Зарарли чиқиндиларга ишлов бериш ва ё‘қотиш\r"
+    },
+    {
+      "id": "23640",
+      "name": "Производство сухих бетонных смесей\r",
+      "nameUz": "Quruq beton qorishmalari ishlab chiqarish",
+      "nameUzc": "Қуруқ бетон қоришмалари ишлаб чиқариш\r"
+    },
+    {
+      "id": "47721",
+      "name": "Розничная торговля в специализированных магазинах обувью\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda poyafzal chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда пояфзал чакана савдоси\r"
+    },
+    {
+      "id": "95110",
+      "name": "Ремонт компьютеров и периферийного оборудования\r",
+      "nameUz": "Kompyuterlar va periferik uskunalarni ta’mirlash",
+      "nameUzc": "Компютерлар ва периферик ускуналарни та’мирлаш\r"
+    },
+    {
+      "id": "84250",
+      "name": "Деятельность по обеспечению безопасности в чрезвычайных ситуациях\r",
+      "nameUz": "Favqulodda vaziyatlarda xavfsizlikni ta’minlash bo‘yicha faoliyat",
+      "nameUzc": "Фавқулодда вазиятларда хавфсизликни та’минлаш бўйича фаолият\r"
+    },
+    {
+      "id": "81300",
+      "name": "Деятельность по благоустройству; ландшафтное планирование\r",
+      "nameUz": "Obodonlashtirish bo‘yicha faoliyat; landshaftni rejalashtirish",
+      "nameUzc": "Ободонлаштириш бўйича фаолият; ландшафтни режалаштириш\r"
+    },
+    {
+      "id": "68202",
+      "name": "Аренда и управление нежилыми помещениями\r",
+      "nameUz": "Yashashga yaroqsiz joylarni ijaraga berish va boshqarish",
+      "nameUzc": "Яшашга яроқсиз жойларни ижарага бериш ва бошқариш\r"
+    },
+    {
+      "id": "64910",
+      "name": "Финансовый лизинг\r",
+      "nameUz": "Moliyaviy lizing",
+      "nameUzc": "Молиявий лизинг\r"
+    },
+    {
+      "id": "01270",
+      "name": "Выращивание культур для производства напитков\r",
+      "nameUz": "Ichimlik ishlab chiqarish uchun ekinlar yetishtirish",
+      "nameUzc": "Ичимлик ишлаб чиқариш учун экинлар етиштириш\r"
+    },
+    {
+      "id": "52210",
+      "name": "Услуги в области сухопутного транспорта\r",
+      "nameUz": "Quruqlik transporti sohasidagi xizmatlar",
+      "nameUzc": "Қуруқлик транспорти соҳасидаги хизматлар\r"
+    },
+    {
+      "id": "24420",
+      "name": "Производство алюминия\r",
+      "nameUz": "Alyuminiy ishlab chiqarish",
+      "nameUzc": "Алюминий ишлаб чиқариш\r"
+    },
+    {
+      "id": "13960",
+      "name": "Производство прочих технических и промышленных текстильных изделий\r",
+      "nameUz": "Boshqa texnik va sanoat to‘qimachilik mahsulotlari ishlab chiqarish",
+      "nameUzc": "Бошқа техник ва саноат тўқимачилик маҳсулотлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "63120",
+      "name": "Web-порталы\r",
+      "nameUz": "Web-portallar",
+      "nameUzc": "Wеб-порталлар\r"
+    },
+    {
+      "id": "47780",
+      "name": "Розничная торговля в специализированных магазинах прочими новыми товарами\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda boshqa yangi tovarlar chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда бошқа янги товарлар чакана савдоси\r"
+    },
+    {
+      "id": "01500",
+      "name": "Смешанное сельское хозяйство\r",
+      "nameUz": "Aralash qishloq xo‘jaligi",
+      "nameUzc": "Аралаш қишлоқ хўжалиги\r"
+    },
+    {
+      "id": "24310",
+      "name": "Холодное волочение\r",
+      "nameUz": "Sovuq holda cho‘zish",
+      "nameUzc": "Совуқ ҳолда чўзиш\r"
+    },
+    {
+      "id": "03120",
+      "name": "Пресноводное рыболовство\r",
+      "nameUz": "Chuchuk suvlarda baliq ovlash",
+      "nameUzc": "Чучук сувларда балиқ овлаш\r"
+    },
+    {
+      "id": "23200",
+      "name": "Производство огнеупорных изделий\r",
+      "nameUz": "O‘tga chidamli buyumlar ishlab chiqarish",
+      "nameUzc": "Ўтга чидамли буюмлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "20600",
+      "name": "Производство искусственных волокон\r",
+      "nameUz": "Sun’iy tolalar ishlab chiqarish",
+      "nameUzc": "Сун’ий толалар ишлаб чиқариш\r"
+    },
+    {
+      "id": "68100",
+      "name": "Купля и продажа недвижимости\r",
+      "nameUz": "Ko‘chmas mulkni sotib olish va sotish",
+      "nameUzc": "Кўчмас мулкни сотиб олиш ва сотиш\r"
+    },
+    {
+      "id": "28220",
+      "name": "Производство подъемно-транспортного оборудования\r",
+      "nameUz": "Ko‘tarma-transport uskunalari ishlab chiqarish",
+      "nameUzc": "Кўтарма-транспорт ускуналари ишлаб чиқариш\r"
+    },
+    {
+      "id": "49200",
+      "name": "Грузовой железнодорожный транспорт\r",
+      "nameUz": "Temir yo‘l yuk transporti",
+      "nameUzc": "Темир ё‘л юк транспорти\r"
+    },
+    {
+      "id": "30120",
+      "name": "Строительство прогулочных и спортивных лодок\r",
+      "nameUz": "Sayr va sport qayiqlari qurish",
+      "nameUzc": "Сайр ва спорт қайиқлари қуриш\r"
+    },
+    {
+      "id": "29320",
+      "name": "Производство прочих комплектующих и аксессуаров для автотранспортных средств\r",
+      "nameUz": "Avtotransport vositalari uchun boshqa butlovchi qismlar va aksessuarlar ishlab chiqarish",
+      "nameUzc": "Автотранспорт воситалари учун бошқа бутловчи қисмлар ва аксессуарлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "79900",
+      "name": "Прочие виды услуг по бронированию и сопутствующие им услуги\r",
+      "nameUz": "Joy bron qilish bo‘yicha xizmatlarning boshqa turlari va ular bilan bog‘liq xizmatlar",
+      "nameUzc": "Жой брон қилиш бўйича хизматларнинг бошқа турлари ва улар билан боғлиқ хизматлар\r"
+    },
+    {
+      "id": "77340",
+      "name": "Аренда и лизинг водных транспортных средств и оборудования\r",
+      "nameUz": "Suv transporti vositalari va uskunalari ijarasi va lizingi",
+      "nameUzc": "Сув транспорти воситалари ва ускуналари ижараси ва лизинги\r"
+    },
+    {
+      "id": "72110",
+      "name": "Научные исследования и экспериментальные разработки в области биотехнологий\r",
+      "nameUz": "Biotexnologiyalar sohasidagi ilmiy tadqiqotlar va eksperimental ishlanmalar",
+      "nameUzc": "Биотехнологиялар соҳасидаги илмий тадқиқотлар ва экспериментал ишланмалар\r"
+    },
+    {
+      "id": "18110",
+      "name": "Печатание газет\r",
+      "nameUz": "Gazetalar nashr qilish",
+      "nameUzc": "Газеталар нашр қилиш\r"
+    },
+    {
+      "id": "43210",
+      "name": "Электротехнические и монтажные работы\r",
+      "nameUz": "Elektrotexnik va montaj ishlari",
+      "nameUzc": "Электротехник ва монтаж ишлари\r"
+    },
+    {
+      "id": "01453",
+      "name": "Разведение коз\r",
+      "nameUz": "Echkilarni ko‘paytirish",
+      "nameUzc": "Эчкиларни кўпайтириш\r"
+    },
+    {
+      "id": "35210",
+      "name": "Производство газа\r",
+      "nameUz": "Gaz ishlab chiqarish",
+      "nameUzc": "Газ ишлаб чиқариш\r"
+    },
+    {
+      "id": "25400",
+      "name": "Производство оружия и боеприпасов\r",
+      "nameUz": "Qurol va o‘q-dorilar ishlab chiqarish",
+      "nameUzc": "Қурол ва ўқ-дорилар ишлаб чиқариш\r"
+    },
+    {
+      "id": "87200",
+      "name": "Деятельность",
+      "nameUz": "Aqliy va jismoniy nuqsonli, ruhiy va narkologik kasalligi bo‘lgan shaxslarning yashashi bilan bog‘liq faoliyat",
+      "nameUzc": "Ақлий ва жисмоний нуқсонли"
+    },
+    {
+      "id": "25300",
+      "name": "Производство паровых котлов",
+      "nameUz": "Markaziy isitish qozonlaridan tashqari bug‘ qozonlari ishlab chiqarish",
+      "nameUzc": "Марказий иситиш қозонларидан ташқари буғ қозонлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "35140",
+      "name": "Продажа электроэнергии\r",
+      "nameUz": "Elektr energiyasini sotish",
+      "nameUzc": "Электр энергиясини сотиш\r"
+    },
+    {
+      "id": "47520",
+      "name": "Розничная торговля в специализированных магазинах скобяными изделиями",
+      "nameUz": "Ixtisoslashgan do‘konlarda mayda-chuyda metall buyumlar, lok-bo‘yoq materiallari va shishalar chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда майда-чуйда металл буюмлар"
+    },
+    {
+      "id": "14140",
+      "name": "Производство нижнего белья\r",
+      "nameUz": "Ichki kiyimlar ishlab chiqarish",
+      "nameUzc": "Ички кийимлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "01112",
+      "name": "Выращивание бобовых культур\r",
+      "nameUz": "Dukkakli ekinlar yetishtirish",
+      "nameUzc": "Дуккакли экинлар етиштириш\r"
+    },
+    {
+      "id": "46439",
+      "name": "Оптовая торговля прочими бытовыми электротоварами\r",
+      "nameUz": "Boshqa maishiy elektr tovarlar ulgurji savdosi",
+      "nameUzc": "Бошқа маиший электр товарлар улгуржи савдоси\r"
+    },
+    {
+      "id": "13103",
+      "name": "Подготовка и прядение шелковых волокон\r",
+      "nameUz": "Ipak tolalarini tayyorlash va yigirish",
+      "nameUzc": "Ипак толаларини тайёрлаш ва йигириш\r"
+    },
+    {
+      "id": "38321",
+      "name": "Сортировка и переработка металлических отходов для получения вторичного сырья\r",
+      "nameUz": "Ikkilamchi xom ashyo olish uchun metall chiqindilarni saralash va qayta ishlash",
+      "nameUzc": "Иккиламчи хом ашё олиш учун металл чиқиндиларни саралаш ва қайта ишлаш\r"
+    },
+    {
+      "id": "46640",
+      "name": "Оптовая торговля техникой для текстильного",
+      "nameUz": "To‘qimachilik, tikuvchilik va trikotaj sanoati uchun texnikalar ulgurji savdosi",
+      "nameUzc": "Тўқимачилик"
+    },
+    {
+      "id": "45202",
+      "name": "Техническое обслуживание и ремонт прочих автомобилей\r",
+      "nameUz": "Boshqa avtomobillarga texnik xizmat ko‘rsatish va ta’mirlash",
+      "nameUzc": "Бошқа автомобилларга техник хизмат кўрсатиш ва та’мирлаш\r"
+    },
+    {
+      "id": "17110",
+      "name": "Производство древесной массы и целлюлозы\r",
+      "nameUz": "Qog‘oz massasi va tsellyuloza ishlab chiqarish",
+      "nameUzc": "Қоғоз массаси ва тселлюлоза ишлаб чиқариш\r"
+    },
+    {
+      "id": "33120",
+      "name": "Ремонт машин и оборудования\r",
+      "nameUz": "Mashina va uskunalarni ta’mirlash",
+      "nameUzc": "Машина ва ускуналарни та’мирлаш\r"
+    },
+    {
+      "id": "10910",
+      "name": "Производство готовых кормов для животных",
+      "nameUz": "Fermalarda boqiladigan hayvonlar uchun tayyor ozuqa ishlab chiqarish",
+      "nameUzc": "Фермаларда боқиладиган ҳайвонлар учун тайёр озуқа ишлаб чиқариш\r"
+    },
+    {
+      "id": "24320",
+      "name": "Холодная прокатка лент и узких полос\r",
+      "nameUz": "Tasma va tor tasmalarni sovuq holda prokatka qilish (yoyish)",
+      "nameUzc": "Тасма ва тор тасмаларни совуқ ҳолда прокатка қилиш (ёйиш)\r"
+    },
+    {
+      "id": "47300",
+      "name": "Розничная торговля в специализированных магазинах моторным топливом\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda motor yoqilg‘isi chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда мотор ёқилғиси чакана савдоси\r"
+    },
+    {
+      "id": "01140",
+      "name": "Выращивание сахарного тростника\r",
+      "nameUz": "Shakarqamish yetishtirish",
+      "nameUzc": "Шакарқамиш етиштириш\r"
+    },
+    {
+      "id": "47190",
+      "name": "Розничная торговля в неспециализированных магазинах прочими товарами\r",
+      "nameUz": "Ixtisoslashmagan do‘konlarda boshqa tovarlar chakana savdosi",
+      "nameUzc": "Ихтисослашмаган дўконларда бошқа товарлар чакана савдоси\r"
+    },
+    {
+      "id": "20170",
+      "name": "Производство синтетического каучука в первичной форме\r",
+      "nameUz": "Birlamchi formalarda sintetik kauchuk ishlab chiqarish",
+      "nameUzc": "Бирламчи формаларда синтетик каучук ишлаб чиқариш\r"
+    },
+    {
+      "id": "96030",
+      "name": "Организация похорон и связанная с этим деятельность\r",
+      "nameUz": "Dafn marosimlarini tashkil qilish va shu bilan bog‘liq faoliyat",
+      "nameUzc": "Дафн маросимларини ташкил қилиш ва шу билан боғлиқ фаолият\r"
+    },
+    {
+      "id": "97000",
+      "name": "Деятельность домашних хозяйств",
+      "nameUz": "Uy xizmatchilari yollovchi uy xo‘jaliklari faoliyati",
+      "nameUzc": "Уй хизматчилари ёлловчи уй хўжаликлари фаолияти\r"
+    },
+    {
+      "id": "96010",
+      "name": "Стирка и химическая чистка текстильных и меховых изделий\r",
+      "nameUz": "To‘qimachilik buyumlari va mo‘ynali buyumlarni yuvish va kimyoviy tozalash",
+      "nameUzc": "Тўқимачилик буюмлари ва мўйнали буюмларни ювиш ва кимёвий тозалаш\r"
+    },
+    {
+      "id": "22111",
+      "name": "Производство резиновых шин",
+      "nameUz": "Rezina shina, pokrishka va kameralar ishlab chiqarish",
+      "nameUzc": "Резина шина"
+    },
+    {
+      "id": "02200",
+      "name": "Лесозаготовки\r",
+      "nameUz": "Yog‘och tayyorlash",
+      "nameUzc": "Ёғоч тайёрлаш\r"
+    },
+    {
+      "id": "73120",
+      "name": "Предоставление рекламы в средствах массовой информации\r",
+      "nameUz": "Ommaviy axborot vositalarida reklama berish",
+      "nameUzc": "Оммавий ахборот воситаларида реклама бериш\r"
+    },
+    {
+      "id": "70220",
+      "name": "Консультирование по вопросам коммерческой деятельности и управления\r",
+      "nameUz": "Tijorat faoliyati va boshqaruv masalalari bo‘yicha maslahat berish",
+      "nameUzc": "Тижорат фаолияти ва бошқарув масалалари бўйича маслаҳат бериш\r"
+    },
+    {
+      "id": "01131",
+      "name": "Выращивание овощей\r",
+      "nameUz": "Sabzavotlar yetishtirish",
+      "nameUzc": "Сабзавотлар етиштириш\r"
+    },
+    {
+      "id": "10610",
+      "name": "Производство продуктов мукомольно-крупяной промышленности\r",
+      "nameUz": "Tegirmon-yorma sanoati mahsulotlari ishlab chiqarish",
+      "nameUzc": "Тегирмон-ёрма саноати маҳсулотлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "26200",
+      "name": "Производство компьютеров и периферийного оборудования\r",
+      "nameUz": "Kompyuterlar va periferik uskunalar ishlab chiqarish",
+      "nameUzc": "Компютерлар ва периферик ускуналар ишлаб чиқариш\r"
+    },
+    {
+      "id": "13930",
+      "name": "Производство ковров и ковровых изделий\r",
+      "nameUz": "Gilam va gilam mahsulotlari ishlab chiqarish",
+      "nameUzc": "Гилам ва гилам маҳсулотлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "13201",
+      "name": "Производство хлопчатобумажных тканей\r",
+      "nameUz": "Ip gazlama ishlab chiqarish",
+      "nameUzc": "Ип газлама ишлаб чиқариш\r"
+    },
+    {
+      "id": "50400",
+      "name": "Речной грузовой транспорт\r",
+      "nameUz": "Daryo yuk transporti",
+      "nameUzc": "Дарё юк транспорти\r"
+    },
+    {
+      "id": "20160",
+      "name": "Производство пластика в первичных формах\r",
+      "nameUz": "Birlamchi formalarda plastmassa ishlab chiqarish",
+      "nameUzc": "Бирламчи формаларда пластмасса ишлаб чиқариш\r"
+    },
+    {
+      "id": "60200",
+      "name": "Деятельность по созданию и трансляции телевизионных программ\r",
+      "nameUz": "Televizion dasturlarni yaratish va namoyish qilish bo‘yicha faoliyat",
+      "nameUzc": "Телевизион дастурларни яратиш ва намойиш қилиш бўйича фаолият\r"
+    },
+    {
+      "id": "50200",
+      "name": "Морской и прибрежный грузовой транспорт\r",
+      "nameUz": "Dengiz va qirg‘oqbo‘yi yuk transporti",
+      "nameUzc": "Денгиз ва қирғоқбўйи юк транспорти\r"
+    },
+    {
+      "id": "46760",
+      "name": "Оптовая торговля прочими промежуточными продуктами\r",
+      "nameUz": "Boshqa oraliq mahsulotlar ulgurji savdosi",
+      "nameUzc": "Бошқа оралиқ маҳсулотлар улгуржи савдоси\r"
+    },
+    {
+      "id": "46390",
+      "name": "Неспециализированная оптовая торговля продуктами питания",
+      "nameUz": "Oziq-ovqat mahsulotlari, jumladan ichimliklar, va tamaki mahsulotlari ixtisoslashmagan ulgurji savdosi",
+      "nameUzc": "Озиқ-овқат маҳсулотлари"
+    },
+    {
+      "id": "30910",
+      "name": "Производство мотоциклов\r",
+      "nameUz": "Mototsikllar ishlab chiqarish",
+      "nameUzc": "Мототсикллар ишлаб чиқариш\r"
+    },
+    {
+      "id": "01280",
+      "name": "Выращивание специй",
+      "nameUz": "Ziravorlar, xushbo‘y, kuchli narkotik va farmatsevtika ekinlarini yetishtirish",
+      "nameUzc": "Зираворлар"
+    },
+    {
+      "id": "06100",
+      "name": "Добыча сырой нефти\r",
+      "nameUz": "Xom neft qazib olish",
+      "nameUzc": "Хом нефт қазиб олиш\r"
+    },
+    {
+      "id": "33179",
+      "name": "Ремонт и техническое обслуживание прочего транспортного оборудования",
+      "nameUz": "Boshqa toifalarga kiritilmagan transport uskunalarining boshqa turlarini ta’mirlash va texnik xizmat ko‘rsatish",
+      "nameUzc": "Бошқа тоифаларга киритилмаган транспорт ускуналарининг бошқа турларини та’мирлаш ва техник хизмат кўрсатиш\r"
+    },
+    {
+      "id": "46480",
+      "name": "Оптовая торговля часами и ювелирными изделиями\r",
+      "nameUz": "Soatlar va zargarlik buyumlari ulgurji savdosi",
+      "nameUzc": "Соатлар ва заргарлик буюмлари улгуржи савдоси\r"
+    },
+    {
+      "id": "22112",
+      "name": "Восстановление резиновых шин и покрышек\r",
+      "nameUz": "Rezina shina va pokrishkalarni tiklash",
+      "nameUzc": "Резина шина ва покришкаларни тиклаш\r"
+    },
+    {
+      "id": "46150",
+      "name": "Деятельность агентов по оптовой торговле мебелью",
+      "nameUz": "Mebel, maishiy tovarlar, temir-metall buyumlar va boshqa metall buyumlar ulgurji savdosi bo‘yicha agentlar faoliyati",
+      "nameUzc": "Мебел"
+    },
+    {
+      "id": "46510",
+      "name": "Оптовая торговля компьютерами",
+      "nameUz": "Kompyuterlar, kompyuter periferik uskunalari va dasturiy ta’minot ulgurji savdosi",
+      "nameUzc": "Компютерлар"
+    },
+    {
+      "id": "13990",
+      "name": "Производство прочих текстильных изделий",
+      "nameUz": "Boshqa toifalarga kiritilmagan to‘qimachilik mahsulotlari ishlab chiqarish",
+      "nameUzc": "Бошқа тоифаларга киритилмаган тўқимачилик маҳсулотлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "25110",
+      "name": "Производство строительных металлических конструкций и изделий\r",
+      "nameUz": "Qurilish metall konstruktsiyalari va buyumlari ishlab chiqarish",
+      "nameUzc": "Қурилиш металл конструктсиялари ва буюмлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "20590",
+      "name": "Производство прочих химических продуктов",
+      "nameUz": "Boshqa toifalarga kiritilmagan kimyoviy moddalar ishlab chiqarish",
+      "nameUzc": "Бошқа тоифаларга киритилмаган кимёвий моддалар ишлаб чиқариш\r"
+    },
+    {
+      "id": "10520",
+      "name": "Производство мороженого\r",
+      "nameUz": "Muzqaymoq ishlab chiqarish",
+      "nameUzc": "Музқаймоқ ишлаб чиқариш\r"
+    },
+    {
+      "id": "26400",
+      "name": "Производство приборов бытовой электроники\r",
+      "nameUz": "Maishiy elektronika asboblari ishlab chiqarish",
+      "nameUzc": "Маиший электроника асбоблари ишлаб чиқариш\r"
+    },
+    {
+      "id": "22290",
+      "name": "Производство прочих пластмассовых изделий\r",
+      "nameUz": "Boshqa plastmassa buyumlar ishlab chiqarish",
+      "nameUzc": "Бошқа пластмасса буюмлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "16240",
+      "name": "Производство деревянной тары\r",
+      "nameUz": "Yog‘och idishlar ishlab chiqarish",
+      "nameUzc": "Ёғоч идишлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "10420",
+      "name": "Производство маргарина и смешанных пищевых жиров\r",
+      "nameUz": "Margarin va ovqatga ishlatiladigan aralash yog‘lar ishlab chiqarish",
+      "nameUzc": "Маргарин ва овқатга ишлатиладиган аралаш ёғлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "73110",
+      "name": "Рекламные агентства\r",
+      "nameUz": "Reklama agentliklari",
+      "nameUzc": "Реклама агентликлари\r"
+    },
+    {
+      "id": "45191",
+      "name": "Оптовая торговля прочими моторными транспортными средствами\r",
+      "nameUz": "Boshqa motorli transport vositalarining ulgurji savdosi",
+      "nameUzc": "Бошқа моторли транспорт воситаларининг улгуржи савдоси\r"
+    },
+    {
+      "id": "85530",
+      "name": "Деятельность школ подготовки водителей транспортных средств\r",
+      "nameUz": "Transport vositalari xaydovchilarini tayyorlash maktablari faoliyati",
+      "nameUzc": "Транспорт воситалари хайдовчиларини тайёрлаш мактаблари фаолияти\r"
+    },
+    {
+      "id": "82990",
+      "name": "Прочие виды вспомогательного обслуживания хозяйственной деятельности",
+      "nameUz": "Boshqa toifalarga kiritilmagan, xo‘jalik faoliyatiga yordamchi xizmat ko‘rsatishning boshqa turlari",
+      "nameUzc": "Бошқа тоифаларга киритилмаган"
+    },
+    {
+      "id": "68204",
+      "name": "Аренда и управление землей\r",
+      "nameUz": "Yerni ijaraga berish va boshqarish",
+      "nameUzc": "Ерни ижарага бериш ва бошқариш\r"
+    },
+    {
+      "id": "65200",
+      "name": "Перестрахование\r",
+      "nameUz": "Qayta sug‘urtalash",
+      "nameUzc": "Қайта суғурталаш\r"
+    },
+    {
+      "id": "47531",
+      "name": "Розничная торговля в специализированных магазинах коврами и ковровыми изделиями\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda gilamlar va gilam mahsulotlari chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда гиламлар ва гилам маҳсулотлари чакана савдоси\r"
+    },
+    {
+      "id": "19200",
+      "name": "Производство продуктов нефтепереработки\r",
+      "nameUz": "Neftni qayta ishlash mahsulotlari ishlab chiqarish",
+      "nameUzc": "Нефтни қайта ишлаш маҳсулотлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "23620",
+      "name": "Производство изделий из гипса для строительных целей\r",
+      "nameUz": "Qurilish maqsadlariga mo‘ljallangan gips buyumlar ishlab chiqarish",
+      "nameUzc": "Қурилиш мақсадларига мўлжалланган гипс буюмлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "94910",
+      "name": "Деятельность религиозных организаций\r",
+      "nameUz": "Diniy tashkilotlar faoliyati",
+      "nameUzc": "Диний ташкилотлар фаолияти\r"
+    },
+    {
+      "id": "82110",
+      "name": "Комплексное административно-управленческое обслуживание\r",
+      "nameUz": "Kompleks ma’muriy-boshqaruv xizmati ko‘rsatish",
+      "nameUzc": "Комплекс ма’мурий-бошқарув хизмати кўрсатиш\r"
+    },
+    {
+      "id": "20200",
+      "name": "Производство пестицидов и прочих агрохимических продуктов\r",
+      "nameUz": "Pestitsidlar va boshqa agrokimyoviy moddalar ishlab chiqarish",
+      "nameUzc": "Пеститсидлар ва бошқа агрокимёвий моддалар ишлаб чиқариш\r"
+    },
+    {
+      "id": "47640",
+      "name": "Розничная торговля в специализированных магазинах спортивными товарами\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda sport tovarlari chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда спорт товарлари чакана савдоси\r"
+    },
+    {
+      "id": "08120",
+      "name": "Разработка гравийных и песчаных карьеров",
+      "nameUz": "Ochiq shag‘al va qum konlarini ishlash, tuproq va kaolin qazib olish",
+      "nameUzc": "Очиқ шағал ва қум конларини ишлаш"
+    },
+    {
+      "id": "86210",
+      "name": "Деятельность в области общей врачебной практики\r",
+      "nameUz": "Umumiy shifokorlik amaliyoti sohasidagi faoliyat",
+      "nameUzc": "Умумий шифокорлик амалиёти соҳасидаги фаолият\r"
+    },
+    {
+      "id": "20300",
+      "name": "Производство красок",
+      "nameUz": "Bo‘yoqlar, laklar va shu kabi bo‘yovchi moddalar, bosmaxona bo‘yoqlari va mastikalar ishlab chiqarish",
+      "nameUzc": "Бўёқлар"
+    },
+    {
+      "id": "47910",
+      "name": "Розничная торговля по почте и через Интернет\r",
+      "nameUz": "Pochta va Internet orqali chakana savdo",
+      "nameUzc": "Почта ва Интернет орқали чакана савдо\r"
+    },
+    {
+      "id": "28290",
+      "name": "Производство прочих машин и оборудования общего назначения",
+      "nameUz": "Boshqa toifalarga kiritilmagan umumiy foydalanishga mo‘ljallangan mashina va uskunalarni ishlab chiqarish",
+      "nameUzc": "Бошқа тоифаларга киритилмаган умумий фойдаланишга мўлжалланган машина ва ускуналарни ишлаб чиқариш\r"
+    },
+    {
+      "id": "01620",
+      "name": "Вспомогательные виды деятельности по разведению животных\r",
+      "nameUz": "Hayvonlarni ko‘paytirish sohasidagi yordamchi faoliyat turlari",
+      "nameUzc": "Ҳайвонларни кўпайтириш соҳасидаги ёрдамчи фаолият турлари\r"
+    },
+    {
+      "id": "32400",
+      "name": "Производство игр и игрушек\r",
+      "nameUz": "O‘yin va o‘yinchoqlar ishlab chiqarish",
+      "nameUzc": "Ўйин ва ўйинчоқлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "47620",
+      "name": "Розничная торговля в специализированных магазинах газетами",
+      "nameUz": "Ixtisoslashgan do‘konlarda gazetalar, jurnallar va kantselyariya tovarlari chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда газеталар"
+    },
+    {
+      "id": "46342",
+      "name": "Оптовая торговля безалкогольными напитками и пивом\r",
+      "nameUz": "Spirtsiz ichimliklar va pivoning ulgurji savdosi",
+      "nameUzc": "Спиртсиз ичимликлар ва пивонинг улгуржи савдоси\r"
+    },
+    {
+      "id": "23990",
+      "name": "Производство прочей неметаллической минеральной продукции",
+      "nameUz": "Boshqa toifalarga kiritilmagan nometall mineral mahsulotlar ishlab chiqarish",
+      "nameUzc": "Бошқа тоифаларга киритилмаган нометалл минерал маҳсулотлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "46211",
+      "name": "Оптовая торговля зерном",
+      "nameUz": "G‘alla, urug‘lar va hayvonlar uchun ozuqalarning ulgurji savdosi",
+      "nameUzc": "Ғалла"
+    },
+    {
+      "id": "20510",
+      "name": "Производство взрывчатых веществ\r",
+      "nameUz": "Portlovchi moddalar ishlab chiqarish",
+      "nameUzc": "Портловчи моддалар ишлаб чиқариш\r"
+    },
+    {
+      "id": "10730",
+      "name": "Производство макаронных изделий и аналогичных мучных продуктов\r",
+      "nameUz": "Makaron mahsulotlari va shunga o‘xshash unli mahsulotlar ishlab chiqarish",
+      "nameUzc": "Макарон маҳсулотлари ва шунга ўхшаш унли маҳсулотлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "13203",
+      "name": "Производство шелковых тканей\r",
+      "nameUz": "Ipak gazlama ishlab chiqarish",
+      "nameUzc": "Ипак газлама ишлаб чиқариш\r"
+    },
+    {
+      "id": "85420",
+      "name": "Высшее образование\r",
+      "nameUz": "Oliy ta’lim",
+      "nameUzc": "Олий та’лим\r"
+    },
+    {
+      "id": "22210",
+      "name": "Производство пластмассовых плит",
+      "nameUz": "Plastmassa plitalar, tasmalar, quvurlar va profillar ishlab chiqarish",
+      "nameUzc": "Пластмасса плиталар"
+    },
+    {
+      "id": "77310",
+      "name": "Аренда и лизинг сельскохозяйственной техники и оборудования\r",
+      "nameUz": "Qishloq xo‘jalik texnikasi va uskunalari ijarasi va lizingi",
+      "nameUzc": "Қишлоқ хўжалик техникаси ва ускуналари ижараси ва лизинги\r"
+    },
+    {
+      "id": "01220",
+      "name": "Выращивание тропических и субтропических фруктов\r",
+      "nameUz": "Tropik va subtropik mevalar yetishtirish",
+      "nameUzc": "Тропик ва субтропик мевалар етиштириш\r"
+    },
+    {
+      "id": "84130",
+      "name": "Регулирование и содействие эффективному ведению экономической деятельности\r",
+      "nameUz": "Iqtisodiy faoliyatni samarali olib borishga ko‘maklashish va boshqarish",
+      "nameUzc": "Иқтисодий фаолиятни самарали олиб боришга кўмаклашиш ва бошқариш\r"
+    },
+    {
+      "id": "25710",
+      "name": "Производство столовых приборов\r",
+      "nameUz": "Ovqatlanish anjomlari ishlab chiqarish",
+      "nameUzc": "Овқатланиш анжомлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "43220",
+      "name": "Монтаж систем водоснабжения",
+      "nameUz": "Suv bilan ta’minlash, isitish va havoni konditsiyalash tizimlarini montaj qilish",
+      "nameUzc": "Сув билан та’минлаш"
+    },
+    {
+      "id": "01300",
+      "name": "Производство продукции питомников\r",
+      "nameUz": "Ko‘chatxona mahsulotlari ishlab chiqarish",
+      "nameUzc": "Кўчатхона маҳсулотлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "16290",
+      "name": "Производство прочих деревянных изделий; производство изделий из пробки",
+      "nameUz": "Boshqa yog‘och buyumlar ishlab chiqarish; po‘kak, pohol va to‘qish uchun materiallardan buyumlar ishlab chiqarish",
+      "nameUzc": "Бошқа ёғоч буюмлар ишлаб чиқариш; пўкак"
+    },
+    {
+      "id": "30920",
+      "name": "Производство велосипедов и инвалидных колясок/кресел\r",
+      "nameUz": "Velosipedlar va nogironlar aravachalari/kreslolari ishlab chiqarish",
+      "nameUzc": "Велосипедлар ва ногиронлар аравачалари/креслолари ишлаб чиқариш\r"
+    },
+    {
+      "id": "46472",
+      "name": "Оптовая торговля осветительным оборудованием\r",
+      "nameUz": "Yoritish uskunalari ulgurji savdosi",
+      "nameUzc": "Ёритиш ускуналари улгуржи савдоси\r"
+    },
+    {
+      "id": "93130",
+      "name": "Деятельность фитнесс-клубов\r",
+      "nameUz": "Fitness-klublar faoliyati",
+      "nameUzc": "Фитнесс-клублар фаолияти\r"
+    },
+    {
+      "id": "29100",
+      "name": "Производство моторных транспортных средств\r",
+      "nameUz": "Motorli transport vositalari ishlab chiqarish",
+      "nameUzc": "Моторли транспорт воситалари ишлаб чиқариш\r"
+    },
+    {
+      "id": "24100",
+      "name": "Производство чугуна",
+      "nameUz": "Cho‘yan, po‘lat va temir qotishmalarni ishlab chiqarish",
+      "nameUzc": "Чўян"
+    },
+    {
+      "id": "46170",
+      "name": "Деятельность агентов по оптовой торговле пищевыми продуктами",
+      "nameUz": "Oziq-ovqat mahsulotlari, jumladan ichimliklar, va tamaki mahsulotlari ulgurji savdosi bo‘yicha agentlar faoliyati",
+      "nameUzc": "Озиқ-овқат маҳсулотлари"
+    },
+    {
+      "id": "10920",
+      "name": "Производство готовых кормов для домашних животных\r",
+      "nameUz": "Uy hayvonlari uchun tayyor ozuqa ishlab chiqarish",
+      "nameUzc": "Уй ҳайвонлари учун тайёр озуқа ишлаб чиқариш\r"
+    },
+    {
+      "id": "25120",
+      "name": "Производство металлических дверей и окон\r",
+      "nameUz": "Metall eshik va derazalar ishlab chiqarish",
+      "nameUzc": "Металл эшик ва деразалар ишлаб чиқариш\r"
+    },
+    {
+      "id": "05200",
+      "name": "Добыча лигнита\r",
+      "nameUz": "Lignit qazib olish",
+      "nameUzc": "Лигнит қазиб олиш\r"
+    },
+    {
+      "id": "01610",
+      "name": "Вспомогательные виды деятельности в области выращивания сельскохозяйственных культур",
+      "nameUz": "Ekinlarni yetishtirish sohasidagi yordamchi faoliyat",
+      "nameUzc": "Экинларни етиштириш соҳасидаги ёрдамчи фаолият"
+    },
+    {
+      "id": "04120",
+      "name": "Представительство иностранного юридического лица",
+      "nameUz": "Chet el yuridik shaxsini vakolatxonasi",
+      "nameUzc": "Чет эл юридик шахсини ваколат хонаси"
+    },
+    {
+      "id": "08129",
+      "name": "Разработка прочих карьерных месторождений, не включенных в другие категории",
+      "nameUz": "Boshqa toifalarga kiritilmagan boshqa karyerlarni ishlab chiqish",
+      "nameUzc": "Бошқа тоифаларга киритилмаган бошқа карьерларни ишлаб чиқиш"
+    },
+    {
+      "id": "9411",
+      "name": "Деятельность членских организаций в сфере коммерции и предпринимательства",
+      "nameUz": "Tijorat va tadbirkorlik a'zolik tashkilotlari faoliyati",
+      "nameUzc": "Тижорат ва тадбиркорлик аъзолик ташкилотлари фаолияти"
+    },
+    {
+      "id": "73",
+      "name": "Рекламная деятельность и изучение конъюнктуры рынка",
+      "nameUz": "REKLАMА FАOLIYATI VА BOZOR KON'YUNKTURАSINI O'RGАNISH",
+      "nameUzc": "РЕКЛАМА ФАОЛИЯТИ ВА БОЗОР КОНЮНКТУРАСИНИ УРГАНИШ"
+    },
+    {
+      "id": "682",
+      "name": "Аренда и управление собственным или арендованным недвижимым имуществом.",
+      "nameUz": "SHаxsiy yoki ijаrаgа olingаn ko'chmаs mulkni ijаrаgа berish vа boshqаrish",
+      "nameUzc": "Шахсий ёки ижарага олинган кўчмас мулкни ижарага бериш ва бошқариш"
+    },
+    {
+      "id": "08121",
+      "name": "Добыча глины и каолина",
+      "nameUz": "Loy va kaolin qazib olish",
+      "nameUzc": "Лой ва каолин қазиб олиш"
+    },
+    {
+      "id": "1431",
+      "name": "Производство трикотажных и крючком чулочно-носочных изделий",
+      "nameUz": "To'qilgаn vа trikotаj pаypoq-noski mаhsulotlаri ishlаb chiqаrish",
+      "nameUzc": "Тўқилган ва трикотаж пайпоқ-носки маҳсулотлари ишлаб чиқариш"
+    },
+    {
+      "id": "00084",
+      "name": "Военная часть",
+      "nameUz": "Xarbiy qism",
+      "nameUzc": "Харбий қисм"
+    },
+    {
+      "id": "28210",
+      "name": "Производство плит",
+      "nameUz": "Plita, pechka va pechka gorelkalari ishlab chiqarish",
+      "nameUzc": "Плита"
+    },
+    {
+      "id": "01493",
+      "name": "Разведение кроликов и прочих пушных зверей\r",
+      "nameUz": "Quyonlar va boshqa mo‘ynali hayvonlarni ko‘paytirish",
+      "nameUzc": "Қуёнлар ва бошқа мўйнали ҳайвонларни кўпайтириш\r"
+    },
+    {
+      "id": "28990",
+      "name": "Производство прочих машин и оборудования специального назначения",
+      "nameUz": "Boshqa toifalarga kiritilmagan, maxsus vazifalarga mo‘ljallangan boshqa mashina va uskunalar ishlab chiqarish",
+      "nameUzc": "Бошқа тоифаларга киритилмаган"
+    },
+    {
+      "id": "46130",
+      "name": "Деятельность агентов по оптовой торговле древесиной и строительными материалами\r",
+      "nameUz": "Yog‘och va qurilish materiallari ulgurji savdosi bo‘yicha agentlar faoliyati",
+      "nameUzc": "Ёғоч ва қурилиш материаллари улгуржи савдоси бўйича агентлар фаолияти\r"
+    },
+    {
+      "id": "14130",
+      "name": "Производство прочей верхней одежды\r",
+      "nameUz": "Boshqa ustki kiyimlar ishlab chiqarish",
+      "nameUzc": "Бошқа устки кийимлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "77120",
+      "name": "Аренда и лизинг грузовых транспортных средств\r",
+      "nameUz": "Yuk tashuvchi transport vositalari ijarasi va lizingi",
+      "nameUzc": "Юк ташувчи транспорт воситалари ижараси ва лизинги\r"
+    },
+    {
+      "id": "61900",
+      "name": "Предоставление прочих телекоммуникационных услуг\r",
+      "nameUz": "Boshqa telekommunikatsiya xizmatlari ko‘rsatish",
+      "nameUzc": "Бошқа телекоммуникатсия хизматлари кўрсатиш\r"
+    },
+    {
+      "id": "37000",
+      "name": "Канализационная система\r",
+      "nameUz": "Kanalizatsiya tizimi",
+      "nameUzc": "Канализатсия тизими\r"
+    },
+    {
+      "id": "08122",
+      "name": "Обогащение и аналогичная первичная обработка каолина и глин каолиновых прочих\r",
+      "nameUz": "Обогащение и аналогичная первичная обработка каолина и глин каолиновых прочих",
+      "nameUzc": "Обогащение и аналогичная первичная обработка каолина и глин каолиновых прочих\r"
+    },
+    {
+      "id": "27310",
+      "name": "Производство волоконно-оптического кабеля\r",
+      "nameUz": "Optik tolali kabel ishlab chiqarish",
+      "nameUzc": "Оптик толали кабел ишлаб чиқариш\r"
+    },
+    {
+      "id": "43990",
+      "name": "Прочие специализированные строительные работы",
+      "nameUz": "Boshqa toifalarga kiritilmagan boshqa ixtisoslashtirilgan qurilish ishlari",
+      "nameUzc": "Бошқа тоифаларга киритилмаган бошқа ихтисослаштирилган қурилиш ишлари\r"
+    },
+    {
+      "id": "63990",
+      "name": "Прочая деятельность по информационному обслуживанию",
+      "nameUz": "Boshqa toifalarga kiritilmagan, axborot xizmati ko‘rsatish bo‘yicha boshqa faoliyat",
+      "nameUzc": "Бошқа тоифаларга киритилмаган"
+    },
+    {
+      "id": "85600",
+      "name": "Вспомогательная деятельность в области образования\r",
+      "nameUz": "Ta’lim sohasidagi yordamchi faoliyat",
+      "nameUzc": "Та’лим соҳасидаги ёрдамчи фаолият\r"
+    },
+    {
+      "id": "71110",
+      "name": "Деятельность в области архитектуры\r",
+      "nameUz": "Me’morchilik sohasidagi faoliyat",
+      "nameUzc": "Ме’морчилик соҳасидаги фаолият\r"
+    },
+    {
+      "id": "11040",
+      "name": "Производство прочих недистиллированных ферментированных напитков\r",
+      "nameUz": "Boshqa distillanmagan fermentlangan (bijg‘itilgan) ichimliklar ishlab chiqarish",
+      "nameUzc": "Бошқа дистилланмаган ферментланган (бижғитилган) ичимликлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "32120",
+      "name": "Производство ювелирных изделий и аналогичных изделий\r",
+      "nameUz": "Zargarlik buyumlari va shu kabi buyumlar ishlab chiqarish",
+      "nameUzc": "Заргарлик буюмлари ва шу каби буюмлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "28120",
+      "name": "Производство гидравлического и пневматического оборудования\r",
+      "nameUz": "Gidravlik va pnevmatik uskunalar ishlab chiqarish",
+      "nameUzc": "Гидравлик ва пневматик ускуналар ишлаб чиқариш\r"
+    },
+    {
+      "id": "84119",
+      "name": "Управление и функционирование государственных служб",
+      "nameUz": "Boshqa toifalarga kiritilmagan davlat xizmatlarini boshqarish",
+      "nameUzc": "Бошқа тоифаларга киритилмаган давлат хизматларини бошқариш\r"
+    },
+    {
+      "id": "64110",
+      "name": "Деятельность центрального банка\r",
+      "nameUz": "Markaziy bank faoliyati",
+      "nameUzc": "Марказий банк фаолияти\r"
+    },
+    {
+      "id": "10830",
+      "name": "Переработка чая и кофе\r",
+      "nameUz": "Choy va qahva ishlab chiqarish",
+      "nameUzc": "Чой ва қаҳва ишлаб чиқариш\r"
+    },
+    {
+      "id": "47790",
+      "name": "Розничная торговля в магазинах товарами",
+      "nameUz": "Ilgari iste’molda bo‘lgan tovarlar chakana savdosi",
+      "nameUzc": "Илгари исте’молда бўлган товарлар чакана савдоси\r"
+    },
+    {
+      "id": "17240",
+      "name": "Производство обоев\r",
+      "nameUz": "Gulqog‘oz ishlab chiqarish",
+      "nameUzc": "Гулқоғоз ишлаб чиқариш\r"
+    },
+    {
+      "id": "46710",
+      "name": "Оптовая торговля твердым",
+      "nameUz": "Qattiq, suyuq va gazsimon yoqilg‘i va shu kabi mahsulotlar ulgurji savdosi",
+      "nameUzc": "Қаттиқ"
+    },
+    {
+      "id": "84113",
+      "name": "Деятельность местных органов управления\r",
+      "nameUz": "Mahalliy boshqaruv idoralari faoliyati",
+      "nameUzc": "Маҳаллий бошқарув идоралари фаолияти\r"
+    },
+    {
+      "id": "58290",
+      "name": "Выпуск прочего программного обеспечения\r",
+      "nameUz": "Boshqa dasturiy ta’minotlarni chiqarish",
+      "nameUzc": "Бошқа дастурий та’минотларни чиқариш\r"
+    },
+    {
+      "id": "51210",
+      "name": "Грузовой воздушный транспорт\r",
+      "nameUz": "Havo yuk transporti",
+      "nameUzc": "Ҳаво юк транспорти\r"
+    },
+    {
+      "id": "20140",
+      "name": "Производство прочих основных органических химических веществ\r",
+      "nameUz": "Boshqa asosiy organik kimyoviy moddalar ishlab chiqarish",
+      "nameUzc": "Бошқа асосий органик кимёвий моддалар ишлаб чиқариш\r"
+    },
+    {
+      "id": "10131",
+      "name": "Производство соленых",
+      "nameUz": "Tuzlangan, quritilgan yoki dudlangan go‘sht, parranda go‘shti va ozuqaviy submahsulotlar ishlab chiqarish",
+      "nameUzc": "Тузланган"
+    },
+    {
+      "id": "35220",
+      "name": "Распределение газообразного топлива через системы газоснабжения\r",
+      "nameUz": "Gaz bilan ta’minlash tizimi orqali gazsimon yoqilg‘ini taqsimlash",
+      "nameUzc": "Газ билан та’минлаш тизими орқали газсимон ёқилғини тақсимлаш\r"
+    },
+    {
+      "id": "33140",
+      "name": "Ремонт электрического оборудования\r",
+      "nameUz": "Elektr uskunalarni ta’mirlash",
+      "nameUzc": "Электр ускуналарни та’мирлаш\r"
+    },
+    {
+      "id": "25910",
+      "name": "Производство металлических бочек и аналогичных емкостей\r",
+      "nameUz": "Metall bochkalar va shu kabi idishlar ishlab chiqarish",
+      "nameUzc": "Металл бочкалар ва шу каби идишлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "09900",
+      "name": "Техническая поддержка для прочих областей горнодобывающей промышленности и подземной разработки\r",
+      "nameUz": "Tog‘-kon sanoatining boshqa sohalari va yopiq usulda qazishga texnik yordam ko‘rsatish",
+      "nameUzc": "Тоғ-кон саноатининг бошқа соҳалари ва ёпиқ усулда қазишга техник ёрдам кўрсатиш\r"
+    },
+    {
+      "id": "10132",
+      "name": "Производство колбасных изделий\r",
+      "nameUz": "Kolbasa mahsulotlari ishlab chiqarish",
+      "nameUzc": "Колбаса маҳсулотлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "45320",
+      "name": "Розничная торговля деталями",
+      "nameUz": "Avtomobil detallari, uzellari va jihozlarining chakana savdosi",
+      "nameUzc": "Автомобил деталлари"
+    },
+    {
+      "id": "64200",
+      "name": "Деятельность холдинговых компаний\r",
+      "nameUz": "Holding kompaniyalari faoliyati",
+      "nameUzc": "Ҳолдинг компаниялари фаолияти\r"
+    },
+    {
+      "id": "42990",
+      "name": "Строительство прочих инженерных сооружений",
+      "nameUz": "Boshqa toifalarga kiritilmagan boshqa muhandislik inshootlari qurish",
+      "nameUzc": "Бошқа тоифаларга киритилмаган бошқа муҳандислик иншоотлари қуриш\r"
+    },
+    {
+      "id": "47630",
+      "name": "Розничная торговля в специализированных магазинах видео и аудио записями\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda video va audio yozuvlar chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда видео ва аудио ёзувлар чакана савдоси\r"
+    },
+    {
+      "id": "62030",
+      "name": "Деятельность по управлению компьютерным оборудованием\r",
+      "nameUz": "Kompyuter uskunalarini boshqarish bo‘yicha faoliyat",
+      "nameUzc": "Компютер ускуналарини бошқариш бўйича фаолият\r"
+    },
+    {
+      "id": "66120",
+      "name": "Брокерские услуги по контрактам на ценные бумаги и товары\r",
+      "nameUz": "Qimmatli qog‘ozlar va tovarlarga shartnomalar bo‘yicha brokerlik xizmati",
+      "nameUzc": "Қимматли қоғозлар ва товарларга шартномалар бўйича брокерлик хизмати\r"
+    },
+    {
+      "id": "6391",
+      "name": "Деятельность информационных агентств\r",
+      "nameUz": "Аxborot аgentliklаri fаoliyati",
+      "nameUzc": "Ахборот агентликлари фаолияти\r"
+    },
+    {
+      "id": "47220",
+      "name": "Розничная торговля в специализированных магазинах мясом и мясными продуктами\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda go‘sht va go‘sht mahsulotlari chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда гўшт ва гўшт маҳсулотлари чакана савдоси\r"
+    },
+    {
+      "id": "47591",
+      "name": "Розничная торговля в специализированных магазинах мебелью\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda mebellar chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда мебеллар чакана савдоси\r"
+    },
+    {
+      "id": "46330",
+      "name": "Оптовая торговля молочными продуктами",
+      "nameUz": "Sut mahsulotlari, tuxum, ovqatga ishlatiladigan yog‘ va moylar ulgurji savdosi",
+      "nameUzc": "Сут маҳсулотлари"
+    },
+    {
+      "id": "10112",
+      "name": "Производство свежего",
+      "nameUz": "Yangi, sovitilgan va muzlatilgan go‘sht ishlab chiqarish",
+      "nameUzc": "Янги"
+    },
+    {
+      "id": "13300",
+      "name": "Отделка текстильных изделий\r",
+      "nameUz": "To‘qimachilik mahsulotlarini bezash",
+      "nameUzc": "Тўқимачилик маҳсулотларини безаш\r"
+    },
+    {
+      "id": "25930",
+      "name": "Производство изделий из проволоки",
+      "nameUz": "Simdan buyumlar, zanjirlar va prujinalar ishlab chiqarish",
+      "nameUzc": "Симдан буюмлар"
+    },
+    {
+      "id": "28130",
+      "name": "Производство прочих насосов и компрессоров\r",
+      "nameUz": "Boshqa nasos va kompressorlar ishlab chiqarish",
+      "nameUzc": "Бошқа насос ва компрессорлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "85520",
+      "name": "Образование в сфере культуры\r",
+      "nameUz": "Madaniyat sohasidagi ta’lim",
+      "nameUzc": "Маданият соҳасидаги та’лим\r"
+    },
+    {
+      "id": "31020",
+      "name": "Производство кухонной мебели\r",
+      "nameUz": "Oshxona uchun mebel ishlab chiqarish",
+      "nameUzc": "Ошхона учун мебел ишлаб чиқариш\r"
+    },
+    {
+      "id": "32110",
+      "name": "Чеканка монет\r",
+      "nameUz": "Tanga zarb qilish",
+      "nameUzc": "Танга зарб қилиш\r"
+    },
+    {
+      "id": "42130",
+      "name": "Строительство мостов и туннелей\r",
+      "nameUz": "Ko‘priklar va tunnellar qurish",
+      "nameUzc": "Кўприклар ва туннеллар қуриш\r"
+    },
+    {
+      "id": "90030",
+      "name": "Деятельность в области искусства\r",
+      "nameUz": "San’at sohasidagi faoliyat",
+      "nameUzc": "Сан’ат соҳасидаги фаолият\r"
+    },
+    {
+      "id": "21100",
+      "name": "Производство основных фармацевтических продуктов\r",
+      "nameUz": "Asosiy farmatsevtika mahsulotlarini ishlab chiqarish",
+      "nameUzc": "Асосий фарматсевтика маҳсулотларини ишлаб чиқариш\r"
+    },
+    {
+      "id": "38322",
+      "name": "Сортировка и переработка неметаллических отходов для получения вторичного сырья\r",
+      "nameUz": "Ikkilamchi xom ashyo olish uchun nometall chiqindilarni saralash va qayta ishlash",
+      "nameUzc": "Иккиламчи хом ашё олиш учун нометалл чиқиндиларни саралаш ва қайта ишлаш\r"
+    },
+    {
+      "id": "46421",
+      "name": "Оптовая торговля одеждой\r",
+      "nameUz": "Kiyimlar ulgurji savdosi",
+      "nameUzc": "Кийимлар улгуржи савдоси\r"
+    },
+    {
+      "id": "47230",
+      "name": "Розничная торговля в специализированных магазинах рыбой",
+      "nameUz": "Ixtisoslashgan do‘konlarda baliq, qisqichbaqasimonlar va mollyuskalar chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда балиқ"
+    },
+    {
+      "id": "81220",
+      "name": "Прочая деятельность по уборке зданий и промышленных объектов\r",
+      "nameUz": "Binolarni va sanoat ob’ektlarini yig‘ishtirish bo‘yicha boshqa faoliyat",
+      "nameUzc": "Биноларни ва саноат об’ектларини йиғиштириш бўйича бошқа фаолият\r"
+    },
+    {
+      "id": "23690",
+      "name": "Производство прочих изделий из бетона",
+      "nameUz": "Beton, qurilish gipsi va tsementdan boshqa buyumlar ishlab chiqarish",
+      "nameUzc": "Бетон"
+    },
+    {
+      "id": "79120",
+      "name": "Деятельность туроператоров\r",
+      "nameUz": "Turoperatorlar faoliyati",
+      "nameUzc": "Туроператорлар фаолияти\r"
+    },
+    {
+      "id": "47711",
+      "name": "Розничная торговля в специализированных магазинах трикотажными и чулочно-носочными изделиями\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda trikotaj va paypoq-noski buyumlari chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда трикотаж ва пайпоқ-носки буюмлари чакана савдоси\r"
+    },
+    {
+      "id": "01132",
+      "name": "Выращивание бахчевых\r",
+      "nameUz": "Poliz ekinlari yetishtirish",
+      "nameUzc": "Полиз экинлари етиштириш\r"
+    },
+    {
+      "id": "13940",
+      "name": "Производство веревок",
+      "nameUz": "Arqon, kanat, chilvir, bog‘ichlar ishlab chiqarish va to‘r to‘qish",
+      "nameUzc": "Арқон"
+    },
+    {
+      "id": "27900",
+      "name": "Производство прочего электрического оборудования\r",
+      "nameUz": "Boshqa elektr asboblar ishlab chiqarish",
+      "nameUzc": "Бошқа электр асбоблар ишлаб чиқариш\r"
+    },
+    {
+      "id": "77290",
+      "name": "Аренда и лизинг других предметов личного потребления и бытовых товаров\r",
+      "nameUz": "Boshqa shaxsiy foydalanish buyumlari va maishiy tovarlar ijarasi va lizingi",
+      "nameUzc": "Бошқа шахсий фойдаланиш буюмлари ва маиший товарлар ижараси ва лизинги\r"
+    },
+    {
+      "id": "84112",
+      "name": "Деятельность региональных органов государственной власти и управления\r",
+      "nameUz": "Davlat hokimiyati va boshqaruvining hududiy idoralari faoliyati",
+      "nameUzc": "Давлат ҳокимияти ва бошқарувининг ҳудудий идоралари фаолияти\r"
+    },
+    {
+      "id": "45111",
+      "name": "Оптовая торговля автомобилями и легкими автотранспортными средствами\r",
+      "nameUz": "Avtomobillar va yengil motorli transport vositalarining ulgurji savdosi",
+      "nameUzc": "Автомобиллар ва енгил моторли транспорт воситаларининг улгуржи савдоси\r"
+    },
+    {
+      "id": "10119",
+      "name": "Прочая деятельность по переработке мяса\r",
+      "nameUz": "Go‘shtni qayta ishlash bo‘yicha boshqa faoliyat",
+      "nameUzc": "Гўштни қайта ишлаш бўйича бошқа фаолият\r"
+    },
+    {
+      "id": "11060",
+      "name": "Производство солода\r",
+      "nameUz": "Colod (undirib yanchilgan bug‘doy, arpa va sh.k.) ishlab chiqarish",
+      "nameUzc": "Cолод (ундириб янчилган буғдой"
+    },
+    {
+      "id": "11030",
+      "name": "Производство сидра и прочих фруктовых вин\r",
+      "nameUz": "Sidr (olma vinosi) va boshqa meva vinolari ishlab chiqarish",
+      "nameUzc": "Сидр (олма виноси) ва бошқа мева винолари ишлаб чиқариш\r"
+    },
+    {
+      "id": "86100",
+      "name": "Деятельность больничных учреждений\r",
+      "nameUz": "Shifoxona muassasalari faoliyati",
+      "nameUzc": "Шифохона муассасалари фаолияти\r"
+    },
+    {
+      "id": "64920",
+      "name": "Прочие виды кредитования\r",
+      "nameUz": "Kredit berishning boshqa turlari",
+      "nameUzc": "Кредит беришнинг бошқа турлари\r"
+    },
+    {
+      "id": "33171",
+      "name": "Ремонт и техническое обслуживание железнодорожных локомотивов и подвижного состава",
+      "nameUz": "Temir yo‘l lokomotivlari va harakatdagi sostavlar, jumladan tramvaylar, metro vagonlari va trolleybuslarni ta’mirlash, texnik xizmat ko‘rsatish",
+      "nameUzc": "Темир ё‘л локомотивлари ва ҳаракатдаги составлар"
+    },
+    {
+      "id": "24430",
+      "name": "Производство свинца",
+      "nameUz": "Qo‘rg‘oshin, rux, qalay ishlab chiqarish",
+      "nameUzc": "Қўрғошин"
+    },
+    {
+      "id": "46190",
+      "name": "Деятельность агентов по оптовой торговле товарами широкого ассортимента\r",
+      "nameUz": "Keng assortimentdagi tovarlar ulgurji savdosi bo‘yicha agentlar faoliyati",
+      "nameUzc": "Кенг ассортиментдаги товарлар улгуржи савдоси бўйича агентлар фаолияти\r"
+    },
+    {
+      "id": "46660",
+      "name": "Оптовая торговля прочей офисной техникой и оборудованием\r",
+      "nameUz": "Boshqa ofis texnikasi va uskunalari ulgurji savdosi",
+      "nameUzc": "Бошқа офис техникаси ва ускуналари улгуржи савдоси\r"
+    },
+    {
+      "id": "01613",
+      "name": "Обслуживание сельскохозяйственного поливного оборудования\r",
+      "nameUz": "Qishloq xo‘jalik sug‘orish uskunalariga xizmat ko‘rsatish",
+      "nameUzc": "Қишлоқ хўжалик суғориш ускуналарига хизмат кўрсатиш\r"
+    },
+    {
+      "id": "45310",
+      "name": "Оптовая торговля деталями",
+      "nameUz": "Avtomobil detallari, uzellari va jihozlarining ulgurji savdosi",
+      "nameUzc": "Автомобил деталлари"
+    },
+    {
+      "id": "46690",
+      "name": "Оптовая торговля прочей техникой и оборудованием\r",
+      "nameUz": "Boshqa texnika va uskunalar ulgurji savdosi",
+      "nameUzc": "Бошқа техника ва ускуналар улгуржи савдоси\r"
+    },
+    {
+      "id": "25290",
+      "name": "Производство прочих металлических цистерн",
+      "nameUz": "Boshqa metall tsisterna, rezervuar va konteynerlar ishlab chiqarish",
+      "nameUzc": "Бошқа металл тсистерна"
+    },
+    {
+      "id": "47650",
+      "name": "Розничная торговля в специализированных магазинах играми и игрушками\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda o‘yin va o‘yinchoqlar chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда ўйин ва ўйинчоқлар чакана савдоси\r"
+    },
+    {
+      "id": "17230",
+      "name": "Производство писчебумажных изделий\r",
+      "nameUz": "Yozuv qog‘ozi ishlab chiqarish",
+      "nameUzc": "Ёзув қоғози ишлаб чиқариш\r"
+    },
+    {
+      "id": "25920",
+      "name": "Производство упаковочного материала из легких металлов\r",
+      "nameUz": "Yengil metallardan upakovka materiallari ishlab chiqarish",
+      "nameUzc": "Енгил металлардан упаковка материаллари ишлаб чиқариш\r"
+    },
+    {
+      "id": "33150",
+      "name": "Ремонт",
+      "nameUz": "Kemalar va qayiqlarni ta’mirlash, texnik xizmat ko‘rsatish",
+      "nameUzc": "Кемалар ва қайиқларни та’мирлаш"
+    },
+    {
+      "id": "68203",
+      "name": "Аренда и управление многоквартирными домами и жилищами\r",
+      "nameUz": "Ko‘p kvartirali uylar va turar joylarni ijaraga berish va boshqarish",
+      "nameUzc": "Кўп квартирали уйлар ва турар жойларни ижарага бериш ва бошқариш\r"
+    },
+    {
+      "id": "84120",
+      "name": "Регулирование деятельности учреждений обеспечивающих медицинское и культурное обслуживание",
+      "nameUz": "Meditsina va madaniy xizmatlar ko‘rsatishni ta’minlovchi muassasalar faoliyatini boshqarish, ijtimoiy ta’minotdan tashqari boshqa ijtimoiy xizmatlar",
+      "nameUzc": "Медитсина ва маданий хизматлар кўрсатишни та’минловчи муассасалар фаолиятини бошқариш"
+    },
+    {
+      "id": "42110",
+      "name": "Строительство дорог и шоссе\r",
+      "nameUz": "Yo‘llar va shosselar qurish",
+      "nameUzc": "Ё‘ллар ва шосселар қуриш\r"
+    },
+    {
+      "id": "36000",
+      "name": "Сбор",
+      "nameUz": "Suvni yig‘ish, qayta ishlash va taqsimlash",
+      "nameUzc": "Сувни йиғиш"
+    },
+    {
+      "id": "43310",
+      "name": "Штукатурные работы\r",
+      "nameUz": "Suvoq ishlari",
+      "nameUzc": "Сувоқ ишлари\r"
+    },
+    {
+      "id": "46110",
+      "name": "Деятельность агентов по оптовой торговле сельскохозяйственным сырьем",
+      "nameUz": "Qishloq xo‘jalik xom ashyosi, tirik hayvonlar, to‘qimachilik xom ashyosi va yarim fabrikatlar ulgurji savdosi bo‘yicha agentlar faoliyati",
+      "nameUzc": "Қишлоқ хўжалик хом ашёси"
+    },
+    {
+      "id": "95250",
+      "name": "Ремонт часов и ювелирных изделий\r",
+      "nameUz": "Soatlar va zargarlik buyumlarini ta’mirlash",
+      "nameUzc": "Соатлар ва заргарлик буюмларини та’мирлаш\r"
+    },
+    {
+      "id": "01161",
+      "name": "Выращивание хлопчатника\r",
+      "nameUz": "Paxta yetishtirish",
+      "nameUzc": "Пахта етиштириш\r"
+    },
+    {
+      "id": "87900",
+      "name": "Прочие виды деятельности по уходу с обеспечением проживания\r",
+      "nameUz": "Yashash uchun joy bilan ta’minlagan holda parvarishlash faoliyatining boshqa turlari",
+      "nameUzc": "Яшаш учун жой билан та’минлаган ҳолда парваришлаш фаолиятининг бошқа турлари\r"
+    },
+    {
+      "id": "85310",
+      "name": "Общее среднее образование\r",
+      "nameUz": "Umumiy o‘rta ta’lim",
+      "nameUzc": "Умумий ўрта та’лим\r"
+    },
+    {
+      "id": "23420",
+      "name": "Производство керамических гигиенических санитарно-технических изделий\r",
+      "nameUz": "Keramikadan gigienik sanitariya-texnika buyumlari ishlab chiqarish",
+      "nameUzc": "Керамикадан гигиеник санитария-техника буюмлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "12000",
+      "name": "Производство табачных изделий\r",
+      "nameUz": "Tamaki mahsulotlari ishlab chiqarish",
+      "nameUzc": "Тамаки маҳсулотлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "82920",
+      "name": "Упаковочная деятельность\r",
+      "nameUz": "O‘rash-joylashtirish faoliyati",
+      "nameUzc": "Ўраш-жойлаштириш фаолияти\r"
+    },
+    {
+      "id": "81100",
+      "name": "Комплексное обслуживание объектов\r",
+      "nameUz": "Ob’ektlarga kompleks xizmat ko‘rsatish",
+      "nameUzc": "Об’ектларга комплекс хизмат кўрсатиш\r"
+    },
+    {
+      "id": "74100",
+      "name": "Специализированная дизайнерская деятельность\r",
+      "nameUz": "Ixtisoslashgan dizaynerlik faoliyati",
+      "nameUzc": "Ихтисослашган дизайнерлик фаолияти\r"
+    },
+    {
+      "id": "68329",
+      "name": "Услуги по управлению недвижимостью",
+      "nameUz": "Boshqa toifalarga kiritilmagan ko‘chmas mulkni boshqarish bo‘yicha xizmatlar",
+      "nameUzc": "Бошқа тоифаларга киритилмаган кўчмас мулкни бошқариш бўйича хизматлар\r"
+    },
+    {
+      "id": "46431",
+      "name": "Оптовая торговля бытовой радио- и телеаппаратурой\r",
+      "nameUz": "Maishiy radio- va teleapparaturalar ulgurji savdosi",
+      "nameUzc": "Маиший радио- ва телеаппаратуралар улгуржи савдоси\r"
+    },
+    {
+      "id": "32910",
+      "name": "Производство метел и щеток\r",
+      "nameUz": "Supurgi va cho‘tkalar ishlab chiqarish",
+      "nameUzc": "Супурги ва чўткалар ишлаб чиқариш\r"
+    },
+    {
+      "id": "01290",
+      "name": "Выращивание прочих многолетних культур\r",
+      "nameUz": "Boshqa ko‘p yillik ekinlarni yetishtirish",
+      "nameUzc": "Бошқа кўп йиллик экинларни етиштириш\r"
+    },
+    {
+      "id": "29310",
+      "name": "Производство электрических и электронных комплектующих для автотранспортных средств\r",
+      "nameUz": "Avtotransport vositalari uchun elektr va elektron butlovchi qismlar ishlab chiqarish",
+      "nameUzc": "Автотранспорт воситалари учун электр ва электрон бутловчи қисмлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "33160",
+      "name": "Ремонт",
+      "nameUz": "Havo kemalari va kosmik kemalarni ta’mirlash, texnik xizmat ko‘rsatish",
+      "nameUzc": "Ҳаво кемалари ва космик кемаларни та’мирлаш"
+    },
+    {
+      "id": "43390",
+      "name": "Прочие отделочные работы\r",
+      "nameUz": "Boshqa pardozlash ishlari",
+      "nameUzc": "Бошқа пардозлаш ишлари\r"
+    },
+    {
+      "id": "47810",
+      "name": "Розничная торговля продуктами питания",
+      "nameUz": "Chodirlar va bozorlarda oziq-ovqat mahsulotlari, ichimliklar va tamaki mahsulotlari chakana savdosi",
+      "nameUzc": "Чодирлар ва бозорларда озиқ-овқат маҳсулотлари"
+    },
+    {
+      "id": "24440",
+      "name": "Производство меди\r",
+      "nameUz": "Mis ishlab chiqarish",
+      "nameUzc": "Мис ишлаб чиқариш\r"
+    },
+    {
+      "id": "28410",
+      "name": "Производство оборудования для обработки металлов давлением\r",
+      "nameUz": "Bosim ostida metallarga ishlov berish uchun uskunalar ishlab chiqarish",
+      "nameUzc": "Босим остида металларга ишлов бериш учун ускуналар ишлаб чиқариш\r"
+    },
+    {
+      "id": "46180",
+      "name": "Деятельность агентов",
+      "nameUz": "Boshqa toifalarga kiritilmagan, tovarlarning alohida turlari yoki bir guruh tovarlar ulgurji savdosiga ixtisoslashgan agentlar faoliyati",
+      "nameUzc": "Бошқа тоифаларга киритилмаган"
+    },
+    {
+      "id": "01410",
+      "name": "Разведение молочных пород крупного рогатого скота\r",
+      "nameUz": "Yirik shoxli qoramollarning sut beradigan zotlarini ko‘paytirish",
+      "nameUzc": "Йирик шохли қорамолларнинг сут берадиган зотларини кўпайтириш\r"
+    },
+    {
+      "id": "28920",
+      "name": "Производство техники для горнодобывающей промышленности и подземной разработки\r",
+      "nameUz": "Tog‘-kon sanoati va yerosti konlari uchun texnika ishlab chiqarish",
+      "nameUzc": "Тоғ-кон саноати ва ерости конлари учун техника ишлаб чиқариш\r"
+    },
+    {
+      "id": "64990",
+      "name": "Другие виды финансовых услуг",
+      "nameUz": "Boshqa toifalarga kiritilmagan, sug‘urtalash va nafaqa jamg‘armalari xizmatlaridan tashqari moliyaviy xizmatlarning boshqa turlari",
+      "nameUzc": "Бошқа тоифаларга киритилмаган"
+    },
+    {
+      "id": "90040",
+      "name": "Деятельность театральных и концертных залов\r",
+      "nameUz": "Teatr va kontsert zallari faoliyati",
+      "nameUzc": "Театр ва контсерт заллари фаолияти\r"
+    },
+    {
+      "id": "46341",
+      "name": "Оптовая торговля алкогольными напитками\r",
+      "nameUz": "Spirtli ichimliklar ulgurji savdosi",
+      "nameUzc": "Спиртли ичимликлар улгуржи савдоси\r"
+    },
+    {
+      "id": "47210",
+      "name": "Розничная торговля в специализированных магазинах фруктами и овощами\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda mevalar va sabzavotlar chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда мевалар ва сабзавотлар чакана савдоси\r"
+    },
+    {
+      "id": "24340",
+      "name": "Производство проволоки путем холодного вытягивания\r",
+      "nameUz": "Sovuq holda cho‘zib tortish yo‘li bilan sim ishlab chiqarish",
+      "nameUzc": "Совуқ ҳолда чўзиб тортиш ё‘ли билан сим ишлаб чиқариш\r"
+    },
+    {
+      "id": "32300",
+      "name": "Производство спортивных товаров\r",
+      "nameUz": "Sport tovarlari ishlab chiqarish",
+      "nameUzc": "Спорт товарлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "62090",
+      "name": "Другие виды деятельности в области информационных технологий и компьютерных систем\r",
+      "nameUz": "Axborot texnologiyalari va kompyuter tizimlari sohasidagi boshqa faoliyat turlari",
+      "nameUzc": "Ахборот технологиялари ва компютер тизимлари соҳасидаги бошқа фаолият турлари\r"
+    },
+    {
+      "id": "72190",
+      "name": "Прочие исследования и разработки в области естественных наук и инженерии\r",
+      "nameUz": "Tabiiy fanlar va injeneriya sohasidagi boshqa tadqiqotlar va ishlanmalar",
+      "nameUzc": "Табиий фанлар ва инженерия соҳасидаги бошқа тадқиқотлар ва ишланмалар\r"
+    },
+    {
+      "id": "85410",
+      "name": "Послесреднее образование\r",
+      "nameUz": "O‘rta ta’limdan keyingi ta’lim",
+      "nameUzc": "Ўрта та’лимдан кейинги та’лим\r"
+    },
+    {
+      "id": "23490",
+      "name": "Производство прочих керамических изделий\r",
+      "nameUz": "Boshqa keramik buyumlar ishlab chiqarish",
+      "nameUzc": "Бошқа керамик буюмлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "01611",
+      "name": "Предоставление сельскохозяйственной техники вместе с оператором и техническим персоналом\r",
+      "nameUz": "Qishloq xo‘jalik texnikasini operatori va texnik xodimi bilan berish",
+      "nameUzc": "Қишлоқ хўжалик техникасини оператори ва техник ходими билан бериш\r"
+    },
+    {
+      "id": "66110",
+      "name": "Управление финансовыми рынками\r",
+      "nameUz": "Moliyaviy bozorlarni boshqarish",
+      "nameUzc": "Молиявий бозорларни бошқариш\r"
+    },
+    {
+      "id": "26510",
+      "name": "Производство приборов и инструментов для измерения",
+      "nameUz": "O‘lchash, nazorat, sinash va navigatsiya uchun asbob-uskunalar ishlab chiqarish",
+      "nameUzc": "Ўлчаш"
+    },
+    {
+      "id": "82200",
+      "name": "Деятельность информационно-справочных служб\r",
+      "nameUz": "Axborot-ma’lumotnoma xizmati faoliyati",
+      "nameUzc": "Ахборот-ма’лумотнома хизмати фаолияти\r"
+    },
+    {
+      "id": "23440",
+      "name": "Производство прочих технических керамических изделий\r",
+      "nameUz": "Boshqa texnik keramik buyumlar ishlab chiqarish",
+      "nameUzc": "Бошқа техник керамик буюмлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "56210",
+      "name": "Доставка пищи на заказ\r",
+      "nameUz": "Buyurtma bo‘yicha ovqat yetkazib berish",
+      "nameUzc": "Буюртма бўйича овқат етказиб бериш\r"
+    },
+    {
+      "id": "14310",
+      "name": "Производство вязаных и трикотажных чулочно-носочных изделий\r",
+      "nameUz": "To‘qilgan va trikotaj paypoq-noski mahsulotlari ishlab chiqarish",
+      "nameUzc": "Тўқилган ва трикотаж пайпоқ-носки маҳсулотлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "10390",
+      "name": "Прочие виды переработки и консервирования фруктов и овощей\r",
+      "nameUz": "Mevalar va sabzavotlarni qayta ishlash va konservalashning boshqa turlari",
+      "nameUzc": "Мевалар ва сабзавотларни қайта ишлаш ва консервалашнинг бошқа турлари\r"
+    },
+    {
+      "id": "13109",
+      "name": "Подготовка и прядение прочих волокон\r",
+      "nameUz": "Boshqa tolalarni tayyorlash va yigirish",
+      "nameUzc": "Бошқа толаларни тайёрлаш ва йигириш\r"
+    },
+    {
+      "id": "10810",
+      "name": "Производство сахара\r",
+      "nameUz": "Shakar ishlab chiqarish",
+      "nameUzc": "Шакар ишлаб чиқариш\r"
+    },
+    {
+      "id": "13202",
+      "name": "Производство шерстяных тканей\r",
+      "nameUz": "Jun gazlama ishlab chiqarish",
+      "nameUzc": "Жун газлама ишлаб чиқариш\r"
+    },
+    {
+      "id": "14190",
+      "name": "Производство прочей одежды и аксессуаров\r",
+      "nameUz": "Boshqa kiyimlar va aksessuarlar ishlab chiqarish",
+      "nameUzc": "Бошқа кийимлар ва аксессуарлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "01192",
+      "name": "Выращивание цветов и их семян\r",
+      "nameUz": "Gullar va ularning urug‘larini yetishtirish",
+      "nameUzc": "Гуллар ва уларнинг уруғларини етиштириш\r"
+    },
+    {
+      "id": "56300",
+      "name": "Подача напитков\r",
+      "nameUz": "Ichimlik yetkazish",
+      "nameUzc": "Ичимлик етказиш\r"
+    },
+    {
+      "id": "90010",
+      "name": "Театральная деятельность\r",
+      "nameUz": "Teatrlar faoliyati",
+      "nameUzc": "Театрлар фаолияти\r"
+    },
+    {
+      "id": "09100",
+      "name": "Технические услуги в области добычи нефти и природного газа\r",
+      "nameUz": "Neft va tabiiy gaz qazib olish sohasidagi texnik xizmatlar",
+      "nameUzc": "Нефт ва табиий газ қазиб олиш соҳасидаги техник хизматлар\r"
+    },
+    {
+      "id": "16230",
+      "name": "Производство прочих деревянных строительных конструкций и столярных изделий\r",
+      "nameUz": "Boshqa yog‘och qurilish konstruktsiyalari va duradgorlik buyumlari ishlab chiqarish",
+      "nameUzc": "Бошқа ёғоч қурилиш конструктсиялари ва дурадгорлик буюмлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "91020",
+      "name": "Деятельность музеев\r",
+      "nameUz": "Muzeylar faoliyati",
+      "nameUzc": "Музейлар фаолияти\r"
+    },
+    {
+      "id": "13102",
+      "name": "Подготовка и прядение шерстяных волокон\r",
+      "nameUz": "Jun tolalarni tayyorlash va yigirish",
+      "nameUzc": "Жун толаларни тайёрлаш ва йигириш\r"
+    },
+    {
+      "id": "88910",
+      "name": "Дневной уход за детьми\r",
+      "nameUz": "Bolalarni kunduzgi parvarishlash",
+      "nameUzc": "Болаларни кундузги парваришлаш\r"
+    },
+    {
+      "id": "95240",
+      "name": "Ремонт мебели и предметов домашнего обихода\r",
+      "nameUz": "Mebellar va uy-ro‘zg‘or anjomlarini ta’mirlash",
+      "nameUzc": "Мебеллар ва уй-рўзғор анжомларини та’мирлаш\r"
+    },
+    {
+      "id": "58130",
+      "name": "Издание газет\r",
+      "nameUz": "Gazetalar nashr qilish",
+      "nameUzc": "Газеталар нашр қилиш\r"
+    },
+    {
+      "id": "47730",
+      "name": "Розничная торговля в специализированных магазинах фармацевтическими товарами\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda farmatsevtika tovarlari chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда фарматсевтика товарлари чакана савдоси\r"
+    },
+    {
+      "id": "10510",
+      "name": "Переработка молока и производство сыра\r",
+      "nameUz": "Sutni qayta ishlash va pishloq ishlab chiqarish",
+      "nameUzc": "Сутни қайта ишлаш ва пишлоқ ишлаб чиқариш\r"
+    },
+    {
+      "id": "25210",
+      "name": "Производство радиаторов и котлов центрального отопления\r",
+      "nameUz": "Radiatorlar va markaziy isitish qozonlari ishlab chiqarish",
+      "nameUzc": "Радиаторлар ва марказий иситиш қозонлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "68201",
+      "name": "Аренда и управление площадями для организации торговли\r",
+      "nameUz": "Savdoni tashkil qilish uchun maydonlarni ijaraga berish va boshqarish",
+      "nameUzc": "Савдони ташкил қилиш учун майдонларни ижарага бериш ва бошқариш\r"
+    },
+    {
+      "id": "43340",
+      "name": "Малярные и стекольные работы\r",
+      "nameUz": "Bo‘yoqchilik va oyna solish ishlari",
+      "nameUzc": "Бўёқчилик ва ойна солиш ишлари\r"
+    },
+    {
+      "id": "01640",
+      "name": "Обработка и подготовка семян для размножения\r",
+      "nameUz": "Urug‘larga ishlov berish va ekishga tayyorlash",
+      "nameUzc": "Уруғларга ишлов бериш ва экишга тайёрлаш\r"
+    },
+    {
+      "id": "13101",
+      "name": "Подготовка и прядение хлопковых волокон\r",
+      "nameUz": "Paxta tolalarini tayyorlash va yigirish",
+      "nameUzc": "Пахта толаларини тайёрлаш ва йигириш\r"
+    },
+    {
+      "id": "25610",
+      "name": "Обработка металлов и нанесение покрытий на металлы\r",
+      "nameUz": "Metallarga ishlov berish va metallarni qoplamalar bilan qoplash",
+      "nameUzc": "Металларга ишлов бериш ва металларни қопламалар билан қоплаш\r"
+    },
+    {
+      "id": "86220",
+      "name": "Деятельность в области специальной врачебной практики\r",
+      "nameUz": "Maxsus shifokorlik amaliyoti sohasidagi faoliyat",
+      "nameUzc": "Махсус шифокорлик амалиёти соҳасидаги фаолият\r"
+    },
+    {
+      "id": "10200",
+      "name": "Переработка и консервирование рыбы",
+      "nameUz": "Baliq, qisqichbaqasimonlar va mollyuskalarni qayta ishlash va konservalash",
+      "nameUzc": "Балиқ"
+    },
+    {
+      "id": "46320",
+      "name": "Оптовая торговля мясом и мясными продуктами\r",
+      "nameUz": "Go‘sht va go‘sht mahsulotlari ulgurji savdosi",
+      "nameUzc": "Гўшт ва гўшт маҳсулотлари улгуржи савдоси\r"
+    },
+    {
+      "id": "84111",
+      "name": "Деятельность республиканских органов государственной власти и управления\r",
+      "nameUz": "Davlat hokimiyati va boshqaruvining respublika idoralari faoliyati",
+      "nameUzc": "Давлат ҳокимияти ва бошқарувининг республика идоралари фаолияти\r"
+    },
+    {
+      "id": "32130",
+      "name": "Производство бижутерии и аналогичных изделий\r",
+      "nameUz": "Bijuteriya va shu kabi buyumlar ishlab chiqarish",
+      "nameUzc": "Бижутерия ва шу каби буюмлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "84300",
+      "name": "Деятельность обязательного социального обеспечения\r",
+      "nameUz": "Majburiy ijtimoiy ta’minot sohasidagi faoliyat",
+      "nameUzc": "Мажбурий ижтимоий та’минот соҳасидаги фаолият\r"
+    },
+    {
+      "id": "86230",
+      "name": "Стоматологическая деятельность\r",
+      "nameUz": "Stomatologiya sohasidagi faoliyat",
+      "nameUzc": "Стоматология соҳасидаги фаолият\r"
+    },
+    {
+      "id": "77400",
+      "name": "Аренда интеллектуальной собственности и подобной продукции",
+      "nameUz": "Mualliflik huquqi himoyalangan ishlardan tashqari, intellektual mulk va shu kabi mahsulotlar ijarasi va lizingi",
+      "nameUzc": "Муаллифлик ҳуқуқи ҳимояланган ишлардан ташқари"
+    },
+    {
+      "id": "24460",
+      "name": "Переработка ядерного топлива\r",
+      "nameUz": "Yadro yonilg‘ilari ishlab chiqarish",
+      "nameUzc": "Ядро ёнилғилари ишлаб чиқариш\r"
+    },
+    {
+      "id": "23520",
+      "name": "Производство извести и строительного гипса\r",
+      "nameUz": "Ohak va qurilish uchun gips ishlab chiqarish",
+      "nameUzc": "Оҳак ва қурилиш учун гипс ишлаб чиқариш\r"
+    },
+    {
+      "id": "46471",
+      "name": "Оптовая торговля бытовой мебелью и коврами\r",
+      "nameUz": "Maishiy mebellar va gilamlar ulgurji savdosi",
+      "nameUzc": "Маиший мебеллар ва гиламлар улгуржи савдоси\r"
+    },
+    {
+      "id": "23650",
+      "name": "Производство волокнистого цемента\r",
+      "nameUz": "Tolali tsement ishlab chiqarish",
+      "nameUzc": "Толали тсемент ишлаб чиқариш\r"
+    },
+    {
+      "id": "27520",
+      "name": "Производство неэлектрических бытовых приборов\r",
+      "nameUz": "Maishiy noelektr asboblar ishlab chiqarish",
+      "nameUzc": "Маиший ноелектр асбоблар ишлаб чиқариш\r"
+    },
+    {
+      "id": "95220",
+      "name": "Ремонт бытовых приборов",
+      "nameUz": "Maishiy tovarlar, uy va bog‘ inventarlarini ta’mirlash",
+      "nameUzc": "Маиший товарлар"
+    },
+    {
+      "id": "20410",
+      "name": "Производство мыла и моющих средств",
+      "nameUz": "Sovun va yuvish vositalari, tozalash va sayqallash preparatlari ishlab chiqarish",
+      "nameUzc": "Совун ва ювиш воситалари"
+    },
+    {
+      "id": "73200",
+      "name": "Исследование конъюнктуры рынка и изучение общественного мнения\r",
+      "nameUz": "Bozor kon’yunkturasini tadqiq qilish va jamoatchilik fikrini o‘rganish",
+      "nameUzc": "Бозор кон’юнктурасини тадқиқ қилиш ва жамоатчилик фикрини ўрганиш\r"
+    },
+    {
+      "id": "70100",
+      "name": "Деятельность головных компаний\r",
+      "nameUz": "Bosh kompaniyalar faoliyati",
+      "nameUzc": "Бош компаниялар фаолияти\r"
+    },
+    {
+      "id": "47712",
+      "name": "Розничная торговля в специализированных магазинах одеждой (кроме трикотажных и чулочно-носочных изделий)\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda kiyimlar chakana savdosi (trikotaj va paypoq-noski buyumlaridan tashqari)",
+      "nameUzc": "Ихтисослашган дўконларда кийимлар чакана савдоси (трикотаж ва пайпоқ-носки буюмларидан ташқари)\r"
+    },
+    {
+      "id": "46230",
+      "name": "Оптовая торговля живыми животными\r",
+      "nameUz": "Tirik hayvonlar ulgurji savdosi",
+      "nameUzc": "Тирик ҳайвонлар улгуржи савдоси\r"
+    },
+    {
+      "id": "25720",
+      "name": "Производство замков",
+      "nameUz": "Qulf, ilmoq va oshiq-moshiqlar ishlab chiqarish",
+      "nameUzc": "Қулф"
+    },
+    {
+      "id": "63910",
+      "name": "Деятельность информационных агентств\r",
+      "nameUz": "Axborot agentliklari faoliyati",
+      "nameUzc": "Ахборот агентликлари фаолияти\r"
+    },
+    {
+      "id": "24200",
+      "name": "Производство труб",
+      "nameUz": "Po‘lat quvur, quvuro‘tkazgich, profil, fitinglar ishlab chiqarish",
+      "nameUzc": "Пўлат қувур"
+    },
+    {
+      "id": "46770",
+      "name": "Оптовая торговля отходами и ломом\r",
+      "nameUz": "Chiqindi va siniq parchalar ulgurji savdosi",
+      "nameUzc": "Чиқинди ва синиқ парчалар улгуржи савдоси\r"
+    },
+    {
+      "id": "01260",
+      "name": "Выращивание масленичных фруктов\r",
+      "nameUz": "Moyli mevalar yetishtirish",
+      "nameUzc": "Мойли мевалар етиштириш\r"
+    },
+    {
+      "id": "01432",
+      "name": "Разведение ослов",
+      "nameUz": "Eshaklar, xachirlar va boshqa tuyoqli zotlarni ko‘paytirish",
+      "nameUzc": "Эшаклар"
+    },
+    {
+      "id": "49320",
+      "name": "Деятельность такси\r",
+      "nameUz": "Taksi faoliyati",
+      "nameUzc": "Такси фаолияти\r"
+    },
+    {
+      "id": "47890",
+      "name": "Розничная торговля в палатках и на рынках прочими товарами\r",
+      "nameUz": "Chodirlar va bozorlarda boshqa tovarlar chakana savdosi",
+      "nameUzc": "Чодирлар ва бозорларда бошқа товарлар чакана савдоси\r"
+    },
+    {
+      "id": "25500",
+      "name": "Ковка",
+      "nameUz": "Listlangan metallni bolg‘alash, iskanjalash, qoliplash, rolikli egish mashinalarida listlangan metallni profillash; poroshok metallurgiya",
+      "nameUzc": "Листланган металлни болғалаш"
+    },
+    {
+      "id": "71120",
+      "name": "Деятельность в области инженерных изысканий и предоставление технических консультаций в этих областях\r",
+      "nameUz": "Muhandislik izlanishlari sohasidagi faoliyat va bu sohalarda texnik maslahatlar berish",
+      "nameUzc": "Муҳандислик изланишлари соҳасидаги фаолият ва бу соҳаларда техник маслаҳатлар бериш\r"
+    },
+    {
+      "id": "28110",
+      "name": "Производство двигателей и турбин",
+      "nameUz": "Aviatsiya uchun mo‘ljallanganidan tashqari dvigatellar va turbinalar, avtomobil va mototsikllar dvigatellari ishlab chiqarish",
+      "nameUzc": "Авиатсия учун мўлжалланганидан ташқари двигателлар ва турбиналар"
+    },
+    {
+      "id": "88100",
+      "name": "Предоставление социальных услуг престарелым и инвалидам без обеспечения проживания\r",
+      "nameUz": "Yashash uchun joy bilan ta’minlamagan holda keksa yoshdagilar va nogironlarga ijtimoiy xizmatlar ko‘rsatish",
+      "nameUzc": "Яшаш учун жой билан та’минламаган ҳолда кекса ёшдагилар ва ногиронларга ижтимоий хизматлар кўрсатиш\r"
+    },
+    {
+      "id": "52299",
+      "name": "Прочие сопроводительные услуги при перевозках",
+      "nameUz": "Boshqa toifalarga kiritilmagan, tashish jarayonidagi boshqa kuzatib borish xizmatlari",
+      "nameUzc": "Бошқа тоифаларга киритилмаган"
+    },
+    {
+      "id": "77350",
+      "name": "Аренда и лизинг воздушных транспортных средств\r",
+      "nameUz": "Havo transporti vositalari va uskunalari ijarasi va lizingi",
+      "nameUzc": "Ҳаво транспорти воситалари ва ускуналари ижараси ва лизинги\r"
+    },
+    {
+      "id": "47820",
+      "name": "Розничная торговля в палатках и на рынках текстилем",
+      "nameUz": "Chodirlar va bozorlarda to‘qimachilik mahsulotlari, kiyim va poyafzallar chakana savdosi",
+      "nameUzc": "Чодирлар ва бозорларда тўқимачилик маҳсулотлари"
+    },
+    {
+      "id": "79110",
+      "name": "Деятельность туристских агентств\r",
+      "nameUz": "Turistik agentliklar faoliyati",
+      "nameUzc": "Туристик агентликлар фаолияти\r"
+    },
+    {
+      "id": "25620",
+      "name": "Основные технологические процессы машиностроения\r",
+      "nameUz": "Mashinasozlikning asosiy texnologik jarayonlari",
+      "nameUzc": "Машинасозликнинг асосий технологик жараёнлари\r"
+    },
+    {
+      "id": "01440",
+      "name": "Разведение верблюдов и верблюдовых\r",
+      "nameUz": "Tuyalar va tuyasimonlarni ko‘paytirish",
+      "nameUzc": "Туялар ва туясимонларни кўпайтириш\r"
+    },
+    {
+      "id": "84210",
+      "name": "Международная деятельность\r",
+      "nameUz": "Xalqaro faoliyat",
+      "nameUzc": "Халқаро фаолият\r"
+    },
+    {
+      "id": "35119",
+      "name": "Производство электроэнергии прочими электростанциями\r",
+      "nameUz": "Boshqa elektr stantsiyalari tomonidan elektr energiyasi ishlab chiqarish",
+      "nameUzc": "Бошқа электр стантсиялари томонидан электр энергияси ишлаб чиқариш\r"
+    },
+    {
+      "id": "10860",
+      "name": "Производство детского питания и диетических пищевых продуктов\r",
+      "nameUz": "Bolalar ovqati va parhez oziq-ovqat mahsulotlari ishlab chiqarish",
+      "nameUzc": "Болалар овқати ва парҳез озиқ-овқат маҳсулотлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "43910",
+      "name": "Кровельные работы\r",
+      "nameUz": "Tom yopish ishlari",
+      "nameUzc": "Том ёпиш ишлари\r"
+    },
+    {
+      "id": "81210",
+      "name": "Общая уборка зданий\r",
+      "nameUz": "Binolarni umumiy yig‘ishtirish",
+      "nameUzc": "Биноларни умумий йиғиштириш\r"
+    },
+    {
+      "id": "38310",
+      "name": "Ликвидация обломков\r",
+      "nameUz": "Siniq bo‘laklarni yo‘qotish",
+      "nameUzc": "Синиқ бўлакларни ё‘қотиш\r"
+    },
+    {
+      "id": "35112",
+      "name": "Производство электроэнергии гидроэлектростанциями\r",
+      "nameUz": "Gidro elektr stantsiyalari tomonidan elektr energiyasi ishlab chiqarish",
+      "nameUzc": "Гидро электр стантсиялари томонидан электр энергияси ишлаб чиқариш\r"
+    },
+    {
+      "id": "28230",
+      "name": "Производство офисной техники и оборудования (за исключением компьютеров и периферийного оборудования)\r",
+      "nameUz": "Ofis texnikasi va jihozlari ishlab chiqarish (kompyuterlar va periferik uskunalardan tashqari)",
+      "nameUzc": "Офис техникаси ва жиҳозлари ишлаб чиқариш (компютерлар ва периферик ускуналардан ташқари)\r"
+    },
+    {
+      "id": "27320",
+      "name": "Производство прочих видов электропровода и кабеля\r",
+      "nameUz": "Elektr simlari va kabelning boshqa turlarini ishlab chiqarish",
+      "nameUzc": "Электр симлари ва кабелнинг бошқа турларини ишлаб чиқариш\r"
+    },
+    {
+      "id": "41201",
+      "name": "Строительство жилых зданий\r",
+      "nameUz": "Turar joy binolarini qurish",
+      "nameUzc": "Турар жой биноларини қуриш\r"
+    },
+    {
+      "id": "66190",
+      "name": "Прочая вспомогательная деятельность по предоставлению финансовых услуг",
+      "nameUz": "Sug‘urtalash va nafaqa ta’minotidan tashqari moliyaviy xizmatlar ko‘rsatish bo‘yicha boshqa yordamchi faoliyat",
+      "nameUzc": "Суғурталаш ва нафақа та’минотидан ташқари молиявий хизматлар кўрсатиш бўйича бошқа ёрдамчи фаолият\r"
+    },
+    {
+      "id": "47760",
+      "name": "Розничная торговля в специализированных магазинах цветами и другими растениями",
+      "nameUz": "Ixtisoslashgan do‘konlarda gullar va boshqa o‘simliklar, urug‘lar, o‘g‘itlar, uy hayvonlari va ular uchun ozuqalar chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда гуллар ва бошқа ўсимликлар"
+    },
+    {
+      "id": "15120",
+      "name": "Производство багажных сумок",
+      "nameUz": "Chemodanlar, ayollar sumkalari va teridan boshqa buyumlar ishlab chiqarish",
+      "nameUzc": "Чемоданлар"
+    },
+    {
+      "id": "27110",
+      "name": "Производство электродвигателей",
+      "nameUz": "Elektr dvigatellar, generatorlar va transformatorlar ishlab chiqarish",
+      "nameUzc": "Электр двигателлар"
+    },
+    {
+      "id": "51220",
+      "name": "Транспортная космическая система\r",
+      "nameUz": "Kosmik transport tizimi",
+      "nameUzc": "Космик транспорт тизими\r"
+    },
+    {
+      "id": "69203",
+      "name": "Услуги налоговых консультантов\r",
+      "nameUz": "Soliq solish masalalari bo‘yicha maslahatchilar xizmati",
+      "nameUzc": "Солиқ солиш масалалари бўйича маслаҳатчилар хизмати\r"
+    },
+    {
+      "id": "10310",
+      "name": "Переработка и консервирование картофеля\r",
+      "nameUz": "Kartoshkani qayta ishlash va konservalash",
+      "nameUzc": "Картошкани қайта ишлаш ва консервалаш\r"
+    },
+    {
+      "id": "28300",
+      "name": "Производство сельскохозяйственной и лесохозяйственной техники\r",
+      "nameUz": "Qishloq xo‘jaligi va o‘rmon xo‘jaligi texnikalarini ishlab chiqarish",
+      "nameUzc": "Қишлоқ хўжалиги ва ўрмон хўжалиги техникаларини ишлаб чиқариш\r"
+    },
+    {
+      "id": "91030",
+      "name": "Деятельность по сохранению исторических мест и зданий",
+      "nameUz": "Tarixiy joylar va binolarni, madaniyat yodgorliklarini asrash bo‘yicha faoliyat",
+      "nameUzc": "Тарихий жойлар ва биноларни"
+    },
+    {
+      "id": "01120",
+      "name": "Выращивание риса\r",
+      "nameUz": "Sholi yetishtirish",
+      "nameUzc": "Шоли етиштириш\r"
+    },
+    {
+      "id": "53200",
+      "name": "Прочая почтовая и курьерская деятельность\r",
+      "nameUz": "Boshqa pochta va kurerlik faoliyati",
+      "nameUzc": "Бошқа почта ва курерлик фаолияти\r"
+    },
+    {
+      "id": "26520",
+      "name": "Производство часов\r",
+      "nameUz": "Soatlar ishlab chiqarish",
+      "nameUzc": "Соатлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "41202",
+      "name": "Строительство нежилых зданий\r",
+      "nameUz": "Yashash uchun mo‘ljallanmagan binolar qurish",
+      "nameUzc": "Яшаш учун мўлжалланмаган бинолар қуриш\r"
+    },
+    {
+      "id": "28150",
+      "name": "Производство подшипников",
+      "nameUz": "Podshipniklar, tishli g‘ildiraklar, tishli uzatma va yuritmalarning elementlarini ishlab chiqarish",
+      "nameUzc": "Подшипниклар"
+    },
+    {
+      "id": "20120",
+      "name": "Производство красителей и пигментов\r",
+      "nameUz": "Bo‘yoq moddalar va pigmentlar ishlab chiqarish",
+      "nameUzc": "Бўёқ моддалар ва пигментлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "01191",
+      "name": "Выращивание кормовых культур и их семян\r",
+      "nameUz": "Yem-xashak ekinlari va ularning urug‘larini yetishtirish",
+      "nameUzc": "Ем-хашак экинлари ва уларнинг уруғларини етиштириш\r"
+    },
+    {
+      "id": "30110",
+      "name": "Строительство кораблей и плавучих конструкций\r",
+      "nameUz": "Kemalar va suzuvchi konstruktsiyalar qurish",
+      "nameUzc": "Кемалар ва сузувчи конструктсиялар қуриш\r"
+    },
+    {
+      "id": "01240",
+      "name": "Выращивание косточковых и семечковых плодов\r",
+      "nameUz": "Danakli va po‘choqli urug‘i bo‘lgan mevalar yetishtirish",
+      "nameUzc": "Данакли ва пўчоқли уруғи бўлган мевалар етиштириш\r"
+    },
+    {
+      "id": "87300",
+      "name": "Деятельность по уходу за престарелыми и инвалидами с обеспечением проживания\r",
+      "nameUz": "Yashash uchun joy bilan ta’minlagan holda keksa yoshdagilar va nogironlarni parvarishlash bo‘yicha faoliyat",
+      "nameUzc": "Яшаш учун жой билан та’минлаган ҳолда кекса ёшдагилар ва ногиронларни парваришлаш бўйича фаолият\r"
+    },
+    {
+      "id": "01199",
+      "name": "Выращивание прочих не многолетних культур",
+      "nameUz": "Boshqa toifalarga kiritilmagan ko‘p yillik bo‘lmagan ekinlarni yetishtirish",
+      "nameUzc": "Бошқа тоифаларга киритилмаган кўп йиллик бўлмаган экинларни етиштириш\r"
+    },
+    {
+      "id": "69101",
+      "name": "Деятельность адвокатских формирований\r",
+      "nameUz": "Advokatlar tuzilmalarining faoliyati",
+      "nameUzc": "Адвокатлар тузилмаларининг фаолияти\r"
+    },
+    {
+      "id": "52230",
+      "name": "Услуги в области воздушного транспорта\r",
+      "nameUz": "Havo transporti sohasidagi xizmatlar",
+      "nameUzc": "Ҳаво транспорти соҳасидаги хизматлар\r"
+    },
+    {
+      "id": "23630",
+      "name": "Производство готового бетона\r",
+      "nameUz": "Tayyor beton ishlab chiqarish",
+      "nameUzc": "Тайёр бетон ишлаб чиқариш\r"
+    },
+    {
+      "id": "65120",
+      "name": "Страхование",
+      "nameUz": "Hayotni sug‘urtalashdan tashqari sug‘urtalash",
+      "nameUzc": "Ҳаётни суғурталашдан ташқари суғурталаш\r"
+    },
+    {
+      "id": "52220",
+      "name": "Услуги в области водного транспорта\r",
+      "nameUz": "Suv transporti sohasidagi xizmatlar",
+      "nameUzc": "Сув транспорти соҳасидаги хизматлар\r"
+    },
+    {
+      "id": "11020",
+      "name": "Производство вина из винограда\r",
+      "nameUz": "Uzumdan vino ishlab chiqarish",
+      "nameUzc": "Узумдан вино ишлаб чиқариш\r"
+    },
+    {
+      "id": "22230",
+      "name": "Производство строительных пластиковых изделий\r",
+      "nameUz": "Qurilish uchun plastik buyumlar ishlab chiqarish",
+      "nameUzc": "Қурилиш учун пластик буюмлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "6419",
+      "name": "Другие виды денежно-кредитного посредничества\r",
+      "nameUz": "Pul-kredit vositаchiligining boshqа turlаri",
+      "nameUzc": "Пул-кредит воситачилигининг бошқа турлари\r"
+    },
+    {
+      "id": "46240",
+      "name": "Оптовая торговля шкурами и кожей\r",
+      "nameUz": "Teri va charmlarning ulgurji savdosi",
+      "nameUzc": "Тери ва чармларнинг улгуржи савдоси\r"
+    },
+    {
+      "id": "07210",
+      "name": "Добыча урановой и ториевой руды\r",
+      "nameUz": "Uran va toriy rudalarini qazib olish",
+      "nameUzc": "Уран ва торий рудаларини қазиб олиш\r"
+    },
+    {
+      "id": "82910",
+      "name": "Деятельность агентств по сбору платежей и кредитных бюро\r",
+      "nameUz": "To‘lovlarni yig‘ish bo‘yicha agentliklar va kredit byurolari faoliyati",
+      "nameUzc": "Тўловларни йиғиш бўйича агентликлар ва кредит бюролари фаолияти\r"
+    },
+    {
+      "id": "49100",
+      "name": "Пассажирский железнодорожный транспорт",
+      "nameUz": "Temir yo‘l yo‘lovchi transporti, shaharlararo",
+      "nameUzc": "Темир ё‘л ё‘ловчи транспорти"
+    },
+    {
+      "id": "77110",
+      "name": "Аренда и лизинг легковых автомобилей и легких моторных транспортных средств\r",
+      "nameUz": "Yengil avtomobillar va yengil motorli transport vositalari ijarasi va lizingi",
+      "nameUzc": "Енгил автомобиллар ва енгил моторли транспорт воситалари ижараси ва лизинги\r"
+    },
+    {
+      "id": "47240",
+      "name": "Розничная торговля в специализированных магазинах хлебобулочными изделиями",
+      "nameUz": "Ixtisoslashgan do‘konlarda non mahsulotlari, undan tayyorlangan va shakarli qandolat mahsulotlari chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда нон маҳсулотлари"
+    },
+    {
+      "id": "20130",
+      "name": "Производство прочих основных неорганических химических веществ\r",
+      "nameUz": "Boshqa asosiy noorganik kimyoviy moddalar ishlab chiqarish",
+      "nameUzc": "Бошқа асосий ноорганик кимёвий моддалар ишлаб чиқариш\r"
+    },
+    {
+      "id": "03110",
+      "name": "Морское рыболовство\r",
+      "nameUz": "Dengizlarda baliq ovlash",
+      "nameUzc": "Денгизларда балиқ овлаш\r"
+    },
+    {
+      "id": "29200",
+      "name": "Производство кузовов для автотранспортных средств; производство трейлеров и полуприцепов\r",
+      "nameUz": "Avtotransport vositalari uchun kuzovlar ishlab chiqarish; treylerlar va yarim pritseplar ishlab chiqarish",
+      "nameUzc": "Автотранспорт воситалари учун кузовлар ишлаб чиқариш; трейлерлар ва ярим притсеплар ишлаб чиқариш\r"
+    },
+    {
+      "id": "20152",
+      "name": "Производство азотосодержащих смесей\r",
+      "nameUz": "Azotli birikmalar ishlab chiqarish",
+      "nameUzc": "Азотли бирикмалар ишлаб чиқариш\r"
+    },
+    {
+      "id": "31010",
+      "name": "Производство офисной и магазинной мебели\r",
+      "nameUz": "Ofis va magazinlar uchun mebel ishlab chiqarish",
+      "nameUzc": "Офис ва магазинлар учун мебел ишлаб чиқариш\r"
+    },
+    {
+      "id": "61100",
+      "name": "Предоставление услуг проводной связи\r",
+      "nameUz": "Simli aloqa xizmatlari ko‘rsatish",
+      "nameUzc": "Симли алоқа хизматлари кўрсатиш\r"
+    },
+    {
+      "id": "15110",
+      "name": "Дубление и выделка кожи; выделка и окраска меха\r",
+      "nameUz": "Terini oshlash va ishlov berish; mo‘ynaga ishlov berish va bo‘yash",
+      "nameUzc": "Терини ошлаш ва ишлов бериш; мўйнага ишлов бериш ва бўяш\r"
+    },
+    {
+      "id": "17290",
+      "name": "Производство прочих изделий из бумаги и картона\r",
+      "nameUz": "Qog‘oz va kartondan boshqa buyumlar ishlab chiqarish",
+      "nameUzc": "Қоғоз ва картондан бошқа буюмлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "49420",
+      "name": "Услуги по перевозкам (переезду)\r",
+      "nameUz": "Ko‘chish bo‘yicha xizmat ko‘rsatish",
+      "nameUzc": "Кўчиш бўйича хизмат кўрсатиш\r"
+    },
+    {
+      "id": "99000",
+      "name": "Деятельность экстерриториальных организаций",
+      "nameUz": "Eksterritorial tashkilotlar faoliyati",
+      "nameUzc": "Экстерриториал ташкилотлар фаолияти"
+    },
+    {
+      "id": "46620",
+      "name": "Оптовая торговля механическими станками\r",
+      "nameUz": "Mexanik dastgohlar ulgurji savdosi",
+      "nameUzc": "Механик дастгоҳлар улгуржи савдоси\r"
+    },
+    {
+      "id": "35111",
+      "name": "Производство электроэнергии тепловыми электростанциями\r",
+      "nameUz": "Issiqlik elektr stantsiyalari tomonidan elektr energiyasi ishlab chiqarish",
+      "nameUzc": "Иссиқлик электр стантсиялари томонидан электр энергияси ишлаб чиқариш\r"
+    },
+    {
+      "id": "16220",
+      "name": "Производство сборных паркетных покрытий\r",
+      "nameUz": "Yig‘ma parket qoplamalar ishlab chiqarish",
+      "nameUzc": "Йиғма паркет қопламалар ишлаб чиқариш\r"
+    },
+    {
+      "id": "18200",
+      "name": "Воспроизведение записей с носителя\r",
+      "nameUz": "Axborot tarqatuvchilardagi yozuvlarni aks ettirish",
+      "nameUzc": "Ахборот тарқатувчилардаги ёзувларни акс эттириш\r"
+    },
+    {
+      "id": "23510",
+      "name": "Производство цемента\r",
+      "nameUz": "Sement ishlab chiqarish",
+      "nameUzc": "Семент ишлаб чиқариш\r"
+    },
+    {
+      "id": "30400",
+      "name": "Производство военных боевых транспортных средств\r",
+      "nameUz": "Harbiy jangovor transport vositalari ishlab chiqarish",
+      "nameUzc": "Ҳарбий жанговор транспорт воситалари ишлаб чиқариш\r"
+    },
+    {
+      "id": "08930",
+      "name": "Добыча соли\r",
+      "nameUz": "Tuz qazib olish",
+      "nameUzc": "Туз қазиб олиш\r"
+    },
+    {
+      "id": "28250",
+      "name": "Производство промышленного холодильного и вентиляционного оборудования\r",
+      "nameUz": "Sanoat sovitish va ventilyatsiya uskunalari ishlab chiqarish",
+      "nameUzc": "Саноат совитиш ва вентилятсия ускуналари ишлаб чиқариш\r"
+    },
+    {
+      "id": "94110",
+      "name": "Деятельность коммерческих и предпринимательских членских организаций\r",
+      "nameUz": "Tijorat va tadbirkorlik a’zolik tashkilotlari faoliyati",
+      "nameUzc": "Тижорат ва тадбиркорлик а’золик ташкилотлари фаолияти\r"
+    },
+    {
+      "id": "93210",
+      "name": "Деятельность парков отдыха и тематических парков\r",
+      "nameUz": "Istirohat bog‘lari va tematik bog‘lar faoliyati",
+      "nameUzc": "Истироҳат боғлари ва тематик боғлар фаолияти\r"
+    },
+    {
+      "id": "64300",
+      "name": "Тресты",
+      "nameUz": "Trestlar, jamg‘armalar va shu kabi moliyaviy tashkilotlar",
+      "nameUzc": "Трестлар"
+    },
+    {
+      "id": "10840",
+      "name": "Производство пряностей и приправ\r",
+      "nameUz": "Ziravor va dorivorlar ishlab chiqarish",
+      "nameUzc": "Зиравор ва дориворлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "47770",
+      "name": "Розничная торговля в специализированных магазинах часами и ювелирными изделиями\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda soatlar va zargarlik buyumlari chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда соатлар ва заргарлик буюмлари чакана савдоси\r"
+    },
+    {
+      "id": "42120",
+      "name": "Строительство железных дорог и линий метро\r",
+      "nameUz": "Temir yo‘llar va metro liniyalari qurish",
+      "nameUzc": "Темир ё‘ллар ва метро линиялари қуриш\r"
+    },
+    {
+      "id": "00000",
+      "name": "Не указано\r",
+      "nameUz": "Kursatilmagan",
+      "nameUzc": "Курсатилмаган\r"
+    },
+    {
+      "id": "46140",
+      "name": "Деятельность агентов по торговле машинами",
+      "nameUz": "Mashinalar, uskunalar, sanoat uskunalari, suv kemalari va havo kemalari ulgurji savdosi bo‘yicha agentlar faoliyati",
+      "nameUzc": "Машиналар"
+    },
+    {
+      "id": "98200",
+      "name": "Предоставление домашними хозяйствами разнообразных услуг для собственного потребления\r",
+      "nameUz": "Uy xo‘jaliklari tomonidan o‘z iste’moli uchun turli xizmatlar ishlab chiqarish",
+      "nameUzc": "Уй хўжаликлари томонидан ўз исте’моли учун турли хизматлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "69202",
+      "name": "Аудиторская деятельность\r",
+      "nameUz": "Auditorlik faoliyati",
+      "nameUzc": "Аудиторлик фаолияти\r"
+    },
+    {
+      "id": "46650",
+      "name": "Оптовая торговля офисной мебелью\r",
+      "nameUz": "Ofis mebellari ulgurji savdosi",
+      "nameUzc": "Офис мебеллари улгуржи савдоси\r"
+    },
+    {
+      "id": "47251",
+      "name": "Розничная торговля алкогольными напитками\r",
+      "nameUz": "Spirtli ichimliklar chakana savdosi",
+      "nameUzc": "Спиртли ичимликлар чакана савдоси\r"
+    },
+    {
+      "id": "52240",
+      "name": "Транспортная обработка грузов\r",
+      "nameUz": "Yuklarga ishlov berish",
+      "nameUzc": "Юкларга ишлов бериш\r"
+    },
+    {
+      "id": "80300",
+      "name": "Проведение расследований\r",
+      "nameUz": "Surishtiruv o‘tkazish",
+      "nameUzc": "Суриштирув ўтказиш\r"
+    },
+    {
+      "id": "96040",
+      "name": "Деятельность по обеспечению физического комфорта\r",
+      "nameUz": "Jismoniy komfortni ta’minlash bo‘yicha faoliyat",
+      "nameUzc": "Жисмоний комфортни та’минлаш бўйича фаолият\r"
+    },
+    {
+      "id": "46350",
+      "name": "Оптовая торговля табачными изделиями\r",
+      "nameUz": "Tamaki mahsulotlari ulgurji savdosi",
+      "nameUzc": "Тамаки маҳсулотлари улгуржи савдоси\r"
+    },
+    {
+      "id": "56290",
+      "name": "Прочие виды организации питания\r",
+      "nameUz": "Ovqatlanishni tashkil qilishning boshqa turlari",
+      "nameUzc": "Овқатланишни ташкил қилишнинг бошқа турлари\r"
+    },
+    {
+      "id": "46450",
+      "name": "Оптовая торговля парфюмерными и косметическими товарами\r",
+      "nameUz": "Parfyumeriya va pardoz tovarlari ulgurji savdosi",
+      "nameUzc": "Парфюмерия ва пардоз товарлари улгуржи савдоси\r"
+    },
+    {
+      "id": "25990",
+      "name": "Производство прочих готовых металлических изделий",
+      "nameUz": "Boshqa toifalarga kiritilmagan tayyor metall buyumlar ishlab chiqarish",
+      "nameUzc": "Бошқа тоифаларга киритилмаган тайёр металл буюмлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "77330",
+      "name": "Аренда и лизинг офисных машин и оборудования",
+      "nameUz": "Ofis mashinalari va uskunalari, jumladan hisoblash texnikasi, ijarasi va lizingi",
+      "nameUzc": "Офис машиналари ва ускуналари"
+    },
+    {
+      "id": "84230",
+      "name": "Деятельность в области юстиции и правосудия\r",
+      "nameUz": "Adliya va sud sohasidagi faoliyat",
+      "nameUzc": "Адлия ва суд соҳасидаги фаолият\r"
+    },
+    {
+      "id": "41100",
+      "name": "Разработка строительных проектов\r",
+      "nameUz": "Qurilish loyihalarini ishlab chiqish",
+      "nameUzc": "Қурилиш лойиҳаларини ишлаб чиқиш\r"
+    },
+    {
+      "id": "82190",
+      "name": "Фотокопировальные работы",
+      "nameUz": "Suratlardan nusxa ko‘chirish ishlari, xujjatlar tayyorlash va ixtisoslashgan idora xizmatining boshqa turlari",
+      "nameUzc": "Суратлардан нусха кўчириш ишлари"
+    },
+    {
+      "id": "47722",
+      "name": "Розничная торговля в специализированных магазинах кожаными изделиями\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda charm buyumlar chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда чарм буюмлар чакана савдоси\r"
+    },
+    {
+      "id": "25940",
+      "name": "Производство крепежных и резьбовых изделий\r",
+      "nameUz": "Mahkamlash uchun va rezbali buyumlar ishlab chiqarish",
+      "nameUzc": "Маҳкамлаш учун ва резбали буюмлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "46630",
+      "name": "Оптовая торговля техникой для горнодобычи и гражданского строительства\r",
+      "nameUz": "Tog‘-kon sanoati va fuqarolik qurilishi uchun texnikalar ulgurji savdosi",
+      "nameUzc": "Тоғ-кон саноати ва фуқаролик қурилиши учун техникалар улгуржи савдоси\r"
+    },
+    {
+      "id": "35130",
+      "name": "Распределение электроэнергии\r",
+      "nameUz": "Elektr energiyasini taqsimlash",
+      "nameUzc": "Электр энергиясини тақсимлаш\r"
+    },
+    {
+      "id": "49500",
+      "name": "Транспортирование по трубопроводу\r",
+      "nameUz": "Quvurlar orqali yuk tashish",
+      "nameUzc": "Қувурлар орқали юк ташиш\r"
+    },
+    {
+      "id": "43291",
+      "name": "Изоляционные работы\r",
+      "nameUz": "Izolyatsiyalash ishlari",
+      "nameUzc": "Изолятсиялаш ишлари\r"
+    },
+    {
+      "id": "71200",
+      "name": "Технические испытания и анализы\r",
+      "nameUz": "Texnik sinovlar va tahlillar",
+      "nameUzc": "Техник синовлар ва таҳлиллар\r"
+    },
+    {
+      "id": "14120",
+      "name": "Производство спецодежды\r",
+      "nameUz": "Korjomalar ishlab chiqarish",
+      "nameUzc": "Коржомалар ишлаб чиқариш\r"
+    },
+    {
+      "id": "24450",
+      "name": "Производство прочих цветных металлов\r",
+      "nameUz": "Boshqa rangli metallar ishlab chiqarish",
+      "nameUzc": "Бошқа рангли металлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "95120",
+      "name": "Ремонт коммуникационного оборудования\r",
+      "nameUz": "Kommunikatsiya uskunalarini ta’mirlash",
+      "nameUzc": "Коммуникатсия ускуналарини та’мирлаш\r"
+    },
+    {
+      "id": "94920",
+      "name": "Деятельность политических организаций\r",
+      "nameUz": "Siyosiy tashkilotlar faoliyati",
+      "nameUzc": "Сиёсий ташкилотлар фаолияти\r"
+    },
+    {
+      "id": "52292",
+      "name": "Услуги таможенных агентов\r",
+      "nameUz": "Bojxona agentlarining xizmatlari",
+      "nameUzc": "Божхона агентларининг хизматлари\r"
+    },
+    {
+      "id": "46490",
+      "name": "Оптовая торговля прочими бытовыми товарами\r",
+      "nameUz": "Boshqa maishiy tovarlar ulgurji savdosi",
+      "nameUzc": "Бошқа маиший товарлар улгуржи савдоси\r"
+    },
+    {
+      "id": "52291",
+      "name": "Организация транспортировки по железной дороге",
+      "nameUz": "Temir yo‘l, avtotransport, dengiz yoki havo orqali transportda tashishni tashkil qilish",
+      "nameUzc": "Темир ё‘л"
+    },
+    {
+      "id": "58110",
+      "name": "Издание книг\r",
+      "nameUz": "Kitoblar nashr qilish",
+      "nameUzc": "Китоблар нашр қилиш\r"
+    },
+    {
+      "id": "20151",
+      "name": "Производство удобрений\r",
+      "nameUz": "O‘g‘itlar ishlab chiqarish",
+      "nameUzc": "Ўғитлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "10139",
+      "name": "Производство прочих мясных продуктов",
+      "nameUz": "Boshqa toifalarga kiritilmagan go‘sht mahsulotlari ishlab chiqarish",
+      "nameUzc": "Бошқа тоифаларга киритилмаган гўшт маҳсулотлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "77220",
+      "name": "Прокат видеозаписей и дисков\r",
+      "nameUz": "Videoyozuvlar va disklar prokati",
+      "nameUzc": "Видеоёзувлар ва дисклар прокати\r"
+    },
+    {
+      "id": "01451",
+      "name": "Разведение овец каракульских пород\r",
+      "nameUz": "Qorako‘l zotli qo‘ylarni ko‘paytirish",
+      "nameUzc": "Қоракўл зотли қўйларни кўпайтириш\r"
+    },
+    {
+      "id": "10620",
+      "name": "Производство крахмала и продукции из крахмала\r",
+      "nameUz": "Kraxmal va kraxmalli mahsulotlar ishlab chiqarish",
+      "nameUzc": "Крахмал ва крахмалли маҳсулотлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "20530",
+      "name": "Производство эфирных масел\r",
+      "nameUz": "Efir moylari ishlab chiqarish",
+      "nameUzc": "Эфир мойлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "14110",
+      "name": "Производство одежды из кожи\r",
+      "nameUz": "Charmdan kiyimlar ishlab chiqarish",
+      "nameUzc": "Чармдан кийимлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "64190",
+      "name": "Другие виды денежно-кредитного посредничества\r",
+      "nameUz": "Pul-kredit vositachiligining boshqa turlari",
+      "nameUzc": "Пул-кредит воситачилигининг бошқа турлари\r"
+    },
+    {
+      "id": "24410",
+      "name": "Производство благородных (драгоценных) металлов\r",
+      "nameUz": "Asl (qimmatbaho) metallar ishlab chiqarish",
+      "nameUzc": "Асл (қимматбаҳо) металлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "59140",
+      "name": "Показ кинофильмов\r",
+      "nameUz": "Kinofilmlar namoyish qilish",
+      "nameUzc": "Кинофилмлар намойиш қилиш\r"
+    },
+    {
+      "id": "94120",
+      "name": "Деятельность профессиональных членских организаций\r",
+      "nameUz": "Professional a’zolik tashkilotlari faoliyati",
+      "nameUzc": "Профессионал а’золик ташкилотлари фаолияти\r"
+    },
+    {
+      "id": "65300",
+      "name": "Деятельность пенсионных фондов\r",
+      "nameUz": "Nafaqa jamg‘armalari faoliyati",
+      "nameUzc": "Нафақа жамғармалари фаолияти\r"
+    },
+    {
+      "id": "11010",
+      "name": "Дистилляция",
+      "nameUz": "Spirtli ichimliklarni distillash, tozalash va aralashtirish",
+      "nameUzc": "Спиртли ичимликларни дистиллаш"
+    },
+    {
+      "id": "33130",
+      "name": "Ремонт электронного и оптического оборудования\r",
+      "nameUz": "Elektron va optik uskunalarni ta’mirlash",
+      "nameUzc": "Электрон ва оптик ускуналарни та’мирлаш\r"
+    },
+    {
+      "id": "33200",
+      "name": "Монтаж промышленной техники и оборудования\r",
+      "nameUz": "Sanoat texnika va uskunalarini montaj qilish (yig‘ish)",
+      "nameUzc": "Саноат техника ва ускуналарини монтаж қилиш (йиғиш)\r"
+    },
+    {
+      "id": "98100",
+      "name": "Производство домашними хозяйствами разнообразных товаров для собственного потребления\r",
+      "nameUz": "Uy xo‘jaliklari tomonidan o‘z iste’moli uchun turli tovarlar ishlab chiqarish",
+      "nameUzc": "Уй хўжаликлари томонидан ўз исте’моли учун турли товарлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "10720",
+      "name": "Производство сухарей и печенья",
+      "nameUz": "Suxari va pechene, xamirdan tayyorlangan uzoq saqlanadigan qandolat mahsulotlari ishlab chiqarish",
+      "nameUzc": "Сухари ва печене"
+    },
+    {
+      "id": "66220",
+      "name": "Деятельность страховых агентов и брокеров\r",
+      "nameUz": "Sug‘urta agentlari va brokerlar faoliyati",
+      "nameUzc": "Суғурта агентлари ва брокерлар фаолияти\r"
+    },
+    {
+      "id": "13910",
+      "name": "Производство вязанного и трикотажного полотна\r",
+      "nameUz": "To‘qilgan va trikotaj polotno ishlab chiqarish",
+      "nameUzc": "Тўқилган ва трикотаж полотно ишлаб чиқариш\r"
+    },
+    {
+      "id": "01470",
+      "name": "Птицеводство\r",
+      "nameUz": "Parrandachilik",
+      "nameUzc": "Паррандачилик\r"
+    },
+    {
+      "id": "55100",
+      "name": "Гостиницы и аналогичные места проживания\r",
+      "nameUz": "Mehmonxonalar va shunga o‘xshash yashash joylari",
+      "nameUzc": "Меҳмонхоналар ва шунга ўхшаш яшаш жойлари\r"
+    },
+    {
+      "id": "46520",
+      "name": "Оптовая торговля электронным и телекоммуникационным оборудованием и запчастями к нему\r",
+      "nameUz": "Elektron va telekommunikatsion uskunalar va ularning ehtiyot qismlari ulgurji savdosi",
+      "nameUzc": "Электрон ва телекоммуникатсион ускуналар ва уларнинг эҳтиёт қисмлари улгуржи савдоси\r"
+    },
+    {
+      "id": "33110",
+      "name": "Ремонт готовых металлических изделий\r",
+      "nameUz": "Tayyor metall buyumlarni ta’mirlash",
+      "nameUzc": "Тайёр металл буюмларни та’мирлаш\r"
+    },
+    {
+      "id": "01499",
+      "name": "Разведение прочих животных",
+      "nameUz": "Boshqa toifalarga kiritilmagan hayvonlarni ko‘paytirish",
+      "nameUzc": "Бошқа тоифаларга киритилмаган ҳайвонларни кўпайтириш\r"
+    },
+    {
+      "id": "58190",
+      "name": "Прочие виды издательской деятельности\r",
+      "nameUz": "Nashriyotchilik faoliyatining boshqa turlari",
+      "nameUzc": "Нашриётчилик фаолиятининг бошқа турлари\r"
+    },
+    {
+      "id": "27400",
+      "name": "Производство электроосветительного оборудования\r",
+      "nameUz": "Elektr yoritish uskunalari ishlab chiqarish",
+      "nameUzc": "Электр ёритиш ускуналари ишлаб чиқариш\r"
+    },
+    {
+      "id": "94200",
+      "name": "Деятельность профсоюзов\r",
+      "nameUz": "Kasaba uyushmalari faoliyati",
+      "nameUzc": "Касаба уюшмалари фаолияти\r"
+    },
+    {
+      "id": "26120",
+      "name": "Производство электронных панелей загрузки\r",
+      "nameUz": "Elektron yuklash panellari ishlab chiqarish",
+      "nameUzc": "Электрон юклаш панеллари ишлаб чиқариш\r"
+    },
+    {
+      "id": "45203",
+      "name": "Мойка",
+      "nameUz": "Avtomobillarni yuvish, sayqallash va shu kabi faoliyat",
+      "nameUzc": "Автомобилларни ювиш"
+    },
+    {
+      "id": "56100",
+      "name": "Рестораны и услуги по доставке продуктов питания\r",
+      "nameUz": "Restoranlar va oziq-ovqat mahsulotlari yetkazish bo‘yicha xizmatlar",
+      "nameUzc": "Ресторанлар ва озиқ-овқат маҳсулотлари етказиш бўйича хизматлар\r"
+    },
+    {
+      "id": "28490",
+      "name": "Производство прочих металлообрабатывающих станков\r",
+      "nameUz": "Boshqa metallga ishlov beradigan dastgohlar ishlab chiqarish",
+      "nameUzc": "Бошқа металлга ишлов берадиган дастгоҳлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "20420",
+      "name": "Производство парфюмерных и косметических средств\r",
+      "nameUz": "Parfyumeriya va pardoz vositalari ishlab chiqarish",
+      "nameUzc": "Парфюмерия ва пардоз воситалари ишлаб чиқариш\r"
+    },
+    {
+      "id": "80100",
+      "name": "Деятельность частных охранных служб\r",
+      "nameUz": "Xususiy soqchilar xizmati faoliyati",
+      "nameUzc": "Хусусий соқчилар хизмати фаолияти\r"
+    },
+    {
+      "id": "93120",
+      "name": "Деятельность спортивных клубов\r",
+      "nameUz": "Sport klublari faoliyati",
+      "nameUzc": "Спорт клублари фаолияти\r"
+    },
+    {
+      "id": "78100",
+      "name": "Деятельность агентств по трудоустройству\r",
+      "nameUz": "Ishga joylashtirish bo‘yicha agentliklar faoliyati",
+      "nameUzc": "Ишга жойлаштириш бўйича агентликлар фаолияти\r"
+    },
+    {
+      "id": "46730",
+      "name": "Оптовая торговля лесоматериалами",
+      "nameUz": "Yog‘och, qurilish materiallari va sanitariya-texnik uskunalar ulgurji savdosi",
+      "nameUzc": "Ёғоч"
+    },
+    {
+      "id": "01139",
+      "name": "Выращивание прочих корне- и клубнеплодных культур и их семян",
+      "nameUz": "Boshqa ildizmevali ekinlar va ularning urug‘larini, qo‘ziqorinlar va tryufellarni yetishtirish",
+      "nameUzc": "Бошқа илдизмевали экинлар ва уларнинг уруғларини"
+    },
+    {
+      "id": "58210",
+      "name": "Выпуск компьютерных игр\r",
+      "nameUz": "Kompyuter o‘yinlarini chiqarish",
+      "nameUzc": "Компютер ўйинларини чиқариш\r"
+    },
+    {
+      "id": "46220",
+      "name": "Оптовая торговля цветами и другими растениями\r",
+      "nameUz": "Gullar va boshqa o‘simliklarning ulgurji savdosi",
+      "nameUzc": "Гуллар ва бошқа ўсимликларнинг улгуржи савдоси\r"
+    },
+    {
+      "id": "01113",
+      "name": "Выращивание масличных культур и их семян\r",
+      "nameUz": "Moyli ekinlar va ularning urug‘ini yetishtirish",
+      "nameUzc": "Мойли экинлар ва уларнинг уруғини етиштириш\r"
+    },
+    {
+      "id": "03220",
+      "name": "Аквакультура пресноводная\r",
+      "nameUz": "Chuchuk suv akvakulturasi",
+      "nameUzc": "Чучук сув аквакултураси\r"
+    },
+    {
+      "id": "46720",
+      "name": "Оптовая торговля металлами и металлическими рудами\r",
+      "nameUz": "Metall va metall rudalari ulgurji savdosi",
+      "nameUzc": "Металл ва металл рудалари улгуржи савдоси\r"
+    },
+    {
+      "id": "42210",
+      "name": "Строительство распределительных инженерных объектов\r",
+      "nameUz": "Taqsimlovchi muhandislik ob’ektlari qurish",
+      "nameUzc": "Тақсимловчи муҳандислик об’ектлари қуриш\r"
+    },
+    {
+      "id": "08990",
+      "name": "Деятельность горнодобывающей промышленности",
+      "nameUz": "Boshqa toifalarga kiritilmagan tog‘-kon sanoati bilan bog‘liq faoliyat",
+      "nameUzc": "Бошқа тоифаларга киритилмаган тоғ-кон саноати билан боғлиқ фаолият\r"
+    },
+    {
+      "id": "32990",
+      "name": "Производство прочей продукции",
+      "nameUz": "Boshqa toifalarga kiritilmagan boshqa mahsulotlar ishlab chiqarish",
+      "nameUzc": "Бошқа тоифаларга киритилмаган бошқа маҳсулотлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "95210",
+      "name": "Ремонт приборов бытовой электроники\r",
+      "nameUz": "Maishiy elektronika jihozlarini ta’mirlash",
+      "nameUzc": "Маиший электроника жиҳозларини та’мирлаш\r"
+    },
+    {
+      "id": "30990",
+      "name": "Производство прочих транспортных средств и оборудования",
+      "nameUz": "Boshqa toifalarga kiritilmagan boshqa transport vositalari va uskunalari ishlab chiqarish",
+      "nameUzc": "Бошқа тоифаларга киритилмаган бошқа транспорт воситалари ва ускуналари ишлаб чиқариш\r"
+    },
+    {
+      "id": "01420",
+      "name": "Разведение прочих пород крупного рогатого скота и буйволов\r",
+      "nameUz": "Yirik shoxli qoramollarning boshqa zotlarini va buyvollarni ko‘paytirish",
+      "nameUzc": "Йирик шохли қорамолларнинг бошқа зотларини ва буйволларни кўпайтириш\r"
+    },
+    {
+      "id": "77320",
+      "name": "Аренда и лизинг строительной техники и оборудования для строительства гражданских объектов\r",
+      "nameUz": "Fuqarolik ob’ektlari qurish uchun mo‘ljallangan qurilish texnikasi va uskunalari ijarasi va lizingi",
+      "nameUzc": "Фуқаролик об’ектлари қуриш учун мўлжалланган қурилиш техникаси ва ускуналари ижараси ва лизинги\r"
+    },
+    {
+      "id": "22220",
+      "name": "Производство пластиковых упаковок для товаров\r",
+      "nameUz": "Tovarlar uchun plastik qadoqlash mahsulotlari ishlab chiqarish",
+      "nameUzc": "Товарлар учун пластик қадоқлаш маҳсулотлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "45209",
+      "name": "Виды технического обслуживания и ремонта моторных транспортных средств",
+      "nameUz": "Boshqa toifalarga kiritilmagan, motorli transport vositalariga texnik xizmat ko‘rsatish va ta’mirlash turlari",
+      "nameUzc": "Бошқа тоифаларга киритилмаган"
+    },
+    {
+      "id": "21200",
+      "name": "Производство фармацевтических препаратов\r",
+      "nameUz": "Farmatsevtika preparatlarini ishlab chiqarish",
+      "nameUzc": "Фарматсевтика препаратларини ишлаб чиқариш\r"
+    },
+    {
+      "id": "91010",
+      "name": "Деятельность библиотек и архивов\r",
+      "nameUz": "Kutubxonalar va arxivlar faoliyati",
+      "nameUzc": "Кутубхоналар ва архивлар фаолияти\r"
+    },
+    {
+      "id": "26800",
+      "name": "Производство магнитных и оптических средств передачи информации\r",
+      "nameUz": "Axborot uzatishning magnit va optik vositalarini ishlab chiqarish",
+      "nameUzc": "Ахборот узатишнинг магнит ва оптик воситаларини ишлаб чиқариш\r"
+    },
+    {
+      "id": "24510",
+      "name": "Литье чугуна\r",
+      "nameUz": "Cho‘yan quyish",
+      "nameUzc": "Чўян қуйиш\r"
+    },
+    {
+      "id": "45201",
+      "name": "Техническое обслуживание и ремонт легковых автомобилей\r",
+      "nameUz": "Yengil avtomobillarga texnik xizmat ko‘rsatish va ta’mirlash",
+      "nameUzc": "Енгил автомобилларга техник хизмат кўрсатиш ва та’мирлаш\r"
+    },
+    {
+      "id": "96090",
+      "name": "Прочие индивидуальные услуги",
+      "nameUz": "Boshqa toifalarga kiritilmagan shaxsiy xizmatlar",
+      "nameUzc": "Бошқа тоифаларга киритилмаган шахсий хизматлар\r"
+    },
+    {
+      "id": "91040",
+      "name": "Деятельность ботанических садов",
+      "nameUz": "Botanika bog‘lari, hayvonot bog‘lari va qo‘riqxonalar faoliyati",
+      "nameUzc": "Ботаника боғлари"
+    },
+    {
+      "id": "74200",
+      "name": "Деятельность в области фотографии\r",
+      "nameUz": "Fotografiya sohasidagi faoliyat",
+      "nameUzc": "Фотография соҳасидаги фаолият\r"
+    },
+    {
+      "id": "46440",
+      "name": "Оптовая торговля изделиями из фарфора",
+      "nameUz": "Chinni buyumlar, shisha idishlar va tozalash vositalari ulgurji savdosi",
+      "nameUzc": "Чинни буюмлар"
+    },
+    {
+      "id": "69201",
+      "name": "Деятельность в области бухгалтерского учета\r",
+      "nameUz": "Buxgalterlik hisobi sohasidagi faoliyat",
+      "nameUzc": "Бухгалтерлик ҳисоби соҳасидаги фаолият\r"
+    },
+    {
+      "id": "46410",
+      "name": "Оптовая торговля текстильными товарами\r",
+      "nameUz": "To‘qimachilik tovarlari ulgurji savdosi",
+      "nameUzc": "Тўқимачилик товарлари улгуржи савдоси\r"
+    },
+    {
+      "id": "15200",
+      "name": "Производство обуви\r",
+      "nameUz": "Poyafzal ishlab chiqarish",
+      "nameUzc": "Пояфзал ишлаб чиқариш\r"
+    },
+    {
+      "id": "47290",
+      "name": "Розничная торговля в специализированных магазинах прочими продуктами питания\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda boshqa oziq-ovqat mahsulotlari chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда бошқа озиқ-овқат маҳсулотлари чакана савдоси\r"
+    },
+    {
+      "id": "01460",
+      "name": "Разведение свиней и поросят\r",
+      "nameUz": "Cho‘chqalar va cho‘chqa bolalarini ko‘paytirish",
+      "nameUzc": "Чўчқалар ва чўчқа болаларини кўпайтириш\r"
+    },
+    {
+      "id": "61300",
+      "name": "Предоставление услуг спутниковой связи\r",
+      "nameUz": "Yo‘ldosh vositasidagi aloqa xizmatlari ko‘rsatish",
+      "nameUzc": "Ё‘лдош воситасидаги алоқа хизматлари кўрсатиш\r"
+    },
+    {
+      "id": "10410",
+      "name": "Производство растительных и животных масел и жиров\r",
+      "nameUz": "O‘simlik va hayvonlar yog‘lari va moylarini ishlab chiqarish",
+      "nameUzc": "Ўсимлик ва ҳайвонлар ёғлари ва мойларини ишлаб чиқариш\r"
+    },
+    {
+      "id": "46160",
+      "name": "Деятельность агентов по оптовой торговле текстильными изделиями",
+      "nameUz": "To‘qimachilik mahsulotlari, kiyim-kechak, poyafzal, mo‘ynali va charm buyumlar ulgurji savdosi bo‘yicha agentlar faoliyati",
+      "nameUzc": "Тўқимачилик маҳсулотлари"
+    },
+    {
+      "id": "16210",
+      "name": "Производство шпона",
+      "nameUz": "Shpon, faner, yog‘ochdan plita va panellar ishlab chiqarish",
+      "nameUzc": "Шпон"
+    },
+    {
+      "id": "17120",
+      "name": "Производство бумаги и картона\r",
+      "nameUz": "Qog‘oz va karton ishlab chiqarish",
+      "nameUzc": "Қоғоз ва картон ишлаб чиқариш\r"
+    },
+    {
+      "id": "90020",
+      "name": "Техническая поддержка при показе спектаклей\r",
+      "nameUz": "Spektakllar namoyishini texnik jihatdan qo‘llab-quvvatlash",
+      "nameUzc": "Спектакллар намойишини техник жиҳатдан қўллаб-қувватлаш\r"
+    },
+    {
+      "id": "96020",
+      "name": "Услуги парикмахерских и салонов красоты\r",
+      "nameUz": "Sartaroshxonalar va go‘zallik salonlari xizmatlari",
+      "nameUzc": "Сартарошхоналар ва гўзаллик салонлари хизматлари\r"
+    },
+    {
+      "id": "84240",
+      "name": "Деятельность по обеспечению общественного порядка и безопасности\r",
+      "nameUz": "Jamoat tartibi va xavfsizligini ta’minlash sohasidagi faoliyat",
+      "nameUzc": "Жамоат тартиби ва хавфсизлигини та’минлаш соҳасидаги фаолият\r"
+    },
+    {
+      "id": "70210",
+      "name": "Деятельность по взаимоотношениям и связью с общественностью\r",
+      "nameUz": "Jamoatchilik bilan o‘zaro munosabatlar va aloqalar bo‘yicha faoliyat",
+      "nameUzc": "Жамоатчилик билан ўзаро муносабатлар ва алоқалар бўйича фаолият\r"
+    },
+    {
+      "id": "51100",
+      "name": "Пассажирский воздушный транспорт\r",
+      "nameUz": "Havo yo‘lovchi transporti",
+      "nameUzc": "Ҳаво ё‘ловчи транспорти\r"
+    },
+    {
+      "id": "01612",
+      "name": "Защита растений от болезней и насекомых-вредителей",
+      "nameUz": "O‘simliklarni kasallik va zararkunanda hashoratlardan, shuningdek kemiruvchilardan himoya qilish",
+      "nameUzc": "Ўсимликларни касаллик ва зараркунанда ҳашоратлардан"
+    },
+    {
+      "id": "25730",
+      "name": "Производство инструментов\r",
+      "nameUz": "Asboblar ishlab chiqarish",
+      "nameUzc": "Асбоблар ишлаб чиқариш\r"
+    },
+    {
+      "id": "72200",
+      "name": "Исследования и экспериментальные разработки в области общественных и гуманитарных наук\r",
+      "nameUz": "Ijtimoiy va gumanitar fanlar sohasidagi tadqiqotlar va eksperimental ishlanmalar",
+      "nameUzc": "Ижтимоий ва гуманитар фанлар соҳасидаги тадқиқотлар ва экспериментал ишланмалар\r"
+    },
+    {
+      "id": "68321",
+      "name": "Управление нежилым недвижимым имуществом производственного и непроизводственного назначения\r",
+      "nameUz": "Ishlab chiqarish maqsadlariga mo‘ljallangan yoki mo‘ljallanmagan yashashga yaroqsiz ko‘chmas mulkni boshqarish",
+      "nameUzc": "Ишлаб чиқариш мақсадларига мўлжалланган ёки мўлжалланмаган яшашга яроқсиз кўчмас мулкни бошқариш\r"
+    },
+    {
+      "id": "47740",
+      "name": "Розничная торговля в специализированных магазинах медицинскими и ортопедическими товарами\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda meditsina va ortopedik tovarlar chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда медитсина ва ортопедик товарлар чакана савдоси\r"
+    },
+    {
+      "id": "69109",
+      "name": "Прочие юридические услуги\r",
+      "nameUz": "Boshqa yuridik xizmatlar",
+      "nameUzc": "Бошқа юридик хизматлар\r"
+    },
+    {
+      "id": "58120",
+      "name": "Издание справочников и списков\r",
+      "nameUz": "Ma’lumotnoma va ro‘yxatlar nashr qilish",
+      "nameUzc": "Ма’лумотнома ва рўйхатлар нашр қилиш\r"
+    },
+    {
+      "id": "46740",
+      "name": "Оптовая торговля металлическими изделиями",
+      "nameUz": "Metall buyumlar, suv quvurlari va isitish uskunalari va inventarlari ulgurji savdosi",
+      "nameUzc": "Металл буюмлар"
+    },
+    {
+      "id": "06200",
+      "name": "Добыча природного газа\r",
+      "nameUz": "Tabiiy gaz qazib olish",
+      "nameUzc": "Табиий газ қазиб олиш\r"
+    },
+    {
+      "id": "45192",
+      "name": "Розничная торговля прочими моторными транспортными средствами\r",
+      "nameUz": "Boshqa motorli transport vositalarining chakana savdosi",
+      "nameUzc": "Бошқа моторли транспорт воситаларининг чакана савдоси\r"
+    },
+    {
+      "id": "23140",
+      "name": "Производство стекловолокна\r",
+      "nameUz": "Shisha tola ishlab chiqarish",
+      "nameUzc": "Шиша тола ишлаб чиқариш\r"
+    },
+    {
+      "id": "01210",
+      "name": "Выращивание винограда\r",
+      "nameUz": "Uzum yetishtirish",
+      "nameUzc": "Узум етиштириш\r"
+    },
+    {
+      "id": "08910",
+      "name": "Добыча минерального сырья для химической промышленности и производства удобрений\r",
+      "nameUz": "Kimyo sanoati va o‘g‘itlar ishlab chiqarish uchun mineral xom ashyolar qazib olish",
+      "nameUzc": "Кимё саноати ва ўғитлар ишлаб чиқариш учун минерал хом ашёлар қазиб олиш\r"
+    },
+    {
+      "id": "94990",
+      "name": "Деятельность прочих членских организаций",
+      "nameUz": "Boshqa toifalarga kiritilmagan a’zolik tashkilotlari faoliyati",
+      "nameUzc": "Бошқа тоифаларга киритилмаган а’золик ташкилотлари фаолияти\r"
+    },
+    {
+      "id": "75000",
+      "name": "Ветеринарная деятельность\r",
+      "nameUz": "Veterinariya faoliyati",
+      "nameUzc": "Ветеринария фаолияти\r"
+    },
+    {
+      "id": "01162",
+      "name": "Выращивание льна\r",
+      "nameUz": "Zig‘ir yetishtirish",
+      "nameUzc": "Зиғир етиштириш\r"
+    },
+    {
+      "id": "92000",
+      "name": "Деятельность по организации азартных игр и заключения пари\r",
+      "nameUz": "Azartli o‘yinlarni tashkil qilish va garov tuzish bo‘yicha xizmatlar",
+      "nameUzc": "Азартли ўйинларни ташкил қилиш ва гаров тузиш бўйича хизматлар\r"
+    },
+    {
+      "id": "33190",
+      "name": "Ремонт прочего оборудования\r",
+      "nameUz": "Boshqa uskunalarni ta’mirlash",
+      "nameUzc": "Бошқа ускуналарни та’мирлаш\r"
+    },
+    {
+      "id": "87100",
+      "name": "Предоставление медицинского ухода с обеспечением проживания\r",
+      "nameUz": "Yashash uchun joy bilan ta’minlagan holda meditsina xizmati ko‘rsatish",
+      "nameUzc": "Яшаш учун жой билан та’минлаган ҳолда медитсина хизмати кўрсатиш\r"
+    },
+    {
+      "id": "45402",
+      "name": "Розничная торговля мотоциклами",
+      "nameUz": "Mototsikllar, ularning detallari, uzellari va jihozlarining chakana savdosi",
+      "nameUzc": "Мототсикллар"
+    },
+    {
+      "id": "10710",
+      "name": "Производство хлеба",
+      "nameUz": "Non, xamirdan yangi tayyorlangan qandolat mahsulotlari, tort va pirojnoe ishlab chiqarish",
+      "nameUzc": "Нон"
+    },
+    {
+      "id": "43299",
+      "name": "Прочие строительно-монтажные работы",
+      "nameUz": "Boshqa toifalarga kiritilmagan qurilish-montaj ishlari",
+      "nameUzc": "Бошқа тоифаларга киритилмаган қурилиш-монтаж ишлари\r"
+    },
+    {
+      "id": "95290",
+      "name": "Ремонт прочих предметов личного пользования и бытовых товаров\r",
+      "nameUz": "Boshqa shaxsiy foydalanish buyumlari va maishiy tovarlarni ta’mirlash",
+      "nameUzc": "Бошқа шахсий фойдаланиш буюмлари ва маиший товарларни та’мирлаш\r"
+    },
+    {
+      "id": "47430",
+      "name": "Розничная торговля в специализированных магазинах аудио- и видеоаппаратурой\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda audio- va videoapparaturalar chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда аудио- ва видеоаппаратуралар чакана савдоси\r"
+    },
+    {
+      "id": "10120",
+      "name": "Переработка мяса домашней птицы\r",
+      "nameUz": "Uy parrandalari go‘shtini qayta ishlash",
+      "nameUzc": "Уй паррандалари гўштини қайта ишлаш\r"
+    },
+    {
+      "id": "20110",
+      "name": "Производство промышленных газов\r",
+      "nameUz": "Sanoat gazlari ishlab chiqarish",
+      "nameUzc": "Саноат газлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "43120",
+      "name": "Подготовительные работы на стройплощадке\r",
+      "nameUz": "Qurilish maydonchalaridagi tayyorgarlik ishlari",
+      "nameUzc": "Қурилиш майдончаларидаги тайёргарлик ишлари\r"
+    },
+    {
+      "id": "85510",
+      "name": "Спортивное образование",
+      "nameUz": "Sport ta’limi, jumladan ko‘ngil ochish maqsadidagi ta’lim",
+      "nameUzc": "Спорт та’лими"
+    },
+    {
+      "id": "22190",
+      "name": "Производство прочих резиновых изделий\r",
+      "nameUz": "Boshqa rezina buyumlar ishlab chiqarish",
+      "nameUzc": "Бошқа резина буюмлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "27200",
+      "name": "Производство батарей и аккумуляторов\r",
+      "nameUz": "Batareya va akkumulyatorlar ishlab chiqarish",
+      "nameUzc": "Батарея ва аккумуляторлар ишлаб чиқариш\r"
+    },
+    {
+      "id": "24540",
+      "name": "Литье других цветных металлов\r",
+      "nameUz": "Boshqa rangli metallar quyish",
+      "nameUzc": "Бошқа рангли металлар қуйиш\r"
+    },
+    {
+      "id": "27120",
+      "name": "Производство электрораспределительной и регулирующей аппаратуры\r",
+      "nameUz": "Elektr taqsimlovchi va boshqaruv apparaturalari ishlab chiqarish",
+      "nameUzc": "Электр тақсимловчи ва бошқарув аппаратуралари ишлаб чиқариш\r"
+    },
+    {
+      "id": "52100",
+      "name": "Складирование и хранение\r",
+      "nameUz": "Omborlarga joylash va saqlash",
+      "nameUzc": "Омборларга жойлаш ва сақлаш\r"
+    },
+    {
+      "id": "03210",
+      "name": "Аквакультура морская\r",
+      "nameUz": "Dengiz akvakulturasi",
+      "nameUzc": "Денгиз аквакултураси\r"
+    },
+    {
+      "id": "35230",
+      "name": "Продажа газообразного топлива по трубопроводам\r",
+      "nameUz": "Uzatish quvurlari orqali gazsimon yoqilg‘ini sotish",
+      "nameUzc": "Узатиш қувурлари орқали газсимон ёқилғини сотиш\r"
+    },
+    {
+      "id": "11050",
+      "name": "Производство пива\r",
+      "nameUz": "Pivo ishlab chiqarish",
+      "nameUzc": "Пиво ишлаб чиқариш\r"
+    },
+    {
+      "id": "28950",
+      "name": "Производство машин и оборудования для изготовления бумаги и картона\r",
+      "nameUz": "Qog‘oz va karton tayyorlash uchun mashina va uskunalar ishlab chiqarish",
+      "nameUzc": "Қоғоз ва картон тайёрлаш учун машина ва ускуналар ишлаб чиқариш\r"
+    },
+    {
+      "id": "85100",
+      "name": "Дошкольное образование\r",
+      "nameUz": "Maktabgacha ta’lim",
+      "nameUzc": "Мактабгача та’лим\r"
+    },
+    {
+      "id": "55200",
+      "name": "Предоставление жилья на выходные и прочие периоды краткосрочного проживания\r",
+      "nameUz": "Dam olish kunlarida va boshqa qisqa yashash muddatlarida turar joy bilan ta’minlash",
+      "nameUzc": "Дам олиш кунларида ва бошқа қисқа яшаш муддатларида турар жой билан та’минлаш\r"
+    },
+    {
+      "id": "01491",
+      "name": "Разведение шелкопряда\r",
+      "nameUz": "Ipak qurtini ko‘paytirish",
+      "nameUzc": "Ипак қуртини кўпайтириш\r"
+    },
+    {
+      "id": "43330",
+      "name": "Покрытие полов и облицовка стен\r",
+      "nameUz": "Pollarni qoplash va devor sirtini qoplash",
+      "nameUzc": "Полларни қоплаш ва девор сиртини қоплаш\r"
+    },
+    {
+      "id": "28960",
+      "name": "Производство оборудования для переработки пластмасс и резины\r",
+      "nameUz": "Plastmassa va rezinani qayta ishlash uchun uskunalar ishlab chiqarish",
+      "nameUzc": "Пластмасса ва резинани қайта ишлаш учун ускуналар ишлаб чиқариш\r"
+    },
+    {
+      "id": "01619",
+      "name": "Предоставление прочих услуг в области растениеводства\r",
+      "nameUz": "Dehqonchilik sohasida boshqa xizmatlar ko‘rsatish",
+      "nameUzc": "Деҳқончилик соҳасида бошқа хизматлар кўрсатиш\r"
+    },
+    {
+      "id": "59130",
+      "name": "Распространение кинофильмов",
+      "nameUz": "Kinofilmlar, video va televizion dasturlarni tarqatish",
+      "nameUzc": "Кинофилмлар"
+    },
+    {
+      "id": "07290",
+      "name": "Добыча руд прочих цветных металлов\r",
+      "nameUz": "Boshqa rangli metall rudalarini qazib olish",
+      "nameUzc": "Бошқа рангли металл рудаларини қазиб олиш\r"
+    },
+    {
+      "id": "95230",
+      "name": "Ремонт обуви и изделий из кожи\r",
+      "nameUz": "Poyafzal va charm buyumlarni ta’mirlash",
+      "nameUzc": "Пояфзал ва чарм буюмларни та’мирлаш\r"
+    },
+    {
+      "id": "47990",
+      "name": "Прочая розничная торговля вне магазинов",
+      "nameUz": "Do‘konlar, chodirlar va bozorlardan tashqaridagi boshqa chakana savdo",
+      "nameUzc": "Дўконлар"
+    },
+    {
+      "id": "46610",
+      "name": "Оптовая торговля сельскохозяйственной техникой",
+      "nameUz": "Qishloq xo‘jaligi texnikalari, uskunalari va ehtiyot qismlari ulgurji savdosi",
+      "nameUzc": "Қишлоқ хўжалиги техникалари"
+    },
+    {
+      "id": "23190",
+      "name": "Производство и обработка прочих стеклянных изделий",
+      "nameUz": "Boshqa shisha buyumlarni, jumladan texnik buyumlarni, ishlab chiqarish va ishlov berish",
+      "nameUzc": "Бошқа шиша буюмларни"
+    },
+    {
+      "id": "01150",
+      "name": "Выращивание табака\r",
+      "nameUz": "Tamaki yetishtirish",
+      "nameUzc": "Тамаки етиштириш\r"
+    },
+    {
+      "id": "39000",
+      "name": "Восстановление и прочие услуги в области удаления отходов\r",
+      "nameUz": "Tiklash va chiqindilarni yo‘qotish sohasidagi boshqa xizmatlar",
+      "nameUzc": "Тиклаш ва чиқиндиларни ё‘қотиш соҳасидаги бошқа хизматлар\r"
+    },
+    {
+      "id": "28240",
+      "name": "Производство ручных электрических инструментов\r",
+      "nameUz": "Qo‘l elektr asboblari ishlab chiqarish",
+      "nameUzc": "Қўл электр асбоблари ишлаб чиқариш\r"
+    },
+    {
+      "id": "10850",
+      "name": "Производство готовых пищевых продуктов\r",
+      "nameUz": "Tayyor oziq-ovqat mahsulotlari ishlab chiqarish",
+      "nameUzc": "Тайёр озиқ-овқат маҳсулотлари ишлаб чиқариш\r"
+    },
+    {
+      "id": "49410",
+      "name": "Грузовые перевозки автомобильным транспортом\r",
+      "nameUz": "Avtomobil transportida yuk tashish",
+      "nameUzc": "Автомобил транспортида юк ташиш\r"
+    },
+    {
+      "id": "66290",
+      "name": "Прочая вспомогательная деятельность по страхованию и пенсионному обеспечению\r",
+      "nameUz": "Sug‘urtalash va nafaqa ta’minoti sohasidagi boshqa yordamchi faoliyat",
+      "nameUzc": "Суғурталаш ва нафақа та’миноти соҳасидаги бошқа ёрдамчи фаолият\r"
+    },
+    {
+      "id": "47510",
+      "name": "Розничная торговля в специализированных магазинах текстильными изделиями\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda to‘qimachilik buyumlari chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда тўқимачилик буюмлари чакана савдоси\r"
+    },
+    {
+      "id": "35120",
+      "name": "Передача электроэнергии\r",
+      "nameUz": "Elektr energiyasini uzatish",
+      "nameUzc": "Электр энергиясини узатиш\r"
+    },
+    {
+      "id": "47420",
+      "name": "Розничная торговля в специализированных магазинах телекоммуникационным оборудованием\r",
+      "nameUz": "Ixtisoslashgan do‘konlarda telekommunikatsiya uskunalari chakana savdosi",
+      "nameUzc": "Ихтисослашган дўконларда телекоммуникатсия ускуналари чакана савдоси\r"
+    },
+    {
+      "id": "24520",
+      "name": "Литье стали\r",
+      "nameUz": "Po‘lat quyish",
+      "nameUzc": "Пўлат қуйиш\r"
+    }
+  ]
+}

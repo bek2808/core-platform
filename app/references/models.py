@@ -1,6 +1,6 @@
 """
-Справочники ЕРСП (единый реестр страховых полисов): регионы, формы собственности,
-страховщики.
+Справочники ЕРСП (единый реестр страховых полисов): регионы, районы, формы
+собственности, страховщики, валюты, ОКЭД.
 
 Откуда данные. Это копии справочников ЕРСП: их не правят руками, а загружают
 командой load_ersp_references (сейчас из файлов в references/data/ersp/, позже -
@@ -10,6 +10,11 @@
 Записи никогда не удаляются. Если строка пропала из ответа ЕРСП, она получает
 отметку «нет в последней загрузке», но остаётся: на неё могут ссылаться
 контрагенты и старые полисы.
+
+Записи хранятся как прислал ЕРСП, без исправлений (ответ целиком - в raw).
+Убираются только пробелы и переводы строк по краям названий. Если в ЕРСП
+ошибка (у евро буквенный код EVR вместо EUR), она остаётся: система
+опирается на id, а не на название или буквенный код.
 """
 from django.db import models
 
@@ -116,3 +121,75 @@ class ErspInsurer(ErspReference):
 
     def __str__(self):
         return self.name
+
+
+class ErspDistrict(ErspReference):
+    """
+    Район (город) по справочнику ЕРСП /api/references/districts.
+
+    Номер района в ЕРСП - не код СОАТО: у Шайхантахурского района СОАТО
+    1726277, а в ЕРСП - 1006. Связь с СОАТО от провайдера появится вместе
+    с правилом, где район нужен (физлица, объекты страхования).
+    """
+
+    name = models.CharField("название", max_length=255)
+    region = models.ForeignKey(
+        ErspRegion, on_delete=models.PROTECT, related_name="districts", verbose_name="регион"
+    )
+
+    class Meta:
+        verbose_name = "район ЕРСП"
+        verbose_name_plural = "районы ЕРСП"
+        ordering = ["region__name", "name"]
+
+    def __str__(self):
+        return self.name
+
+
+class ErspCurrency(ErspReference):
+    """
+    Валюта по справочнику ЕРСП /api/references/currencies.
+
+    id - цифровой код ISO 4217 (860 - сум, 840 - доллар США, 978 - евро);
+    на него система и опирается. Буквенные коды в ЕРСП местами с ошибками
+    (EVR, UAН с кириллической Н), поэтому для логики они не используются.
+    """
+
+    UZS = 860  # узбекский сум - валюта по умолчанию
+
+    ticker = models.CharField("буквенный код", max_length=8, blank=True)
+    name = models.CharField("название", max_length=255)
+    name_uz = models.CharField("название (узб., латиница)", max_length=255, blank=True)
+    name_uzc = models.CharField("название (узб., кириллица)", max_length=255, blank=True)
+
+    class Meta:
+        verbose_name = "валюта ЕРСП"
+        verbose_name_plural = "валюты ЕРСП"
+        ordering = ["ticker"]
+
+    def __str__(self):
+        return f"{self.ticker} - {self.name}"
+
+
+class ErspOked(ErspReference):
+    """
+    Вид экономической деятельности (ОКЭД) по справочнику ЕРСП.
+
+    Главный ключ - сам код ОКЭД строкой: у кодов бывает ведущий ноль (01452),
+    числом он бы потерялся. Обычно 5 цифр; в ЕРСП есть и 6 кодов верхних
+    уровней классификатора из 2-4 цифр (73, 682, 9411). Русские названия
+    в ЕРСП местами обрезаны, поэтому показывается узбекское (латиница).
+    """
+
+    id = models.CharField("код ОКЭД", max_length=5, primary_key=True)
+    name = models.CharField("название", max_length=500)
+    name_uz = models.CharField("название (узб., латиница)", max_length=500, blank=True)
+    name_uzc = models.CharField("название (узб., кириллица)", max_length=500, blank=True)
+
+    class Meta:
+        verbose_name = "ОКЭД ЕРСП"
+        verbose_name_plural = "ОКЭД ЕРСП"
+        ordering = ["id"]
+
+    def __str__(self):
+        return f"{self.id} - {self.name_uz or self.name}"

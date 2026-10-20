@@ -1,5 +1,6 @@
 """
-Автотесты справочников ЕРСП: загрузка из файлов, повторная загрузка,
+Автотесты справочников ЕРСП (регионы, районы, формы собственности,
+страховщики, валюты, ОКЭД): загрузка из файлов, повторная загрузка,
 пропавшие записи, ошибки в ответе ЕРСП, админ-панель только для чтения.
 
 Запуск на сервере: bin/test references
@@ -21,18 +22,28 @@ from .loader import (
     read_soato_regions,
     sync_all,
 )
-from .models import ErspInsurer, ErspOwnershipForm, ErspRegion
+from .models import (
+    ErspCurrency,
+    ErspDistrict,
+    ErspInsurer,
+    ErspOked,
+    ErspOwnershipForm,
+    ErspRegion,
+)
 
 ERSP_DIR = DATA_DIR / "ersp"
 
 
 def file_rows():
-    """Строки трёх справочников из файлов в образе (каждый раз свежая копия)."""
+    """Строки справочников из файлов в образе (каждый раз свежая копия)."""
     return {
         "regions": read_ersp_response(ERSP_DIR / "regions.json"),
         "ownership_forms": read_ersp_response(ERSP_DIR / "ownership_forms.json"),
         "insurers": read_ersp_response(ERSP_DIR / "insurers.json"),
         "soato_regions": read_soato_regions(),
+        "districts": read_ersp_response(ERSP_DIR / "districts.json"),
+        "currencies": read_ersp_response(ERSP_DIR / "currencies.json"),
+        "okeds": read_ersp_response(ERSP_DIR / "okeds.json"),
     }
 
 
@@ -44,6 +55,14 @@ class DataFilesTests(SimpleTestCase):
         self.assertEqual(len(rows["regions"]), 14)
         self.assertEqual(len(rows["ownership_forms"]), 24)
         self.assertEqual(len(rows["insurers"]), 49)
+        self.assertEqual(len(rows["districts"]), 249)
+        self.assertEqual(len(rows["currencies"]), 164)
+        self.assertEqual(len(rows["okeds"]), 696)
+
+    def test_every_district_in_known_region(self):
+        rows = file_rows()
+        region_ids = {row["id"] for row in rows["regions"]}
+        self.assertTrue(all(row["regionId"] in region_ids for row in rows["districts"]))
 
     def test_every_region_has_its_own_soato_code(self):
         # Наша таблица СОАТО покрывает ровно регионы ЕРСП, коды не повторяются.
@@ -71,6 +90,44 @@ class LoadFromFilesTests(TestCase):
         self.assertEqual(ErspOwnershipForm.objects.count(), 24)
         self.assertEqual(ErspInsurer.objects.count(), 49)
         self.assertEqual(self.results["страховщики"].created, 49)
+        self.assertEqual(ErspDistrict.objects.count(), 249)
+        self.assertEqual(ErspCurrency.objects.count(), 164)
+        self.assertEqual(ErspOked.objects.count(), 696)
+
+    def test_district_belongs_to_region(self):
+        # В ЕРСП номер района - не СОАТО: Шайхантахурский - 1006 (СОАТО 1726277).
+        district = ErspDistrict.objects.get(pk=1006)
+        self.assertEqual(district.region_id, 10)
+        self.assertEqual(ErspDistrict.objects.get(pk=739001080).name, "ЯШНАБАДСКИЙ РАЙОН")
+
+    def test_currency_by_iso_numeric_code(self):
+        # id валюты в ЕРСП - цифровой код ISO 4217; на него и опираемся.
+        self.assertEqual(ErspCurrency.objects.get(pk=ErspCurrency.UZS).ticker, "UZS")
+        self.assertEqual(ErspCurrency.objects.get(pk=840).ticker, "USD")
+
+    def test_currency_kept_as_received(self):
+        # Ошибки ЕРСП не исправляем: у евро код EVR. Убраны только пробелы по краям.
+        self.assertEqual(ErspCurrency.objects.get(pk=978).ticker, "EVR")
+        self.assertEqual(ErspCurrency.objects.get(pk=972).ticker, "TJS")
+        self.assertEqual(ErspCurrency.objects.get(pk=972).raw["ticker"], "TJS ")
+
+    def test_oked_code_keeps_leading_zero(self):
+        self.assertTrue(ErspOked.objects.filter(pk="01452").exists())
+        self.assertEqual(
+            ErspOked.objects.get(pk="65120").name_uz,
+            "Hayotni sug‘urtalashdan tashqari sug‘urtalash",
+        )
+
+    def test_oked_upper_level_codes_kept(self):
+        # В ЕРСП есть 6 кодов верхних уровней классификатора (2-4 цифры).
+        self.assertTrue(ErspOked.objects.filter(pk="9411").exists())
+        self.assertTrue(ErspOked.objects.filter(pk="73").exists())
+
+    def test_oked_names_without_line_breaks(self):
+        # В ответе ЕРСП у части названий в конце \r - в базе его нет, в raw - есть.
+        oked = ErspOked.objects.get(pk="94910")
+        self.assertFalse(oked.name.endswith("\r"))
+        self.assertTrue(oked.raw["name"].endswith("\r"))
 
     def test_ersp_id_is_primary_key(self):
         # В ЕРСП уходит именно этот id, поэтому он хранится как есть.
@@ -115,6 +172,19 @@ class ReloadTests(TestCase):
         for result in results.values():
             self.assertEqual((result.created, result.updated, result.hidden), (0, 0, 0))
         self.assertEqual(results["страховщики"].unchanged, 49)
+        self.assertEqual(results["ОКЭД"].unchanged, 696)
+
+    def test_district_with_unknown_region_rejected(self):
+        rows = copy.deepcopy(self.rows)
+        rows["districts"][0]["regionId"] = 99
+        with self.assertRaises(LoadError):
+            sync_all(**rows)
+
+    def test_wrong_oked_code_rejected(self):
+        rows = copy.deepcopy(self.rows)
+        rows["okeds"][0]["id"] = "65 1A"
+        with self.assertRaises(LoadError):
+            sync_all(**rows)
 
     def test_changed_row_is_updated(self):
         rows = copy.deepcopy(self.rows)
@@ -190,6 +260,7 @@ class CommandTests(TestCase):
         out = StringIO()
         call_command("load_ersp_references", stdout=out)
         self.assertIn("страховщики: новых 49", out.getvalue())
+        self.assertIn("ОКЭД: новых 696", out.getvalue())
         self.assertEqual(ErspInsurer.objects.count(), 49)
 
 

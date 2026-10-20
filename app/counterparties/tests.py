@@ -251,9 +251,7 @@ INSON = {
     "inn": "207078596",
     "full_name": '"INSON" AKSIYADORLIK JAMIYATI SUG\'URTA TASHKILOTI',
     "short_name": '"INSON" AJ ST',
-    "oked": "65120",
-    # «а» в этой строке - кириллические, как присылает провайдер.
-    "oked_title": "Hаyotni sug`urtаlаshdаn tаshqаri sug`urtаlаsh",
+    "oked_id": "65120",
     "okpo": "23047346",
     "soato_code": "1726277",
     "soato_name": "Шайхантахурский район",
@@ -307,8 +305,10 @@ class LegalEntityTests(CounterpartyTestCase):
         self.assertEqual(legal.country, "UZ")
         self.assertEqual(legal.insurance_company, self.mosaic)
         self.assertEqual(legal.charter_capital, Decimal("85751457400.00"))
-        self.assertEqual(legal.charter_capital_currency, "UZS")
-        self.assertEqual(legal.oked_title, INSON["oked_title"])  # хранится как пришло
+        self.assertEqual(legal.charter_capital_currency_id, 860)  # сум - по умолчанию
+        self.assertEqual(
+            str(legal.oked), "65120 - Hayotni sug‘urtalashdan tashqari sug‘urtalash"
+        )  # название - из справочника ЕРСП
 
     def test_full_name_shown_when_no_short_name(self):
         counterparty, _ = self.make(short_name="")
@@ -324,10 +324,13 @@ class LegalEntityTests(CounterpartyTestCase):
 
     def test_everything_else_may_be_empty(self):
         # Карточку можно сохранить неполной: обязательны только ИНН и наименование.
-        empty = {field: "" for field in ["short_name", "oked", "oked_title", "okpo",
-                                         "soato_code", "soato_name", "reg_certificate_number"]}
-        counterparty, _ = self.make(**empty, reg_certificate_date=None, charter_capital=None)
+        empty = {field: "" for field in ["short_name", "okpo", "soato_code", "soato_name",
+                                         "reg_certificate_number"]}
+        counterparty, legal = self.make(
+            **empty, oked_id=None, reg_certificate_date=None, charter_capital=None
+        )
         self.assertIsNone(counterparty.region)
+        self.assertIsNone(legal.charter_capital_currency)  # нет капитала - нет и валюты
 
     def test_inn_spaces_removed(self):
         _, legal = self.make(inn=" 207 078 596 ")
@@ -356,9 +359,24 @@ class LegalEntityTests(CounterpartyTestCase):
         self.assertEqual(legal.country, "UZ")
 
     def test_codes_format(self):
-        for field, wrong in [("oked", "6512"), ("okpo", "2304734"), ("soato_code", "17262")]:
+        for field, wrong in [("okpo", "2304734"), ("soato_code", "17262")]:
             with self.subTest(field=field), self.assertRaises(ValidationError):
                 self.make(**{field: wrong})
+
+    def test_oked_must_be_in_ersp_reference(self):
+        with self.assertRaises(ValidationError) as error:
+            self.make(oked_id="99999")
+        self.assertIn("oked", error.exception.message_dict)
+
+    def test_other_currency_kept(self):
+        _, legal = self.make(charter_capital_currency_id=840)
+        self.assertEqual(legal.charter_capital_currency.ticker, "USD")
+
+    def test_capital_needs_currency_in_database(self):
+        # Обход кода (без подстановки сума) - база не примет капитал без валюты.
+        _, legal = self.make()
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            LegalEntity._base_manager.filter(pk=legal.pk).update(charter_capital_currency=None)
 
     def test_negative_capital_rejected(self):
         with self.assertRaises(ValidationError):
@@ -521,9 +539,11 @@ class CounterpartyAdminTests(CounterpartyTestCase):
             "legal_entity-MIN_NUM_FORMS": "1",
             "legal_entity-MAX_NUM_FORMS": "1",
             "legal_entity-0-country": "UZ",
-            "legal_entity-0-charter_capital_currency": "UZS",
+            "legal_entity-0-charter_capital_currency": "860",
         }
         for field, value in values.items():
+            if field == "oked_id":
+                field = "oked"
             if field == "is_foreign":
                 if value:
                     data["legal_entity-0-is_foreign"] = "on"
@@ -609,6 +629,28 @@ class CounterpartyAdminTests(CounterpartyTestCase):
         )
         self.assertContains(history, "ОКЭД")
         self.assertContains(history, "65200")
+
+    def test_cleared_region_restored_from_soato(self):
+        # Найдено Бекзодом 20.10: регион очистили в карточке, данные юрлица не
+        # трогали - и регион по СОАТО не подставился. Теперь подставляется.
+        counterparty, _ = self.make(by=self.bekzod)
+        self.assertEqual(counterparty.region_id, 10)
+        data = self.post_data(counterparty)
+        data["region"] = ""
+        response = self.client.post(
+            f"/admin/counterparties/counterparty/{counterparty.pk}/change/", data
+        )
+        self.assertEqual(response.status_code, 302)
+        counterparty.refresh_from_db()
+        self.assertEqual(counterparty.region_id, 10)
+        # В журнале честно: сотрудник очистил, система вернула. (Первая запись
+        # о регионе - подстановка при создании карточки, её не смотрим.)
+        changes = list(
+            ChangeLog.objects.filter(field="region", action="update")
+            .order_by("id")
+            .values_list("source", "old_value", "new_value")
+        )
+        self.assertEqual(changes[-2:], [(Source.MANUAL, 10, None), (Source.SYSTEM, None, 10)])
 
     def test_no_delete(self):
         counterparty, _ = self.make()

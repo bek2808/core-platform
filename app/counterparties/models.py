@@ -25,7 +25,7 @@ from django.db.models.functions import Lower
 
 from audit.models import Source, TrackedModel
 from companies.models import UZBEKISTAN, InsuranceCompany
-from references.models import ErspOwnershipForm, ErspRegion
+from references.models import ErspCurrency, ErspOked, ErspOwnershipForm, ErspRegion
 
 from .normalize import digits_only, remove_spaces, search_key, squash_spaces
 
@@ -173,7 +173,6 @@ PHONE_REGEX = r"^[0-9]{7,15}$"            # международный форм�
 LOCAL_PHONE_REGEX = r"^998[0-9]{9}$"      # Узбекистан: 998 и 9 цифр
 FOREIGN_INN_REGEX = r"^[A-Z0-9]{9,20}$"   # иностранный ИНН: буквы и цифры, от 9
 COUNTRY_REGEX = r"^[A-Z]{2}$"
-CURRENCY_REGEX = r"^[A-Z]{3}$"
 
 
 class Counterparty(TrackedModel):
@@ -268,13 +267,29 @@ class Counterparty(TrackedModel):
             legal_entity.full_name, legal_entity.short_name, legal_entity.inn
         )
         self.save(by=by, update_fields=["display_name", "search_text"])
+        self.fill_region_from_soato(by=by, soato_code=legal_entity.soato_code)
 
-        if self.region_id is None and legal_entity.soato_code:
-            region = ErspRegion.objects.filter(soato_code=legal_entity.soato_code[:4]).first()
-            if region is not None:
-                self.region = region
-                # Регион выбрала система, а не сотрудник: так и пишем в журнал.
-                self.save(by=by, source=Source.SYSTEM, update_fields=["region"])
+    def fill_region_from_soato(self, by=None, soato_code=None):
+        """
+        Если регион пуст - поставить его по первым 4 цифрам кода СОАТО района.
+
+        Вызывается после каждого сохранения карточки и данных юрлица:
+        и когда изменился СОАТО, и когда сотрудник очистил регион.
+        soato_code не передан - берётся из данных юрлица в базе.
+        """
+        if self.region_id is not None:
+            return
+        if soato_code is None:
+            soato_code = (
+                LegalEntity.objects.filter(pk=self.pk).values_list("soato_code", flat=True).first()
+            )
+        if not soato_code:
+            return
+        region = ErspRegion.objects.filter(soato_code=soato_code[:4]).first()
+        if region is not None:
+            self.region = region
+            # Регион выбрала система, а не сотрудник: так и пишем в журнал.
+            self.save(by=by, source=Source.SYSTEM, update_fields=["region"])
 
 
 class LegalEntity(TrackedModel):
@@ -316,13 +331,15 @@ class LegalEntity(TrackedModel):
     )
     full_name = models.CharField("полное наименование", max_length=500)
     short_name = models.CharField("краткое наименование", max_length=255, blank=True)
-    oked = models.CharField(
-        "ОКЭД",
-        max_length=5,
+    oked = models.ForeignKey(
+        ErspOked,
+        on_delete=models.PROTECT,
+        null=True,
         blank=True,
-        validators=[RegexValidator(r"^[0-9]{5}$", "ОКЭД - ровно 5 цифр.")],
+        related_name="+",
+        verbose_name="ОКЭД",
+        help_text="Из справочника ЕРСП; название показывается из него.",
     )
-    oked_title = models.CharField("вид деятельности", max_length=500, blank=True)
     okpo = models.CharField(
         "ОКПО",
         max_length=8,
@@ -337,10 +354,7 @@ class LegalEntity(TrackedModel):
     )
     soato_name = models.CharField("район", max_length=255, blank=True)
     reg_certificate_number = models.CharField(
-        "номер свидетельства о регистрации",
-        max_length=50,
-        blank=True,
-        help_text="Это не страховая лицензия.",
+        "номер свидетельства о регистрации", max_length=50, blank=True
     )
     reg_certificate_date = models.DateField("дата свидетельства о регистрации", null=True, blank=True)
     charter_capital = models.DecimalField(
@@ -351,12 +365,14 @@ class LegalEntity(TrackedModel):
         blank=True,
         validators=[MinValueValidator(0)],
     )
-    charter_capital_currency = models.CharField(
-        "валюта капитала",
-        max_length=3,
-        default="UZS",
-        validators=[RegexValidator(CURRENCY_REGEX, "Валюта - три латинские буквы (ISO 4217), например UZS.")],
-        help_text="Код валюты ISO 4217. Провайдер ЕРСП отдаёт капитал в сумах (UZS).",
+    charter_capital_currency = models.ForeignKey(
+        ErspCurrency,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name="валюта капитала",
+        help_text="Из справочника ЕРСП. Если капитал указан, а валюта нет - сум (провайдер отдаёт капитал в сумах).",
     )
     ownership_form = models.ForeignKey(
         ErspOwnershipForm,
@@ -394,11 +410,6 @@ class LegalEntity(TrackedModel):
                 violation_error_message="Страна: у местной организации - UZ, у иностранной - код другой страны.",
             ),
             models.CheckConstraint(
-                condition=Q(oked="") | Q(oked__regex=r"^[0-9]{5}$"),
-                name="counterparties_legalentity_oked",
-                violation_error_message="ОКЭД - ровно 5 цифр.",
-            ),
-            models.CheckConstraint(
                 condition=Q(okpo="") | Q(okpo__regex=r"^[0-9]{8}$"),
                 name="counterparties_legalentity_okpo",
                 violation_error_message="ОКПО - ровно 8 цифр.",
@@ -414,9 +425,9 @@ class LegalEntity(TrackedModel):
                 violation_error_message="Уставный капитал не может быть отрицательным.",
             ),
             models.CheckConstraint(
-                condition=Q(charter_capital_currency__regex=CURRENCY_REGEX),
-                name="counterparties_legalentity_currency",
-                violation_error_message="Валюта - три латинские буквы.",
+                condition=Q(charter_capital__isnull=True) | Q(charter_capital_currency__isnull=False),
+                name="counterparties_legalentity_capital_has_currency",
+                violation_error_message="У уставного капитала должна быть валюта.",
             ),
         ]
 
@@ -449,13 +460,14 @@ class LegalEntity(TrackedModel):
             self.country = UZBEKISTAN
         self.full_name = squash_spaces(self.full_name)
         self.short_name = squash_spaces(self.short_name)
-        self.oked = remove_spaces(self.oked)
-        self.oked_title = squash_spaces(self.oked_title)
         self.okpo = remove_spaces(self.okpo)
         self.soato_code = remove_spaces(self.soato_code)
         self.soato_name = squash_spaces(self.soato_name)
         self.reg_certificate_number = squash_spaces(self.reg_certificate_number)
-        self.charter_capital_currency = remove_spaces(self.charter_capital_currency or "").upper()
+        if self.charter_capital is not None and self.charter_capital_currency_id is None:
+            # Провайдер ЕРСП отдаёт капитал в сумах; сотрудник может выбрать другую валюту.
+            if ErspCurrency.objects.filter(pk=ErspCurrency.UZS).exists():
+                self.charter_capital_currency_id = ErspCurrency.UZS
 
     def clean(self):
         errors = []
