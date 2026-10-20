@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# encryption-key - завести ключ шифрования секретов в базе (секрет Podman
+# core_encryption_key). Им шифруются client_secret и пароль для входа в ЕРСП
+# (app/config/crypto.py).
+# Запуск из ~/core-platform под support:
+#   bin/encryption-key              завести ключ (один раз)
+#   bin/encryption-key --replace    заменить ключ (только если старый потерян
+#                                   или раскрыт - см. ниже)
+#
+# Как устроено:
+# - ключ - 32 случайных байта из генератора ОС (модуль secrets в Python);
+# - он создаётся сразу внутри секрета через канал (|): не выводится на экран,
+#   не попадает в историю команд, в список процессов и во временные файлы;
+# - копии ключа нет нигде (решение Бекзода 20.10). Если ключ потерян,
+#   зашифрованные значения вводятся заново через экран
+#   «Интеграции -> Подключение к ЕРСП» (их всегда можно получить у НАПП).
+#
+# Замена ключа (--replace): всё, что зашифровано старым ключом, перестаёт
+# расшифровываться - данные для входа в ЕРСП придётся ввести заново
+# у КАЖДОЙ страховой. Поэтому скрипт просит подтверждение словом.
+# После создания или замены - перезапуск core-web, чтобы контейнер получил секрет.
+
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+SECRET="core_encryption_key"
+REPLACE="${1:-}"
+
+if [ -n "$REPLACE" ] && [ "$REPLACE" != "--replace" ]; then
+  echo "Использование: bin/encryption-key [--replace]" >&2
+  exit 1
+fi
+
+REPLACE_FLAG=""
+if bin/core-run podman secret inspect "$SECRET" >/dev/null 2>&1; then
+  if [ "$REPLACE" != "--replace" ]; then
+    echo "Ключ $SECRET уже есть - ничего не меняю." >&2
+    echo "Заменять его нужно только если он потерян или раскрыт: bin/encryption-key --replace" >&2
+    exit 1
+  fi
+  echo "ВНИМАНИЕ: после замены ключа данные для входа в ЕРСП всех страховых"
+  echo "перестанут расшифровываться - их придётся ввести заново через экран."
+  read -rp "Чтобы заменить ключ, введите слово ЗАМЕНИТЬ: " ANSWER
+  if [ "$ANSWER" != "ЗАМЕНИТЬ" ]; then
+    echo "Ключ не заменён." >&2
+    exit 1
+  fi
+  REPLACE_FLAG="--replace"
+fi
+
+python3 -c 'import base64, secrets, sys; sys.stdout.write(base64.urlsafe_b64encode(secrets.token_bytes(32)).decode())' \
+  | bin/core-run podman secret create $REPLACE_FLAG "$SECRET" - >/dev/null
+
+echo "Готово: ключ $SECRET заведён. Значение на экран не выводится."
+echo "Дальше: строка Secret=$SECRET в quadlet/core-web.container и перезапуск core-web."

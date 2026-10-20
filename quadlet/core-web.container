@@ -26,6 +26,9 @@ Secret=django_secret_key
 # Данные для входа в ЕРСП (bin/ersp-secret). Токен приложение получает само.
 Secret=ersp_prod_credentials
 Secret=ersp_sandbox_credentials
+# Ключ шифрования секретов в базе (bin/encryption-key; app/config/crypto.py).
+# Заводится ДО установки этого файла: без секрета контейнер не запустится.
+Secret=core_encryption_key
 
 # Настройки среды (см. app/config/settings.py).
 Environment=DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1

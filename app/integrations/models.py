@@ -1,5 +1,11 @@
 """
-Журнал обмена с внешними системами (сейчас - ЕРСП).
+Обмен с внешними системами (сейчас - ЕРСП): подключение страховой к ЕРСП
+и журнал обмена.
+
+Подключение к ЕРСП (ErspConnection и ErspCredentials) - модель описана
+в docs/integrations-model.md.
+
+Журнал обмена (Exchange).
 
 Одна строка - один запрос: что отправили, что ответили, в какую среду,
 кто и когда, сколько ждали ответа и чем кончилось. Здесь же хранится
@@ -13,8 +19,12 @@
 """
 from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db import models
+from django.db import IntegrityError, models, transaction
+from django.db.models import Q
 from django.utils import timezone
+
+from audit.models import TrackedModel
+from config import crypto
 
 
 class Environment(models.TextChoices):
@@ -90,3 +100,203 @@ class Exchange(models.Model):
     def __str__(self):
         subject = f" {self.subject}" if self.subject else ""
         return f"{self.get_operation_display()}{subject} ({self.get_environment_display()})"
+
+
+# --- Подключение к ЕРСП ---------------------------------------------------------------
+
+class ErspConnection(TrackedModel):
+    """
+    Подключение страховой компании к ЕРСП: одна карточка на страховую.
+    Внутри - данные для входа по каждой среде (ErspCredentials) и среда,
+    в которую уходят полисы.
+
+    Среды для чтения не настраиваются (решение Бекзода 20.10): справочники
+    и провайдер - всегда боевая среда (в песочнице справочники неполные).
+    Меняется только среда отправки полисов: по умолчанию песочница,
+    переключение на боевую - с подтверждением на экране и записью в журнал.
+
+    Карточку и оба блока сред создаёт for_company(); записи не удаляются.
+    """
+
+    insurance_company = models.OneToOneField(
+        "companies.InsuranceCompany",
+        on_delete=models.PROTECT,
+        related_name="ersp_connection",
+        verbose_name="страховая компания",
+    )
+    send_environment = models.CharField(
+        "отправка полисов",
+        max_length=16,
+        choices=Environment.choices,
+        default=Environment.SANDBOX,
+        help_text="Куда уходят полисы. Боевая - настоящий реестр регулятора.",
+    )
+
+    class Meta:
+        verbose_name = "подключение к ЕРСП"
+        verbose_name_plural = "подключение к ЕРСП"
+        ordering = ["insurance_company__name"]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(send_environment__in=Environment.values),
+                name="integrations_erspconnection_send_environment_known",
+                violation_error_message="Среда отправки - боевая или песочница.",
+            ),
+        ]
+
+    def __str__(self):
+        return f"ЕРСП: {self.insurance_company}"
+
+    @classmethod
+    def for_company(cls, company, by=None):
+        """
+        Карточка подключения страховой. Если её нет - создаётся вместе
+        с пустыми блоками обеих сред (by - кто открыл экран; в журнал).
+        """
+        connection = cls.objects.filter(insurance_company=company).first()
+        if connection is None:
+            try:
+                with transaction.atomic():
+                    connection = cls(insurance_company=company)
+                    connection.save(by=by)
+            except IntegrityError:
+                # Карточку в ту же секунду создал другой сотрудник - берём его.
+                connection = cls.objects.get(insurance_company=company)
+        missing = set(Environment.values) - set(connection.credentials.values_list("environment", flat=True))
+        for environment in sorted(missing):
+            try:
+                with transaction.atomic():
+                    ErspCredentials(connection=connection, environment=environment).save(by=by)
+            except IntegrityError:
+                pass  # блок уже создан параллельно
+        return connection
+
+
+class ErspCredentials(TrackedModel):
+    """
+    Данные для входа страховой в одну среду ЕРСП (выдаёт НАПП): client_id,
+    client_secret, логин, пароль.
+
+    client_id и логин хранятся как есть и видны на экране. client_secret
+    и пароль хранятся только шифром (config.crypto) и обратно не
+    показываются никому: на экране - «задан ••••». В журнал изменений
+    попадает только факт смены («*** -> ***»), не значение и не шифр.
+
+    Шифр меняется только через set_secret(): форма экрана шифров не
+    видит (editable=False), поэтому проверка формата шифра в базе
+    (CheckConstraint) не может дать сотруднику ошибку 500.
+    """
+
+    # Секретное значение -> поле с его шифром.
+    SECRET_FIELDS = {
+        "client_secret": "client_secret_cipher",
+        "password": "password_cipher",
+    }
+
+    connection = models.ForeignKey(
+        ErspConnection,
+        on_delete=models.PROTECT,
+        related_name="credentials",
+        verbose_name="подключение",
+    )
+    environment = models.CharField("среда", max_length=16, choices=Environment.choices)
+    client_id = models.CharField("client_id", max_length=255, blank=True)
+    username = models.CharField("логин", max_length=255, blank=True)
+    client_secret_cipher = models.TextField(
+        "client_secret", blank=True, editable=False,
+        help_text="Шифр (config.crypto). Значение не хранится и не показывается.",
+    )
+    password_cipher = models.TextField(
+        "пароль", blank=True, editable=False,
+        help_text="Шифр (config.crypto). Значение не хранится и не показывается.",
+    )
+
+    audit_mask = ("client_secret_cipher", "password_cipher")
+
+    class Meta:
+        verbose_name = "данные для входа в ЕРСП"
+        verbose_name_plural = "данные для входа в ЕРСП"
+        ordering = ["connection", "environment"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["connection", "environment"],
+                name="integrations_erspcredentials_one_per_environment",
+                violation_error_message="Для этой среды данные для входа уже заведены.",
+            ),
+            models.CheckConstraint(
+                condition=Q(environment__in=Environment.values),
+                name="integrations_erspcredentials_environment_known",
+                violation_error_message="Среда - боевая или песочница.",
+            ),
+            models.CheckConstraint(
+                condition=Q(client_secret_cipher="") | Q(client_secret_cipher__regex=crypto.CIPHER_REGEX),
+                name="integrations_erspcredentials_client_secret_is_cipher",
+                violation_error_message="client_secret хранится только шифром.",
+            ),
+            models.CheckConstraint(
+                condition=Q(password_cipher="") | Q(password_cipher__regex=crypto.CIPHER_REGEX),
+                name="integrations_erspcredentials_password_is_cipher",
+                violation_error_message="Пароль хранится только шифром.",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.connection.insurance_company}: {self.get_environment_display()}"
+
+    @property
+    def insurance_company_id(self):
+        # Своей колонки нет: страховая берётся из карточки (для журнала).
+        connection = getattr(self, "connection", None)
+        return connection.insurance_company_id if connection is not None else None
+
+    def journal_root(self):
+        # Изменения видны в «Истории» карточки подключения.
+        return getattr(self, "connection", None)
+
+    def normalize(self):
+        self.client_id = (self.client_id or "").strip()
+        self.username = (self.username or "").strip()
+
+    # --- Секретные значения ---------------------------------------------------------
+
+    def _context(self, name):
+        # Шифр привязан к страховой, среде и полю: в чужой строке он не расшифруется.
+        return f"integrations.ErspCredentials:{self.insurance_company_id}:{self.environment}:{name}"
+
+    def set_secret(self, name, value):
+        """Задать секретное значение (зашифровать); пустая строка - стереть."""
+        field = self.SECRET_FIELDS[name]
+        setattr(self, field, crypto.encrypt(value, self._context(name)) if value else "")
+
+    def has_secret(self, name):
+        return bool(getattr(self, self.SECRET_FIELDS[name]))
+
+    def secret(self, name):
+        """Расшифрованное значение ("" - не задано). Ошибка - crypto.CryptoError."""
+        cipher = getattr(self, self.SECRET_FIELDS[name])
+        return crypto.decrypt(cipher, self._context(name)) if cipher else ""
+
+    def missing(self):
+        """Чего не хватает для входа: названия незаполненных значений."""
+        names = []
+        if not self.client_id:
+            names.append("client_id")
+        if not self.has_secret("client_secret"):
+            names.append("client_secret")
+        if not self.username:
+            names.append("логин")
+        if not self.has_secret("password"):
+            names.append("пароль")
+        return names
+
+    def login_data(self):
+        """
+        Все четыре значения для входа (секреты расшифрованы) - только для
+        запроса токена. Никуда не сохранять и не выводить.
+        """
+        return {
+            "client_id": self.client_id,
+            "client_secret": self.secret("client_secret"),
+            "username": self.username,
+            "password": self.secret("password"),
+        }

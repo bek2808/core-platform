@@ -44,6 +44,9 @@ from django.utils import timezone
 # Служебные поля: в журнал не пишутся, у них своя роль.
 SERVICE_FIELDS = {"created_at", "created_by", "updated_at", "updated_by"}
 
+# Что пишется в журнал вместо значения поля из audit_mask.
+MASK = "***"
+
 
 class Source(models.TextChoices):
     MANUAL = "manual", "вручную"
@@ -103,6 +106,11 @@ class TrackedModel(models.Model):
     # Поля, которые не пишутся в журнал (например, служебная копия
     # для поиска). Задаётся в конкретной таблице.
     audit_exclude = ()
+
+    # Поля, значение которых в журнал не пишется, а пишется только факт
+    # изменения: «*** -> ***» (было задано - задано новое), «- -> ***»
+    # (задано впервые), «*** -> -» (стёрто). Для шифров паролей.
+    audit_mask = ()
 
     objects = TrackedQuerySet.as_manager()
 
@@ -202,6 +210,10 @@ def write_journal(instance, fields, before, *, by, source):
             continue  # у новой записи пустые поля не интересны
         if not created and old == new:
             continue
+        if field.name in instance.audit_mask:
+            # Сравнивали настоящие значения, а в журнал - только «задано / нет».
+            old = MASK if old not in (None, "") else None
+            new = MASK if new not in (None, "") else None
         entries.append(
             ChangeLog(
                 change_id=change_id,
