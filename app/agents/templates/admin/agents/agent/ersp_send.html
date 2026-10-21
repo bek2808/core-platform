@@ -1,0 +1,86 @@
+{% extends "admin/base_site.html" %}
+{% comment %}
+Отправка агента в песочницу ЕРСП (AgentAdmin.ersp_send_view; правила - agents/ersp_send.py).
+Шаг 1: что уйдёт. Шаг 2 («Проверка»): справочник песочницы обновлён и сверен, показан точный запрос.
+Шаг 3: отправка - только после проверки и подтверждения; отпечаток запроса не даёт отправить
+не то, что проверено.
+{% endcomment %}
+{% block extrastyle %}{{ block.super }}
+<style>
+  .ersp-fields { width: 100%; }
+  .ersp-fields td, .ersp-fields th { vertical-align: top; text-align: left; }
+  .ersp-fields td.key { font-family: monospace; white-space: nowrap; width: 1%; }
+  .ersp-fields td.empty { color: var(--error-fg); }
+  .ersp-box { margin: 0 0 1em; }
+  .ersp-fields + form { margin-top: 1.5em; }
+  .ersp-note { color: var(--body-quiet-color); }
+</style>
+{% endblock %}
+{% block breadcrumbs %}
+<ol class="breadcrumbs">
+  <li><a href="{% url 'admin:index' %}">Начало</a></li>
+  <li><a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a></li>
+  <li><a href="{% url 'admin:agents_agent_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a></li>
+  <li><a href="{{ change_url }}">{{ target }}</a></li>
+  <li aria-current="page">Отправка в ЕРСП</li>
+</ol>
+{% endblock %}
+{% block content %}
+<div id="content-main">
+  <p class="ersp-box">Среда: <strong>песочница ЕРСП</strong>. Из боевой среды агента потом нельзя удалить, поэтому
+     отсюда отправка идёт только в песочницу. Агента из песочницы по API тоже не удалить - только вручную
+     в erspadmin.</p>
+  <p class="ersp-box">Что произойдёт: <strong>{{ request_info.method_label }}</strong>
+     (<code>{{ request_info.path }}</code>). Данные уходят целиком из нашей карточки: непереданные
+     необязательные поля ЕРСП очищает.</p>
+
+  {% if request_info.gaps %}
+    <div class="errornote"><strong>Отправка невозможна - не хватает:</strong>
+      <ul>{% for gap in request_info.gaps %}<li>{{ gap }}</li>{% endfor %}</ul></div>
+  {% endif %}
+  {% for problem in check_problems %}<p class="errornote">{{ problem }}</p>{% endfor %}
+  {% if checked %}
+    {% for note in check_notes %}<p class="ersp-note">✓ {{ note }}</p>{% endfor %}
+    <p class="ersp-note">Справочник ЕРСП (песочница) обновлён в {{ checked_at|date:"d.m.Y H:i:s" }}
+      (новых записей: {{ directory.created }}, изменено: {{ directory.updated }}).
+      <a href="{% url 'admin:integrations_exchange_changelist' %}">Журнал обмена</a></p>
+  {% endif %}
+
+  <h2>Что уйдёт в ЕРСП</h2>
+  <table class="ersp-fields">
+    <thead><tr><th>поле</th><th>значение</th></tr></thead>
+    <tbody>
+    {% for key, value in shown_fields %}
+      <tr><td class="key">{{ key }}</td><td{% if not value %} class="empty"{% endif %}>{{ value|default:"— (пусто)" }}</td></tr>
+    {% endfor %}
+    {% if file_info %}
+      <tr><td class="key">agencyAgreementFile</td>
+          <td>{{ file_info.name }} ({{ file_info.size|filesizeformat }}, {{ file_info.type }}, sha256 {{ file_info.sha256|slice:":16" }}…)</td></tr>
+    {% else %}
+      <tr><td class="key">agencyAgreementFile</td><td class="empty">— нет файла</td></tr>
+    {% endif %}
+    </tbody>
+  </table>
+
+  <form method="post">{% csrf_token %}
+    <div class="submit-row">
+      <button type="submit" name="action" value="check" class="default">Проверить перед отправкой</button>
+      <a href="{{ change_url }}" class="closelink">Назад к карточке</a>
+    </div>
+  </form>
+
+  {% if can_send %}
+    <h2>Отправить</h2>
+    <form method="post">{% csrf_token %}
+      <input type="hidden" name="fingerprint" value="{{ fingerprint }}">
+      <p><label><input type="checkbox" name="confirm" value="1">
+        Я проверил(а) запрос выше. Понимаю, что агента нельзя удалить из ЕРСП по API.</label></p>
+      <div class="submit-row">
+        <button type="submit" name="action" value="send" class="default">Отправить в песочницу ЕРСП</button>
+      </div>
+    </form>
+  {% elif checked %}
+    <p class="ersp-note">Отправка станет доступна, когда проверка пройдёт без замечаний.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -39,6 +39,8 @@ class Exchange(models.Model):
         PROVIDER_PASSPORT = "provider_passport", "провайдер: физлицо по паспорту и дате рождения"
         PROVIDER_PINFL = "provider_pinfl", "провайдер: физлицо по ПИНФЛ"
         REFERENCES_AGENCIES = "references_agencies", "справочник: агенты и филиалы"
+        AGENCY_ADD = "agency_add", "агент: добавить в ЕРСП"
+        AGENCY_UPDATE = "agency_update", "агент: изменить в ЕРСП"
 
     class Outcome(models.TextChoices):
         OK = "ok", "успешно"

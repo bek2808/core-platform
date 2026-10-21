@@ -80,6 +80,21 @@ def provider_answer(result=INSON):
     return 200, {"error": 0, "error_message": "", "result": result}
 
 
+def parse_multipart(body, content_type):
+    """Разобрать multipart/form-data так же, как сервер (разборщик Django)."""
+    from django.core.files.uploadhandler import MemoryFileUploadHandler
+    from django.http.multipartparser import MultiPartParser
+
+    meta = {"CONTENT_TYPE": content_type, "CONTENT_LENGTH": str(len(body))}
+    fields, files = MultiPartParser(meta, io.BytesIO(body), [MemoryFileUploadHandler()]).parse()
+    pairs = [(key, value) for key in fields for value in fields.getlist(key)]
+    file = None
+    for key in files:
+        uploaded = files[key]
+        file = (key, uploaded.name, uploaded.read(), uploaded.content_type)
+    return {"fields": pairs, "file": file}
+
+
 class FakeErsp:
     """
     Заглушка ЕРСП. answers - очередь ответов: (код HTTP, тело) или исключение.
@@ -91,10 +106,14 @@ class FakeErsp:
         self.calls = []
 
     def __call__(self, method, url, headers, body, timeout):
-        self.calls.append({
-            "method": method, "url": url, "headers": headers,
-            "body": json.loads(body) if body is not None else None,
-        })
+        content_type = headers.get("Content-Type", "")
+        if body is not None and content_type.startswith("multipart/form-data"):
+            # Форма с файлом (агент в ЕРСП): разбираем настоящим разборщиком Django -
+            # как это сделает сервер. body - {"fields": [(ключ, значение)], "file": (поле, имя, содержимое, тип)}.
+            parsed = parse_multipart(body, content_type)
+        else:
+            parsed = json.loads(body) if body is not None else None
+        self.calls.append({"method": method, "url": url, "headers": headers, "body": parsed})
         answer = self.answers.pop(0)
         if isinstance(answer, Exception):
             raise answer

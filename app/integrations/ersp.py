@@ -42,6 +42,7 @@
         ... error.message - что показать сотруднику; error.exchange - строка журнала
 """
 import fcntl
+import hashlib
 import json
 import logging
 import os
@@ -61,7 +62,7 @@ from config.crypto import CryptoError
 from .models import Environment, ErspConnection, ErspCredentials, Exchange
 
 # Ключи, значения которых в журнал не пишутся (заменяются на ***).
-SECRET_KEYS = {"client_secret", "password", "access_token", "refresh_token"}
+SECRET_KEYS = {"client_secret", "password", "access_token", "refresh_token", "electronAgencyApiToken"}
 MASK = "***"
 
 # Токен считаем истёкшим за 60 с до конца срока: запрос, начатый на последней
@@ -338,6 +339,37 @@ def urllib_transport(method, url, headers, body, timeout):
         return error.code, error.read()
 
 
+def multipart(fields, file=None):
+    """
+    Тело запроса multipart/form-data: поля (список пар ключ-значение, порядок
+    сохраняется) и, если нужно, один файл file = (поле, имя файла, содержимое, тип).
+    Возвращает (тело в байтах, значение Content-Type, то, что пишется в журнал):
+    в журнал вместо содержимого файла - его имя, размер и SHA-256.
+    """
+    boundary = "----core" + uuid.uuid4().hex
+    parts = []
+
+    def quoted(value):
+        return str(value).replace("\\", "\\\\").replace('"', "%22").replace("\r", "").replace("\n", "")
+
+    logged = {}
+    for key, value in fields:
+        parts.append(
+            f'--{boundary}\r\nContent-Disposition: form-data; name="{quoted(key)}"\r\n\r\n{value}\r\n'.encode("utf-8")
+        )
+        logged[key] = value
+    if file is not None:
+        field, filename, content, content_type = file
+        parts.append(
+            (f'--{boundary}\r\nContent-Disposition: form-data; name="{quoted(field)}"; '
+             f'filename="{quoted(filename)}"\r\nContent-Type: {content_type}\r\n\r\n').encode("utf-8")
+            + content + b"\r\n"
+        )
+        logged[field] = f"файл {filename}, {len(content)} байт, sha256 {hashlib.sha256(content).hexdigest()}"
+    parts.append(f"--{boundary}--\r\n".encode("utf-8"))
+    return b"".join(parts), f"multipart/form-data; boundary={boundary}", logged
+
+
 class ErspClient:
     def __init__(self, environment, company, user=None, transport=None, clock=time.time):
         if environment not in Environment.values:
@@ -442,6 +474,26 @@ class ErspClient:
         )
         return payload["result"]
 
+    def agencies_add(self, fields, file):
+        """
+        Добавить агента (POST /api/agencies/add, multipart): fields - пары
+        «ключ - значение» по описанию метода, file - (поле, имя, содержимое, тип).
+        Возвращает "result" ответа (его вид уточняется на первой отправке) или None.
+        """
+        return self._agency_write(Exchange.Operation.AGENCY_ADD, "/api/agencies/add", fields, file)
+
+    def agencies_update(self, fields, file=None):
+        """Изменить агента (POST /api/agencies/update): поля - полный набор, плюс id."""
+        return self._agency_write(Exchange.Operation.AGENCY_UPDATE, "/api/agencies/update", fields, file)
+
+    def _agency_write(self, operation, path, fields, file):
+        body, content_type, logged = multipart(fields, file)
+        payload, _ = self._call(
+            operation, path, None, subject=dict(fields).get("name", ""),
+            multipart_body=(body, content_type, logged), result_type=None,
+        )
+        return payload.get("result")
+
     def _person_request(self, fields):
         """
         Тело запроса о физлице: общие поля провайдера + свои. senderPinfl -
@@ -490,17 +542,21 @@ class ErspClient:
                 )
 
     def _send(self, operation, path, body, subject="", token=None, authorized=True,
-              method="POST", result_type=dict):
+              method="POST", result_type=dict, multipart_body=None):
         """
         Отправить запрос, записать его в журнал обмена и разобрать ответ.
         method - POST (тело - JSON) или GET (тела нет, body=None: справочники).
         result_type - каким должен быть "result" в ответе: dict (одна запись)
-        или list (справочник).
+        или list (справочник); None - не требовать (запись уже сделана, ответ
+        разбираем сами). multipart_body - (тело, Content-Type, что писать в журнал)
+        вместо JSON.
         Возвращает (ответ JSON, строка журнала) или бросает ErspError.
         """
         url = self.base_url + path
         headers = {"Accept": "application/json", "User-Agent": "core-platform"}
-        if body is not None:
+        if multipart_body is not None:
+            headers["Content-Type"] = multipart_body[1]
+        elif body is not None:
             headers["Content-Type"] = "application/json"
         if authorized:
             headers["Authorization"] = f"Bearer {token}"
@@ -512,12 +568,18 @@ class ErspClient:
             subject=str(subject)[:100],
             method=method,
             url=url,
-            request_body=mask(body) if body is not None else None,
+            request_body=(
+                mask(multipart_body[2]) if multipart_body is not None
+                else mask(body) if body is not None else None
+            ),
         )
         self.last_exchange = log
         started = time.monotonic()
         try:
-            data = json.dumps(body).encode("utf-8") if body is not None else None
+            if multipart_body is not None:
+                data = multipart_body[0]
+            else:
+                data = json.dumps(body).encode("utf-8") if body is not None else None
             status, raw = self.transport(method, url, headers, data, settings.ERSP_TIMEOUT_S)
         except OSError as error:  # нет связи, тайм-аут, ошибка сертификата
             log.duration_ms = int((time.monotonic() - started) * 1000)
@@ -554,7 +616,7 @@ class ErspClient:
         if operation == Exchange.Operation.TOKEN:
             if not token_result(payload).get("access_token"):
                 self._fail(log, Exchange.Outcome.BAD_RESPONSE, "В ответе ЕРСП нет токена (access_token).")
-        elif not isinstance(payload.get("result"), result_type):
+        elif result_type is not None and not isinstance(payload.get("result"), result_type):
             self._fail(log, Exchange.Outcome.BAD_RESPONSE, "В ответе ЕРСП нет данных (result).")
 
         log.outcome = Exchange.Outcome.OK

@@ -136,6 +136,7 @@ class Agent(TrackedModel):
         verbose_name = "агент"
         verbose_name_plural = "агенты"
         ordering = ["counterparty__display_name"]
+        permissions = [("send_to_ersp", "Может отправлять агентов в ЕРСП")]
         constraints = [
             models.UniqueConstraint(
                 fields=["insurance_company", "counterparty"],

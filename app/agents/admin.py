@@ -47,9 +47,10 @@ from audit.admin import NoRelatedLinks, TrackedAdmin
 from companies.models import Department
 from counterparties.models import BankAccount, Counterparty
 from files.display import size_text, uploaded_text
+from integrations.ersp import ErspError
 from integrations.models import ErspAgency
 
-from . import services
+from . import ersp_send, services
 from .models import Agent, Agreement, ErspLink, Member, Placement, visible_agents
 
 
@@ -481,6 +482,8 @@ class AgentAdmin(NoRelatedLinks, TrackedAdmin):
                  name="agents_agent_terminate"),
             path("<path:object_id>/agreements/<int:agreement_id>/scan/", self.admin_site.admin_view(self.scan_view),
                  name="agents_agent_scan"),
+            path("<path:object_id>/ersp/", self.admin_site.admin_view(self.ersp_send_view),
+                 name="agents_agent_ersp_send"),
             path("<path:object_id>/add-member/", self.admin_site.admin_view(self.add_member_view),
                  name="agents_agent_add_member"),
             path("<path:object_id>/members/<int:member_id>/disable/", self.admin_site.admin_view(self.disable_member_view),
@@ -504,6 +507,8 @@ class AgentAdmin(NoRelatedLinks, TrackedAdmin):
             actions.append(("agents_agent_terminate", "Прекратить соглашение"))
         if request.user.has_perm("agents.add_member"):
             actions.append(("agents_agent_add_member", "Завести пользователя"))
+        if request.user.has_perm("agents.send_to_ersp"):
+            actions.append(("agents_agent_ersp_send", "Отправить в ЕРСП"))
         return [{"url": reverse(f"admin:{name}", args=[agent.pk]), "label": label} for name, label in actions]
 
     def change_view(self, request, object_id, form_url="", extra_context=None):
@@ -558,6 +563,49 @@ class AgentAdmin(NoRelatedLinks, TrackedAdmin):
             return None
         messages.success(request, done)
         return redirect("admin:agents_agent_change", agent.pk)
+
+    def ersp_send_view(self, request, object_id):
+        """Отправка агента в песочницу ЕРСП: что уйдёт -> проверка -> отправка (agents/ersp_send.py)."""
+        if not request.user.has_perm("agents.send_to_ersp"):
+            raise PermissionDenied
+        agent = self._target(request, object_id)
+        change_url = reverse("admin:agents_agent_change", args=[agent.pk])
+        action = request.POST.get("action") if request.method == "POST" else None
+        check = None
+        problems = []
+
+        if action == "send":
+            if not request.POST.get("confirm"):
+                messages.error(request, "Отметьте, что вы проверили запрос.")
+            else:
+                try:
+                    outcome = ersp_send.send(agent, request.user, request.POST.get("fingerprint", ""))
+                except ersp_send.SendRefused as error:
+                    messages.error(request, str(error))
+                except ErspError as error:
+                    messages.error(request, f"ЕРСП: {error.message} Подробности - в журнале обмена.")
+                else:
+                    messages.success(request, outcome.message)
+                    return redirect(change_url)
+        elif action == "check":
+            try:
+                check = ersp_send.check(agent, request.user)
+            except ErspError as error:
+                messages.error(request, f"Справочник ЕРСП не загружен: {error.message}")
+
+        if check is not None:
+            info, problems = check.request, check.problems
+        else:
+            info = ersp_send.build(agent)
+        return TemplateResponse(request, "admin/agents/agent/ersp_send.html", {
+            **self.admin_site.each_context(request),
+            "opts": self.opts, "title": f"Отправка в ЕРСП: {agent}", "target": agent, "change_url": change_url,
+            "request_info": info, "shown_fields": info.shown_fields(), "file_info": info.file_info(),
+            "checked": check is not None, "check_problems": problems,
+            "check_notes": check.notes if check else [],
+            "checked_at": check.checked_at if check else None, "directory": check.directory if check else None,
+            "can_send": bool(check and check.can_send), "fingerprint": info.fingerprint(),
+        })
 
     def place_view(self, request, object_id):
         agent = self._target(request, object_id)
