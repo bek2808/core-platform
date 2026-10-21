@@ -48,6 +48,7 @@ import os
 import ssl
 import threading
 import time
+import uuid
 import urllib.error
 import urllib.request
 from contextlib import contextmanager
@@ -417,6 +418,44 @@ class ErspClient:
         """
         payload, _ = self._call(Exchange.Operation.PROVIDER_INN, "/api/provider/inn", {"inn": inn}, subject=inn)
         return payload["result"]
+
+    def provider_passport(self, document, birth_date):
+        """
+        Сведения о физлице по паспорту и дате рождения (метод провайдера
+        /api/provider/passport-birth-date-v2). document - серия и номер
+        слитно («AD0000000»), birth_date - дата. Возвращает словарь "result".
+        """
+        body = self._person_request({"document": document, "birthDate": birth_date.isoformat()})
+        payload, _ = self._call(
+            Exchange.Operation.PROVIDER_PASSPORT, "/api/provider/passport-birth-date-v2", body, subject=document,
+        )
+        return payload["result"]
+
+    def provider_pinfl(self, pinfl):
+        """
+        Сведения о физлице по ПИНФЛ (метод провайдера /api/provider/pinfl-v2).
+        Возвращает словарь "result".
+        """
+        body = self._person_request({"pinfl": pinfl})
+        payload, _ = self._call(
+            Exchange.Operation.PROVIDER_PINFL, "/api/provider/pinfl-v2", body, subject=pinfl,
+        )
+        return payload["result"]
+
+    def _person_request(self, fields):
+        """
+        Тело запроса о физлице: общие поля провайдера + свои. senderPinfl -
+        ПИНФЛ того, кто запрашивает (решение Бекзода 21.10): берётся из учётной
+        записи сотрудника. Согласие isConsent - «Y»: запрашивает сотрудник страховой
+        по паспортным данным из подписанного соглашения.
+        """
+        sender = getattr(self.user, "pinfl", "") if self.user is not None else ""
+        if not sender:
+            raise ErspError(
+                "В вашей учётной записи не заполнен ПИНФЛ: ЕРСП требует указать, кто запрашивает "
+                "данные физлица. Заполните ПИНФЛ в карточке пользователя."
+            )
+        return {"transactionId": uuid.uuid4().hex, "isConsent": "Y", "senderPinfl": sender, **fields}
 
     def references_agencies(self):
         """

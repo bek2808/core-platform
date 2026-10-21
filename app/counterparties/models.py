@@ -27,7 +27,14 @@ from django.utils import timezone
 
 from audit.models import Source, TrackedModel
 from companies.models import UZBEKISTAN, InsuranceCompany
-from references.models import ErspCurrency, ErspOked, ErspOwnershipForm, ErspRegion
+from references.models import (
+    ErspCountry,
+    ErspCurrency,
+    ErspOked,
+    ErspOwnershipForm,
+    ErspRegion,
+    ErspResidentType,
+)
 
 from .normalize import digits_only, remove_spaces, search_key, squash_spaces
 
@@ -234,7 +241,7 @@ class Counterparty(TrackedModel):
     audit_exclude = ("display_name", "search_text")
     # У данных юрлица тот же номер записи, что у карточки: их изменения видны
     # в «Истории» карточки (audit.admin.CardFilter).
-    journal_same_number = ("counterparties.LegalEntity",)
+    journal_same_number = ("counterparties.LegalEntity", "counterparties.Individual")
 
     class Meta:
         verbose_name = "контрагент"
@@ -273,6 +280,13 @@ class Counterparty(TrackedModel):
         )
         self.save(by=by, update_fields=["display_name", "search_text"])
         self.fill_region_from_soato(by=by, soato_code=legal_entity.soato_code)
+
+    def refresh_from_individual(self, individual, by=None):
+        """Наименование и ключ поиска физлица: «ФАМИЛИЯ ИМЯ ОТЧЕСТВО» (как отдаёт провайдер)."""
+        name = " ".join(p for p in (individual.last_name, individual.first_name, individual.middle_name) if p)
+        self.display_name = name
+        self.search_text = search_key(name, individual.pinfl, individual.passport)
+        self.save(by=by, update_fields=["display_name", "search_text"])
 
     def fill_region_from_soato(self, by=None, soato_code=None):
         """
@@ -519,9 +533,203 @@ class LegalEntity(TrackedModel):
         self.counterparty.refresh_from_legal_entity(self, by=by)
 
 
-# --- Представители и счета (вложенные записи карточки) -------------------------------
+# --- Физическое лицо -------------------------------------------------------------
 
 PINFL_REGEX = r"^[0-9]{14}$"
+
+
+class Individual(TrackedModel):
+    """
+    Данные физического лица (одна строка на карточку физлица).
+
+    Общая карточка физлица (решение Бекзода 22.10): набор полей - как у `person`
+    в ЕРСП и у агента-физлица, и у участников договора (страхователь,
+    выгодоприобретатель, застрахованный, владелец объекта): ФИО, пол, дата
+    рождения, ПИНФЛ, паспорт (серия, номер, кем и когда выдан), водительское
+    удостоверение, тип резидентства и страна. Телефон, эл. почта, регион и адрес
+    лежат в самой карточке контрагента. Остальное из этапа «Физлица» (чёрный
+    список, объекты) добавится без переноса этих полей.
+
+    У иностранца (тип резидентства 2) ПИНФЛ нет, а если он указан, иностранцем
+    быть нельзя (правило ЕРСП); у гражданина ПИНФЛ нужен - это проверяет
+    готовность к ЕРСП, а не база. Отчество «ХХХ» (его отсутствие) в базе пусто:
+    «ХХХ» подставляется при отправке в ЕРСП.
+
+    Данные хранятся обычным текстом (решение Бекзода 22.10), как ИНН.
+    Заполненный ПИНФЛ уникален в пределах страховой компании: в ЕРСП агент
+    с таким ПИНФЛ у одной страховой может быть только один. Страховая компания хранится
+    и здесь (копия из карточки, заполняется автоматически), чтобы это правило
+    и совпадение с карточкой проверяла сама база (составная ссылка, миграция 0007);
+    карточка при этом обязана быть физлицом (триггер в той же миграции).
+    """
+
+    counterparty = models.OneToOneField(
+        Counterparty,
+        on_delete=models.PROTECT,
+        primary_key=True,
+        related_name="individual",
+        verbose_name="контрагент",
+    )
+    insurance_company = models.ForeignKey(
+        InsuranceCompany,
+        on_delete=models.PROTECT,
+        editable=False,
+        related_name="+",
+        verbose_name="страховая компания",
+    )
+    last_name = models.CharField("фамилия", max_length=255)
+    first_name = models.CharField("имя", max_length=255)
+    middle_name = models.CharField("отчество", max_length=255, blank=True)
+    class Gender(models.TextChoices):
+        MALE = "m", "мужской"
+        FEMALE = "f", "женский"
+
+    pinfl = models.CharField(
+        "ПИНФЛ",
+        max_length=14,
+        blank=True,
+        validators=[RegexValidator(PINFL_REGEX, "ПИНФЛ - ровно 14 цифр.")],
+        help_text="У иностранца ПИНФЛ нет - поле пустое. У гражданина обязателен для ЕРСП.",
+    )
+    gender = models.CharField("пол", max_length=1, choices=Gender.choices, blank=True)
+    passport_series = models.CharField("серия паспорта", max_length=10, blank=True)
+    passport_number = models.CharField("номер паспорта", max_length=20, blank=True)
+    passport_issued_by = models.CharField("кем выдан паспорт", max_length=255, blank=True)
+    passport_issue_date = models.DateField("когда выдан паспорт", null=True, blank=True)
+    driver_license_series = models.CharField("серия водительского удостоверения", max_length=10, blank=True)
+    driver_license_number = models.CharField("номер водительского удостоверения", max_length=20, blank=True)
+    birth_date = models.DateField("дата рождения")
+    resident_type = models.ForeignKey(
+        ErspResidentType,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name="тип резидентства",
+        help_text="Из справочника ЕРСП. Для агента-физлица обязателен.",
+    )
+    country = models.ForeignKey(
+        ErspCountry,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name="страна",
+        help_text="Из справочника ЕРСП (Узбекистан - 210). Для агента-физлица обязательна.",
+    )
+
+    class Meta:
+        verbose_name = "данные физлица"
+        verbose_name_plural = "данные физлиц"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["insurance_company", "pinfl"],
+                condition=~Q(pinfl=""),
+                name="counterparties_individual_pinfl_unique",
+                violation_error_message="Физлицо с таким ПИНФЛ уже есть.",
+            ),
+            models.CheckConstraint(
+                condition=Q(pinfl="") | Q(pinfl__regex=PINFL_REGEX),
+                name="counterparties_individual_pinfl",
+                violation_error_message="ПИНФЛ - ровно 14 цифр.",
+            ),
+            models.CheckConstraint(
+                condition=~(Q(resident_type=ErspResidentType.FOREIGNER) & ~Q(pinfl="")),
+                name="counterparties_individual_foreigner_no_pinfl",
+                violation_error_message="У иностранца не может быть ПИНФЛ (правило ЕРСП).",
+            ),
+            models.CheckConstraint(
+                condition=Q(gender__in=["", "m", "f"]),
+                name="counterparties_individual_gender",
+                violation_error_message="Пол - мужской или женский.",
+            ),
+            models.CheckConstraint(
+                condition=Q(driver_license_series="") | Q(driver_license_series__regex=r"^[A-Z0-9]{1,10}$"),
+                name="counterparties_individual_license_series",
+                violation_error_message="Серия водительского удостоверения - латинские буквы и цифры.",
+            ),
+            models.CheckConstraint(
+                condition=~Q(last_name="") & ~Q(first_name=""),
+                name="counterparties_individual_names",
+                violation_error_message="Фамилия и имя обязательны.",
+            ),
+            models.CheckConstraint(
+                condition=Q(passport_series="") | Q(passport_series__regex=r"^[A-Z0-9]{1,10}$"),
+                name="counterparties_individual_passport_series",
+                violation_error_message="Серия паспорта - латинские буквы и цифры, без пробелов.",
+            ),
+            models.CheckConstraint(
+                condition=Q(passport_number="") | Q(passport_number__regex=r"^[A-Z0-9]{1,20}$"),
+                name="counterparties_individual_passport_number",
+                violation_error_message="Номер паспорта - латинские буквы и цифры, без пробелов.",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.last_name} {self.first_name}".strip()
+
+    def card(self):
+        """Карточка физлица (в форме новая карточка ещё не сохранена - см. LegalEntity.card)."""
+        counterparty = getattr(self, "counterparty", None)
+        if counterparty is not None:
+            return counterparty
+        return getattr(self, "card_in_form", None)
+
+    def journal_root(self):
+        return self.card()
+
+    @property
+    def passport(self):
+        """Серия и номер слитно: «AD0000000» - так их принимает провайдер."""
+        return f"{self.passport_series}{self.passport_number}"
+
+    def normalize(self):
+        counterparty = self.card()
+        if counterparty is not None:
+            self.insurance_company_id = counterparty.insurance_company_id
+        self.last_name = squash_spaces(self.last_name)
+        self.first_name = squash_spaces(self.first_name)
+        self.middle_name = squash_spaces(self.middle_name)
+        self.pinfl = remove_spaces(self.pinfl or "")
+        self.passport_series = remove_spaces(self.passport_series or "").upper()
+        self.passport_number = remove_spaces(self.passport_number or "").upper()
+        self.passport_issued_by = squash_spaces(self.passport_issued_by)
+        self.driver_license_series = remove_spaces(self.driver_license_series or "").upper()
+        self.driver_license_number = remove_spaces(self.driver_license_number or "").upper()
+
+    def clean(self):
+        errors = []
+        if self.resident_type_id == ErspResidentType.FOREIGNER and remove_spaces(self.pinfl or ""):
+            raise ValidationError({"pinfl": "У иностранца не может быть ПИНФЛ (правило ЕРСП)."})
+        counterparty = self.card()
+        if counterparty is not None and counterparty.kind != Counterparty.Kind.INDIVIDUAL:
+            errors.append("Данные физлица - только у карточки физического лица.")
+        # Повтор ПИНФЛ: то же правило есть в базе, но со страховой, которой в форме
+        # нет, - такие правила Django в форме не проверяет (ловушка из AGENTS.md).
+        company_id = counterparty.insurance_company_id if counterparty is not None else None
+        pinfl = remove_spaces(self.pinfl or "")
+        if company_id and pinfl:
+            same = (
+                Individual.objects.filter(insurance_company_id=company_id, pinfl=pinfl)
+                .exclude(pk=self.pk)
+                .select_related("counterparty")
+                .first()
+            )
+            if same is not None:
+                raise ValidationError({"pinfl": f"Физлицо с таким ПИНФЛ уже есть: {same.counterparty}."})
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, by=None, **kwargs):
+        update_fields = kwargs.get("update_fields")
+        if update_fields is not None:
+            kwargs["update_fields"] = {*update_fields, "insurance_company"}
+        super().save(*args, by=by, **kwargs)
+        self.counterparty.refresh_from_individual(self, by=by)
+
+
+# --- Представители и счета (вложенные записи карточки) -------------------------------
+
 LOCAL_ACCOUNT_REGEX = r"^[0-9]{20}$"
 FOREIGN_ACCOUNT_REGEX = r"^[A-Z0-9]{5,34}$"  # IBAN - до 34 знаков
 

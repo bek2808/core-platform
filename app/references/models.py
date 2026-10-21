@@ -247,6 +247,9 @@ class ErspResidentType(ErspNamedReference):
     (гражданин, иностранец, ЛБГ и др.). Для агента-физлица и физлиц вообще.
     """
 
+    CITIZEN = 1  # «гражданин»
+    FOREIGNER = 2  # «иностранец»: ПИНФЛ у него нет
+
     class Meta(ErspNamedReference.Meta):
         verbose_name = "тип резидентства ЕРСП"
         verbose_name_plural = "типы резидентства ЕРСП"

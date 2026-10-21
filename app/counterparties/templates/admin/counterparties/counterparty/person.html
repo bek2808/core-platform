@@ -1,0 +1,90 @@
+{% extends "admin/base_site.html" %}
+{% comment %}
+Новое физлицо по паспорту или ПИНФЛ от провайдера ЕРСП
+(CounterpartyAdmin.by_passport_view; правила - counterparties/provider_person.py).
+{% endcomment %}
+{% block extrastyle %}{{ block.super }}
+<style>
+  .person-source { color: var(--body-quiet-color); margin-bottom: 1em; }
+  /* Как в карточке контрагента: подпись над полем, все поля начинаются на одной линии.
+     Без этого подпись и поле шли в строку, и поле начиналось там, где кончается подпись
+     (замер 22.10: от 374 до 518 пикселей слева). */
+  .person-form .form-row > div > label { display: block; float: none; width: auto; padding: 0 0 4px; }
+  .person-form .form-row input, .person-form .form-row select { width: 22em; max-width: 100%; box-sizing: border-box; }
+  .person-form .form-row .help { margin: 4px 0 0; padding: 0; }
+  .person-form .form-row .readonly { margin: 0; padding: 0; width: auto; }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<ol class="breadcrumbs">
+  <li><a href="{% url 'admin:index' %}">Начало</a></li>
+  <li><a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a></li>
+  <li><a href="{% url 'admin:counterparties_counterparty_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a></li>
+  <li aria-current="page">Новое физлицо</li>
+</ol>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+
+{% if person_ask %}
+  <form method="post" class="person-form">{% csrf_token %}
+    <input type="hidden" name="action" value="query">
+    <p>Система запросит данные физлица у провайдера ЕРСП (боевая среда) и покажет их для проверки.
+       Нужен ПИНФЛ или паспорт вместе с датой рождения. В запросе уйдёт ваш ПИНФЛ как запрашивающего.</p>
+    {% if ask.non_field_errors %}<p class="errornote">{{ ask.non_field_errors|join:" " }}</p>{% endif %}
+    <fieldset class="module aligned">
+      {% for field in ask %}
+      <div class="form-row{% if field.errors %} errors{% endif %}">
+        {{ field.errors }}
+        <div>{{ field.label_tag }} {{ field }}
+          {% if field.help_text %}<div class="help">{{ field.help_text }}</div>{% endif %}</div>
+      </div>
+      {% endfor %}
+    </fieldset>
+    <div class="submit-row"><input type="submit" class="default" value="Запросить у провайдера">
+      <a href="{{ change_url }}" class="closelink">Отмена</a></div>
+  </form>
+
+{% else %}
+  <p class="person-source">
+    Ответ провайдера ЕРСП ({{ exchange.get_environment_display }} среда) от {{ exchange.started_at|date:"d.m.Y H:i" }} -
+    <a href="{% url 'admin:integrations_exchange_change' exchange.pk %}">журнал обмена № {{ exchange.pk }}</a>.
+    <a href="{{ request.path }}">Другие данные</a>
+  </p>
+  {% for warning in data.warnings %}<p class="warning">{{ warning }}</p>{% endfor %}
+  {% if not data.usable %}
+    <p class="errornote">{{ data.problems|join:" " }} Физлицо по этому ответу не завести: проверьте данные запроса.</p>
+  {% else %}
+  <form method="post" class="person-form">{% csrf_token %}
+    <input type="hidden" name="exchange" value="{{ exchange.pk }}">
+    <input type="hidden" name="action" value="create">
+    {% if confirm.non_field_errors %}<p class="errornote">{{ confirm.non_field_errors|join:" " }}</p>{% endif %}
+    <fieldset class="module aligned">
+      <h2>От провайдера</h2>
+      <div class="form-row"><div><label>Фамилия</label><div class="readonly">{{ data.last_name }}</div></div></div>
+      <div class="form-row"><div><label>Имя</label><div class="readonly">{{ data.first_name }}</div></div></div>
+      <div class="form-row"><div><label>Отчество</label><div class="readonly">{{ data.middle_name|default:"—" }}</div></div></div>
+      <div class="form-row"><div><label>ПИНФЛ</label><div class="readonly">{{ data.pinfl }}</div></div></div>
+      <div class="form-row"><div><label>Пол</label><div class="readonly">{% if data.gender == "m" %}мужской{% elif data.gender == "f" %}женский{% else %}—{% endif %}</div></div></div>
+      <div class="form-row"><div><label>Дата рождения</label><div class="readonly">{{ data.birth_date|date:"d.m.Y" }}</div></div></div>
+    </fieldset>
+    <fieldset class="module aligned">
+      <h2>Проверьте и дополните</h2>
+      {% for field in confirm %}
+      <div class="form-row{% if field.errors %} errors{% endif %}">
+        {{ field.errors }}
+        <div>{{ field.label_tag }} {{ field }}
+          {% if field.help_text %}<div class="help">{{ field.help_text }}</div>{% endif %}</div>
+      </div>
+      {% endfor %}
+    </fieldset>
+    <p>Всё запишется в журнал изменений с источником «провайдер ЕРСП».</p>
+    <div class="submit-row"><input type="submit" class="default" value="Завести физлицо">
+      <a href="{{ change_url }}" class="closelink">Отмена</a></div>
+  </form>
+  {% endif %}
+{% endif %}
+</div>
+{% endblock %}

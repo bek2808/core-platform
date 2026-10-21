@@ -36,6 +36,8 @@ class Exchange(models.Model):
     class Operation(models.TextChoices):
         TOKEN = "token", "получение токена"
         PROVIDER_INN = "provider_inn", "провайдер: организация по ИНН"
+        PROVIDER_PASSPORT = "provider_passport", "провайдер: физлицо по паспорту и дате рождения"
+        PROVIDER_PINFL = "provider_pinfl", "провайдер: физлицо по ПИНФЛ"
         REFERENCES_AGENCIES = "references_agencies", "справочник: агенты и филиалы"
 
     class Outcome(models.TextChoices):

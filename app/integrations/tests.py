@@ -10,6 +10,7 @@ Mosaic - в карточке подключения (ErspMixin), ключ шиф
 
 Запуск на сервере: bin/test integrations
 """
+import datetime
 import io
 import json
 import tempfile
@@ -283,6 +284,42 @@ class ClientTests(ErspMixin, TestCase):
         # Ответ хранится целиком, как пришёл (с пробелами в адресе и т. п.).
         self.assertEqual(exchange.response_body["result"], INSON)
         self.assertIsNotNone(exchange.duration_ms)
+
+    def test_provider_passport(self):
+        person = {"currentPinfl": "30101990000000", "regionId": 10}
+        fake = FakeErsp(token_answer(), provider_answer(person))
+        self.bekzod.pinfl = "30202020202020"
+        result = self.client_for(fake, company=self.mosaic, user=self.bekzod).provider_passport(
+            "AD0000000", datetime.date(1990, 1, 1)
+        )
+        self.assertEqual(result, person)
+        self.assertEqual(fake.paths(), ["/oauth/v2/token", "/api/provider/passport-birth-date-v2"])
+        body = fake.calls[1]["body"]
+        self.assertEqual(body["document"], "AD0000000")
+        self.assertEqual(body["birthDate"], "1990-01-01")
+        self.assertEqual(body["senderPinfl"], "30202020202020")  # кто запрашивает
+        self.assertEqual(body["isConsent"], "Y")
+        self.assertTrue(body["transactionId"])
+        exchange = Exchange.objects.get(operation=Exchange.Operation.PROVIDER_PASSPORT)
+        self.assertEqual(exchange.subject, "AD0000000")
+        self.assertEqual(exchange.response_body["result"], person)
+
+    def test_provider_pinfl(self):
+        fake = FakeErsp(token_answer(), provider_answer({"currentPinfl": "30101990000000"}))
+        self.bekzod.pinfl = "30202020202020"
+        self.client_for(fake, company=self.mosaic, user=self.bekzod).provider_pinfl("30101990000000")
+        self.assertEqual(fake.paths(), ["/oauth/v2/token", "/api/provider/pinfl-v2"])
+        self.assertEqual(fake.calls[1]["body"]["pinfl"], "30101990000000")
+        self.assertEqual(Exchange.objects.get(operation=Exchange.Operation.PROVIDER_PINFL).subject, "30101990000000")
+
+    def test_person_request_needs_sender_pinfl(self):
+        """Без ПИНФЛ запрашивающего запрос не уходит совсем (ни входа, ни журнала)."""
+        fake = FakeErsp()
+        self.bekzod.pinfl = ""
+        with self.assertRaisesMessage(ErspError, "не заполнен ПИНФЛ"):
+            self.client_for(fake, company=self.mosaic, user=self.bekzod).provider_pinfl("30101990000000")
+        self.assertEqual(fake.calls, [])
+        self.assertFalse(Exchange.objects.exists())
 
     def test_system_request_logged_under_company(self):
         fake = FakeErsp(token_answer())

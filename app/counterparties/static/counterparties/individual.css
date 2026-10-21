@@ -1,0 +1,26 @@
+/*
+ * Блок «Данные физлица» в карточке контрагента: поля в колонках одной ширины,
+ * чтобы подписи и поля всех строк начинались на одной линии (правило «ровность
+ * полей» из AGENTS.md; замер в браузере 22.10: без этого колонки второй и
+ * третьей строк начинались на разных расстояниях слева, а дата стояла ниже
+ * соседнего поля). Тот же приём, что у соглашений агента (agents/agents.css).
+ */
+#individual-group .form-row .fieldBox {
+    flex: 0 0 22em;
+    box-sizing: border-box;
+}
+#individual-group .form-row input[type="text"],
+#individual-group .form-row input.vDateField,
+#individual-group .form-row select {
+    width: 16em;
+    box-sizing: border-box;
+}
+/* Дата лежит в <p class="date"> с отступом сверху - выравниваем по соседнему полю. */
+#individual-group .form-row .fieldBox p.date {
+    margin: 0;
+    padding-top: 0;
+}
+/* Подписи - в одну строку («Серия водительского удостоверения» переносилась). */
+#individual-group .form-row label {
+    white-space: nowrap;
+}

@@ -28,14 +28,15 @@ from audit.admin import NoRelatedLinks, TrackedAdmin
 from audit.models import Source
 from integrations.ersp import PROVIDER, ErspClient, ErspError
 from integrations.models import Exchange
-from references.models import CbuBank
+from references.models import CbuBank, ErspCountry, ErspRegion, ErspResidentType
 
-from . import banks, provider
+from . import banks, provider, provider_person
 
 from .models import (
     Bank,
     BankAccount,
     Counterparty,
+    Individual,
     LegalEntity,
     PowerBasis,
     Position,
@@ -184,6 +185,31 @@ class LegalEntityInline(NoRelatedLinks, admin.StackedInline):
     ]
 
 
+class IndividualInline(NoRelatedLinks, admin.StackedInline):
+    """Данные физлица - блок внутри карточки физического лица."""
+
+    model = Individual
+    formset = LegalEntityFormSet  # тот же приём: передаёт блоку карточку (card_in_form)
+    can_delete = False
+    min_num = 1
+    max_num = 1
+    extra = 0
+    verbose_name = "данные физлица"
+    verbose_name_plural = "данные физлица"
+
+    class Media:
+        css = {"all": ["counterparties/individual.css"]}
+
+    fieldsets = [
+        (None, {"fields": [("last_name", "first_name", "middle_name"), ("gender", "birth_date")]}),
+        ("Документы", {"fields": [
+            "pinfl", ("passport_series", "passport_number"), ("passport_issued_by", "passport_issue_date"),
+            ("driver_license_series", "driver_license_number"),
+        ]}),
+        ("ЕРСП", {"fields": [("resident_type", "country")]}),
+    ]
+
+
 # Длина поля в форме при вводе: человек пишет «+998 (99) 894-44-40» или
 # «3010 5780 1234 56»; лишние знаки система убирает сама (normalize модели),
 # а длину модель проверяет уже по цифрам. Форма не должна резать ввод раньше.
@@ -227,16 +253,63 @@ class BankAccountInline(NoRelatedLinks, admin.TabularInline):
     autocomplete_fields = ["bank", "currency"]
 
 
+class PersonAskForm(forms.Form):
+    """Шаг 1: чем искать физлицо у провайдера - паспортом с датой рождения или ПИНФЛ."""
+
+    passport = forms.CharField(label="Серия и номер паспорта", required=False, max_length=30,
+                               help_text="Слитно или через пробел, например AD 0000000.")
+    birth_date = forms.DateField(label="Дата рождения", required=False,
+                                 widget=forms.DateInput(attrs={"placeholder": "дд.мм.гггг"}),
+                                 input_formats=["%d.%m.%Y", "%Y-%m-%d"])
+    pinfl = forms.CharField(label="ПИНФЛ", required=False, max_length=30,
+                            help_text="Если ПИНФЛ известен - паспорт и дата рождения не нужны.")
+
+    def clean(self):
+        cleaned = super().clean()
+        pinfl = remove_spaces(cleaned.get("pinfl") or "")
+        passport = remove_spaces(cleaned.get("passport") or "").upper()
+        birth = cleaned.get("birth_date")
+        if pinfl:
+            if not re.fullmatch(r"[0-9]{14}", pinfl):
+                self.add_error("pinfl", "ПИНФЛ - ровно 14 цифр.")
+        elif passport and birth:
+            if not re.fullmatch(r"[A-Z]{1,5}[0-9]{4,9}", passport):
+                self.add_error("passport", "Серия и номер - латинские буквы и цифры, например AD0000000.")
+        else:
+            raise ValidationError("Укажите ПИНФЛ или паспорт вместе с датой рождения.")
+        cleaned["pinfl"], cleaned["passport"] = pinfl, passport
+        return cleaned
+
+
+class PersonConfirmForm(forms.Form):
+    """Шаг 2: то, чего провайдер не отдаёт или что стоит проверить глазами."""
+
+    passport_series = forms.CharField(label="Серия паспорта", required=False, max_length=10)
+    passport_number = forms.CharField(label="Номер паспорта", required=False, max_length=20)
+    passport_issued_by = forms.CharField(label="Кем выдан паспорт", required=False, max_length=255)
+    passport_issue_date = forms.DateField(label="Когда выдан паспорт", required=False,
+                                          widget=forms.DateInput(attrs={"placeholder": "дд.мм.гггг"}),
+                                          input_formats=["%d.%m.%Y", "%Y-%m-%d"])
+    gender = forms.ChoiceField(label="Пол", required=False, choices=[("", "---------"), *Individual.Gender.choices])
+    phone = forms.CharField(label="Телефон", required=False, max_length=FORM_INPUT_MAX_LENGTH,
+                            help_text="С кодом страны, например 998901234567.")
+    address = forms.CharField(label="Адрес", required=False, max_length=500)
+    region = forms.ModelChoiceField(label="Регион", required=False, queryset=ErspRegion.objects.all())
+    resident_type = forms.ModelChoiceField(label="Тип резидентства", required=False,
+                                           queryset=ErspResidentType.objects.all())
+    country = forms.ModelChoiceField(label="Страна", required=False, queryset=ErspCountry.objects.all())
+
+
 @admin.register(Counterparty)
 class CounterpartyAdmin(NoRelatedLinks, TrackedAdmin):
     inlines = [LegalEntityInline, RepresentativeInline, BankAccountInline]
-    list_display = ["display_name", "inn", "is_foreign", "region", "status"]
-    list_filter = ["status", "legal_entity__is_foreign", "region"]
-    list_select_related = ["legal_entity", "region", "insurance_company"]
+    list_display = ["display_name", "kind", "inn", "is_foreign", "region", "status"]
+    list_filter = ["status", "kind", "legal_entity__is_foreign", "region"]
+    list_select_related = ["legal_entity", "individual", "region", "insurance_company"]
     # Поиск устроен по-своему (get_search_results): наименование - по ключу
     # для поиска, ИНН - точно. Строка ниже нужна, чтобы появилось поле поиска.
     search_fields = ["search_text"]
-    search_help_text = "Наименование (любой частью, кириллицей или латиницей) или ИНН."
+    search_help_text = "Наименование (любой частью, кириллицей или латиницей), ИНН или ПИНФЛ."
 
     actions = ["archive", "restore"]
 
@@ -265,6 +338,12 @@ class CounterpartyAdmin(NoRelatedLinks, TrackedAdmin):
             counterparty.save(by=request.user, update_fields=["status"])
             count += 1
         return count
+
+    def get_inlines(self, request, obj):
+        # У физлица - свои данные, без представителей (они бывают только у организации).
+        if obj is not None and obj.kind == Counterparty.Kind.INDIVIDUAL:
+            return [IndividualInline, BankAccountInline]
+        return [LegalEntityInline, RepresentativeInline, BankAccountInline]
 
     def get_queryset(self, request):
         # Клиентскую базу своей страховой видят все её сотрудники при любой
@@ -318,6 +397,7 @@ class CounterpartyAdmin(NoRelatedLinks, TrackedAdmin):
         found = queryset.filter(
             Q(search_text__icontains=search_key(term))
             | Q(legal_entity__inn=remove_spaces(term).upper())
+            | Q(individual__pinfl=remove_spaces(term))
         )
         return found, False
 
@@ -327,6 +407,8 @@ class CounterpartyAdmin(NoRelatedLinks, TrackedAdmin):
         Чего не хватает для отправки в ЕРСП - по сохранённой карточке
         (после правки нажмите «Сохранить и продолжить редактирование»).
         """
+        if obj.kind == Counterparty.Kind.INDIVIDUAL:
+            return "Готовность физлица к договорам определим на этапе «Физлица»; для агента - в карточке агента."
         blocks = []
         for role, title in [
             (Role.INSURANT, "Как страхователь"),
@@ -351,6 +433,8 @@ class CounterpartyAdmin(NoRelatedLinks, TrackedAdmin):
         own = [
             path("by-inn/", self.admin_site.admin_view(self.by_inn_view),
                  name="counterparties_counterparty_by_inn"),
+            path("by-passport/", self.admin_site.admin_view(self.by_passport_view),
+                 name="counterparties_counterparty_by_passport"),
             path("<path:object_id>/provider/", self.admin_site.admin_view(self.provider_view),
                  name="counterparties_counterparty_provider"),
         ]
@@ -381,10 +465,10 @@ class CounterpartyAdmin(NoRelatedLinks, TrackedAdmin):
             found = found.filter(subject=inn)
         return found.first()
 
-    def _page(self, request, title, context):
+    def _page(self, request, title, context, template="provider.html"):
         return TemplateResponse(
             request,
-            "admin/counterparties/counterparty/provider.html",
+            f"admin/counterparties/counterparty/{template}",
             {**self.admin_site.each_context(request), "opts": self.model._meta, "title": title, **context},
         )
 
@@ -500,10 +584,116 @@ class CounterpartyAdmin(NoRelatedLinks, TrackedAdmin):
             "rows": provider.compare(None, data), "change_url": list_url,
         })
 
-    @admin.display(description="ИНН", ordering="legal_entity__inn")
+    # --- Новое физлицо по паспорту или ПИНФЛ (counterparties/provider_person.py) ----
+    #
+    # Так же, как по ИНН: запрос к провайдеру - только по кнопке, ответ ложится
+    # в журнал обмена, а страница подтверждения работает с этой строкой журнала.
+
+    def _ask_provider_person(self, request, company, form):
+        """Запрос о физлице. Возвращает строку журнала или None (ошибка уже показана)."""
+        try:
+            client = ErspClient.for_purpose(PROVIDER, company, user=request.user)
+            if form["pinfl"]:
+                client.provider_pinfl(form["pinfl"])
+            else:
+                client.provider_passport(form["passport"], form["birth_date"])
+        except ErspError as error:
+            messages.error(request, f"Провайдер ЕРСП: {error.message}")
+            return None
+        return client.last_exchange
+
+    @staticmethod
+    def _stored_person_answer(exchange_id, company):
+        try:
+            pk = int(exchange_id)
+        except (TypeError, ValueError):
+            return None
+        return Exchange.objects.filter(
+            pk=pk, outcome=Exchange.Outcome.OK, insurance_company=company,
+            operation__in=[Exchange.Operation.PROVIDER_PASSPORT, Exchange.Operation.PROVIDER_PINFL],
+        ).first()
+
+    def by_passport_view(self, request):
+        """Новое физлицо: паспорт и дата рождения (или ПИНФЛ) -> ответ провайдера -> завести."""
+        if not self.has_add_permission(request):
+            raise PermissionDenied
+        list_url = reverse("admin:counterparties_counterparty_changelist")
+        company = request.user.insurance_company
+        if company is None:
+            messages.error(request, "Заведение физлица - для сотрудника страховой компании "
+                                    "(в учётной записи не указана страховая).")
+            return redirect(list_url)
+
+        def go_to_existing(person):
+            messages.info(request, f"Физлицо с этим ПИНФЛ уже есть: {person.counterparty}.")
+            return redirect(reverse("admin:counterparties_counterparty_change", args=[person.counterparty_id]))
+
+        action = request.POST.get("action")
+        if request.method == "POST" and action == "query":
+            ask = PersonAskForm(request.POST)
+            if not ask.is_valid():
+                return self._page(request, "Новое физлицо по паспорту", {
+                    "person_ask": True, "ask": ask, "change_url": list_url,
+                }, template="person.html")
+            known = (
+                Individual.objects.filter(insurance_company=company, pinfl=ask.cleaned_data["pinfl"]).first()
+                if ask.cleaned_data["pinfl"] else None
+            )
+            if known is not None:
+                return go_to_existing(known)
+            exchange = self._ask_provider_person(request, company, ask.cleaned_data)
+            if exchange is None:
+                return self._page(request, "Новое физлицо по паспорту", {
+                    "person_ask": True, "ask": ask, "change_url": list_url,
+                }, template="person.html")
+            return redirect(f"{request.path}?exchange={exchange.pk}")
+
+        exchange_id = request.POST.get("exchange") or request.GET.get("exchange")
+        if not exchange_id:
+            return self._page(request, "Новое физлицо по паспорту", {
+                "person_ask": True, "ask": PersonAskForm(), "change_url": list_url,
+            }, template="person.html")
+        exchange = self._stored_person_answer(exchange_id, company)
+        if exchange is None:
+            messages.error(request, "Ответ провайдера не найден - запросите заново.")
+            return redirect(request.path)
+        data = provider_person.parse(exchange.response_body["result"])
+        if data.pinfl:
+            known = Individual.objects.filter(insurance_company=company, pinfl=data.pinfl).first()
+            if known is not None:
+                return go_to_existing(known)
+
+        if request.method == "POST" and action == "create":
+            confirm = PersonConfirmForm(request.POST)
+            if confirm.is_valid():
+                try:
+                    card = provider_person.create(company, data, confirm.cleaned_data, request.user)
+                except (provider_person.ProviderError, ValidationError) as error:
+                    text = error.messages if isinstance(error, ValidationError) else [str(error)]
+                    confirm.add_error(None, "Физлицо не заведено: " + " ".join(text))
+                else:
+                    messages.success(request, f"Заведено физлицо по данным провайдера: {card}.")
+                    return redirect(reverse("admin:counterparties_counterparty_change", args=[card.pk]))
+        else:
+            confirm = PersonConfirmForm(initial={
+                "passport_series": data.passport_series, "passport_number": data.passport_number,
+                "passport_issued_by": data.passport_issued_by, "passport_issue_date": data.passport_issue_date,
+                "gender": data.gender, "address": data.address, "region": data.region,
+                "resident_type": ErspResidentType.objects.filter(pk=ErspResidentType.CITIZEN).first(),
+                "country": ErspCountry.objects.filter(pk=ErspCountry.UZBEKISTAN).first(),
+            })
+        return self._page(request, "Новое физлицо по данным провайдера", {
+            "person_new": True, "exchange": exchange, "data": data, "confirm": confirm,
+            "change_url": list_url,
+        }, template="person.html")
+
+    @admin.display(description="ИНН / ПИНФЛ", ordering="legal_entity__inn")
     def inn(self, obj):
         legal_entity = getattr(obj, "legal_entity", None)
-        return legal_entity.inn if legal_entity else "—"
+        if legal_entity:
+            return legal_entity.inn
+        individual = getattr(obj, "individual", None)
+        return (individual.pinfl or individual.passport or "—") if individual else "—"
 
     @admin.display(description="иностранная", boolean=True, ordering="legal_entity__is_foreign")
     def is_foreign(self, obj):
