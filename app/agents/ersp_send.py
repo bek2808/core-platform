@@ -208,7 +208,9 @@ def build(agent):
         fields.append(("agentAgreementDate", _date(agreement.signed_on)))
     fields.append(("formationDate", _date(agent.formation_date)))
     fields.append(("isElectronAgency", _flag(agent.is_electronic)))
-    fields.append(("isHeadElectronAgency", _flag(agent.is_head_electronic)))
+    if agent.is_electronic:
+        # Для обычного агента это поле нельзя отправлять вовсе (422 «prohibited unless is electron agency is true»).
+        fields.append(("isHeadElectronAgency", _flag(agent.is_head_electronic)))
     fields.extend(body)
     return request
 

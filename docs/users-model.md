@@ -820,4 +820,5 @@
     примерно 1 МБ (413 от nginx, хотя в описании метода — до 5 МБ), поэтому
     скан больше 1 000 000 байт считается «чего не хватает»; булевы поля
     формы (`isElectronAgency`, `isHeadElectronAgency`) — `1` / `0`, а не
-    «true» / «false» (422).
+    «true» / «false» (422); `isHeadElectronAgency` у обычного агента
+    не отправляется совсем (иначе 422 «prohibited unless is electron agency is true»).

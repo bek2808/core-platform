@@ -159,8 +159,8 @@ class BuildTests(SendCase):
         self.assertEqual(fields["name"], 'Агент: ООО "InRe"')
         self.assertEqual((fields["parentId"], fields["agencyType"], fields["areaTypeId"]), ("53", "2", "1"))
         self.assertEqual((fields["agentAgreementNumber"], fields["agentAgreementDate"]), ("AZM/21-000", "2021-04-14"))
-        self.assertEqual((fields["formationDate"], fields["isElectronAgency"], fields["isHeadElectronAgency"]),
-                         ("2015-03-01", "0", "0"))
+        self.assertEqual((fields["formationDate"], fields["isElectronAgency"]), ("2015-03-01", "0"))
+        self.assertNotIn("isHeadElectronAgency", fields)  # у обычного агента поле запрещено (422)
         base = "agency[organization]"
         self.assertEqual(fields[f"{base}[inn]"], INN)
         self.assertEqual(fields[f"{base}[name]"], 'ООО "InRe"')
