@@ -91,6 +91,7 @@ class StarterListsTests(AssignmentCase):
             "integrations_admin": "Администратор интеграций",
             "employee": "Сотрудник",
             "platform_admin": "Администратор платформы",  # A4
+            "agents": "Работа с агентами",  # B2 (agents/0005)
         })
         self.assertTrue(all(role.audience == "company" for role in Role.objects.exclude(code="platform_admin")))
 

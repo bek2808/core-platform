@@ -328,11 +328,19 @@ class Department(TrackedModel):
                     # Люди, которые работают здесь сегодня или с будущей даты.
                     today = timezone.localdate()
                     working = self.assignments.filter(Q(valid_to__isnull=True) | Q(valid_to__gte=today))
+                    # Агенты, прикреплённые сюда сегодня или с будущей даты (этап B).
+                    agents = self.agent_placements.filter(Q(valid_to__isnull=True) | Q(valid_to__gte=today))
                     if working.exists():
                         names = ", ".join(a.user.full_name() for a in working.select_related("user")[:5])
                         errors["status"] = (
                             f"Здесь работают люди: {names}. Сначала переведите их или закройте "
                             "их прикрепления датой «по»."
+                        )
+                    elif agents.exists():
+                        names = ", ".join(str(p.agent) for p in agents.select_related("agent__counterparty")[:5])
+                        errors["status"] = (
+                            f"Здесь прикреплены агенты: {names}. Сначала переведите их "
+                            "в другое подразделение (кнопка «Перевести» в карточке агента)."
                         )
 
         if company_id is not None:

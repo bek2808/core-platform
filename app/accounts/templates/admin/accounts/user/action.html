@@ -8,7 +8,7 @@
 <script src="{% url 'admin:jsi18n' %}"></script>
 {{ media }}
 {% endblock %}
-{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'admin/css/forms.css' %}">{% endblock %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'admin/css/forms.css' %}"><link rel="stylesheet" href="{% static 'admin/css/widgets.css' %}">{% endblock %}
 {% block bodyclass %}{{ block.super }} app-accounts model-user change-form{% endblock %}
 {% block breadcrumbs %}
 <ol class="breadcrumbs">

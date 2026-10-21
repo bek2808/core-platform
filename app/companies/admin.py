@@ -33,8 +33,7 @@ from django.utils.html import format_html
 
 from audit.admin import NoRelatedLinks, TrackedAdmin
 
-from agents.models import ErspLink
-from integrations.models import ErspAgency
+from agents.admin import DepartmentErspLinkInline
 
 from .models import Department, InsuranceCompany
 
@@ -172,57 +171,6 @@ class DepartmentForm(forms.ModelForm):
             ]
 
 
-class AgencyChoice(forms.ModelChoiceField):
-    def label_from_instance(self, agency):
-        kind = agency.get_agency_type_display() if agency.agency_type else "вид не указан"
-        return f"{agency.ersp_id} - {agency.name} ({kind}, {agency.get_environment_display()})"
-
-
-class ErspLinkForm(forms.ModelForm):
-    class Meta:
-        model = ErspLink
-        fields = ["ersp_agency", "is_active"]
-        field_classes = {"ersp_agency": AgencyChoice}
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        field = self.fields.get("ersp_agency")
-        if field is None:
-            return
-        if self.instance.pk:
-            # Связь не переносится на другую запись ЕРСП (проверяет и база).
-            field.disabled = True
-        else:
-            # Для новой связи - только живые записи ЕРСП, ещё ни с чем не связанные.
-            field.queryset = field.queryset.filter(
-                is_present=True, is_deleted=False, link__isnull=True,
-            )
-
-
-class ErspLinkInline(NoRelatedLinks, admin.TabularInline):
-    model = ErspLink
-    form = ErspLinkForm
-    fk_name = "department"
-    extra = 0
-    fields = ["ersp_agency", "environment", "is_active"]
-    readonly_fields = ["environment"]
-    # «Добавить еще один agencyId» - подпись кнопки Django собирает из verbose_name.
-    verbose_name = "agencyId"
-    verbose_name_plural = "Связь с ЕРСП (agencyId)"
-    classes = ["ersp-links"]
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "ersp_agency":
-            # Справочник ЕРСП своей страховой (загружается командой load_ersp_agencies).
-            kwargs["queryset"] = own_departments(request, ErspAgency.objects.all()).order_by(
-                "environment", "ersp_id"
-            )
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-
 @admin.register(Department)
 class DepartmentAdmin(TrackedAdmin):
     form = DepartmentForm
@@ -262,7 +210,7 @@ class DepartmentAdmin(TrackedAdmin):
     def get_inlines(self, request, obj):
         # Связь с ЕРСП - у сохранённого головного офиса или филиала.
         if obj is not None and obj.kind != Department.Kind.DIVISION:
-            return [ErspLinkInline]
+            return [DepartmentErspLinkInline]
         return []
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):

@@ -1,0 +1,3 @@
+/* Карточка агента: блок «Соглашения» - поля парами одной ширины («ровность полей», AGENTS.md). */
+.agreements .form-row input[type="text"] { width: 18em; }
+.agreements .form-row select { min-width: 18em; }
