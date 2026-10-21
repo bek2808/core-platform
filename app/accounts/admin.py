@@ -391,7 +391,9 @@ class UserAdmin(TrackedAdmin, BaseUserAdmin):
     def get_inline_instances(self, request, obj=None):
         # Прикрепление - после создания учётной записи: его страховая и
         # подразделения берутся от уже сохранённого пользователя.
-        if obj is None:
+        if obj is None or obj.kind == User.Kind.AGENT:
+            # У пользователя агента прикреплений нет: он связан с агентом
+            # (блок «Пользователи агента» в карточке агента, этап B3).
             return []
         return super().get_inline_instances(request, obj)
 
@@ -437,6 +439,8 @@ class UserAdmin(TrackedAdmin, BaseUserAdmin):
             readonly += PRIVILEGE_FIELDS
         if is_own_card(request, obj):
             readonly += ["is_active", "kind"]  # себя не блокирует и вид себе не меняет
+        elif obj is not None and obj.kind == User.Kind.AGENT:
+            readonly += ["kind"]  # пользователь агента остаётся им (связь - в карточке агента)
         if obj is not None:
             readonly += ["insurance_company"]  # задаётся один раз (проверяет и база)
         return readonly
@@ -457,12 +461,12 @@ class UserAdmin(TrackedAdmin, BaseUserAdmin):
                     # Места работы - своей страховой (суперпользователю - всех).
                     self.limit_places(company_id)
                 kind = self.fields.get("kind")
-                if kind is not None and not is_superuser:
+                if kind is not None:
                     # Администратором платформы пользователя делает только платформа.
-                    kind.choices = [
-                        (value, label) for value, label in kind.choices
-                        if value != User.Kind.PLATFORM
-                    ]
+                    # Пользователь агента заводится только из карточки агента
+                    # (этап B3): здесь его вид не выбрать никому.
+                    hidden = {User.Kind.AGENT} if is_superuser else {User.Kind.AGENT, User.Kind.PLATFORM}
+                    kind.choices = [(value, label) for value, label in kind.choices if value not in hidden]
 
             def clean(self):
                 data = super().clean()
@@ -534,7 +538,12 @@ class UserAdmin(TrackedAdmin, BaseUserAdmin):
     def _personnel_allowed(request, user):
         # Место работы - у людей страховой; своё администратор страховой не меняет;
         # платформа места не меняет вовсе (этим ведает сама страховая).
-        return user.insurance_company_id is not None and not is_own_card(request, user) and not is_platform(request)
+        # У пользователя агента места работы нет - он подключается и отключается
+        # в карточке агента (этап B3).
+        return (
+            user.insurance_company_id is not None and user.kind != User.Kind.AGENT
+            and not is_own_card(request, user) and not is_platform(request)
+        )
 
     def _target(self, request, object_id, personnel_action=True):
         user = self.get_object(request, unquote(object_id))

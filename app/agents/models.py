@@ -5,7 +5,7 @@
 Агент - организация (позже и человек), которая продаёт полисы страховой
 по соглашению. В системе агент = контрагент из справочника (Agent) +
 соглашения (Agreement) + место в подразделении (Placement) + связь с ЕРСП
-(ErspLink) + пользователи для входа (часть B3). Брокеры ведутся здесь же
+(ErspLink) + пользователи для входа (Member, часть B3). Брокеры ведутся здесь же
 с видом «брокер» (решение 30). Сейчас - только юрлица (решение 22): ИП -
 физлицо (решение 29), они появятся после этапа «Физлица».
 
@@ -545,6 +545,110 @@ class Placement(TrackedModel):
 
         if errors:
             raise ValidationError(errors)
+
+
+# --- Пользователь агента -------------------------------------------------------------
+
+AGENT_ROLE = "agent"               # роль «Агент»: свои продажи
+AGENT_DIRECTOR_ROLE = "agent_director"  # роль «Директор агента»: продажи всего агентства
+
+
+class Member(TrackedModel):
+    """
+    Пользователь агента: учётная запись вида «агент», привязанная к агенту
+    с даты по дату. Каждый сотрудник агентства входит под своим логином.
+
+    Директор агента видит все продажи агентства, обычный сотрудник - только
+    свои (роли «Директор агента» и «Агент»; права в них придут вместе
+    с договорами). У одного пользователя периоды не пересекаются (база).
+    Пользователь и агент после создания не меняются (триггер).
+
+    Заводит и отключает пользователя агента страховая (решение 28), из
+    карточки агента. Вход - только пока у пользователя действующая связь
+    с агентом, а у агента - действующее соглашение (accounts/backends.py).
+    """
+
+    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="agent_memberships", verbose_name="пользователь")
+    agent = models.ForeignKey(Agent, on_delete=models.PROTECT, related_name="members", verbose_name="агент")
+    is_director = models.BooleanField(
+        "директор агента", default=False,
+        help_text="Видит все продажи агентства. Обычный сотрудник агента - только свои.",
+    )
+    valid_from = models.DateField("действует с")
+    valid_to = models.DateField("действует по", null=True, blank=True)
+
+    objects = PeriodQuerySet.as_manager()
+
+    class Meta:
+        verbose_name = "пользователь агента"
+        verbose_name_plural = "пользователи агента"
+        ordering = ["agent", "-valid_from"]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(valid_to__isnull=True) | Q(valid_to__gte=F("valid_from")),
+                name="agents_member_dates_order",
+                violation_error_message="«Действует по» не может быть раньше «действует с».",
+            ),
+            ExclusionConstraint(
+                name="agents_member_no_overlap",
+                expressions=[
+                    ("user", RangeOperators.EQUAL),
+                    (DateRange("valid_from", "valid_to", _INCLUSIVE), RangeOperators.OVERLAPS),
+                ],
+                violation_error_message="На эти даты пользователь уже связан с агентом.",
+            ),
+        ]
+
+    def __str__(self):
+        user = self.user.full_name() if self.user_id else "?"
+        return f"{user}{' (директор)' if self.is_director else ''}"
+
+    @property
+    def insurance_company_id(self):
+        # Для журнала изменений: строка журнала видна только своей страховой.
+        return self.agent.insurance_company_id if self.agent_id else None
+
+    def journal_root(self):
+        return self.agent if self.agent_id else None
+
+    def role_code(self):
+        return AGENT_DIRECTOR_ROLE if self.is_director else AGENT_ROLE
+
+    def clean(self):
+        errors = {}
+        user = self.user if self.user_id else None
+        agent = self.agent if self.agent_id else None
+        if _fixed(self, "user_id", "agent_id"):
+            errors["user"] = "Связь не переносится на другого пользователя или агента."
+        if user is not None:
+            if user.kind != User.Kind.AGENT:
+                errors["user"] = "Пользователь агента - только учётная запись вида «агент»."
+            elif agent is not None and user.insurance_company_id != agent.insurance_company_id:
+                errors["user"] = "Пользователь - из другой страховой."
+        if self.valid_from and self.valid_to and self.valid_to < self.valid_from:
+            errors["valid_to"] = "«Действует по» не может быть раньше «действует с»."
+        elif user is not None and self.valid_from:
+            others = type(self).objects.filter(user=user).exclude(pk=self.pk)
+            periods = {(o.valid_from, o.valid_to): o for o in others}
+            if _overlapping(periods, self.valid_from, self.valid_to) is not None:
+                errors["valid_from"] = "На эти даты пользователь уже связан с агентом."
+        if errors:
+            raise ValidationError(errors)
+
+
+def current_membership(user, day=None):
+    """Действующая на дату связь пользователя с агентом или None."""
+    return user.agent_memberships.on(day).select_related("agent").first()
+
+
+def agent_user_may_work(user, day=None):
+    """
+    Может ли пользователь агента войти на дату: есть действующая связь
+    с агентом, и у агента - действующее соглашение. Соглашение закончилось -
+    вход закрывается сам, без ночных заданий.
+    """
+    membership = current_membership(user, day)
+    return membership is not None and membership.agent.is_working(day)
 
 
 # --- Связь с ЕРСП ------------------------------------------------------------------

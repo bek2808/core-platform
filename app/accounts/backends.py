@@ -14,6 +14,12 @@
 Выключенная страховая (снята отметка «работает», часть A4): её сотрудники
 не входят, открытые сессии перестают действовать; данные остаются.
 
+Пользователь агента (вид «агент», этап B3): входит, только пока у него
+действующая связь с агентом (agents.Member), а у агента - действующее
+соглашение. Соглашение закончилось - вход закрывается сам на следующий
+день. Права - роль «Директор агента» или «Агент» по отметке «директор»
+в связи (каталог ролей; права в роли придут вместе с договорами).
+
 Группы в учётной записи действуют только у администратора платформы
 (вид «платформа»): у него нет страховой и прикреплений.
 
@@ -38,10 +44,21 @@ class AssignmentBackend(ModelBackend):
             return True
         if user.insurance_company_id is not None and not user.insurance_company.is_active:
             return False
+        if user.kind == User.Kind.AGENT:
+            from agents.models import agent_user_may_work  # agents зависит от accounts
+
+            return agent_user_may_work(user)
         return Assignment.objects.on().filter(user=user).exists()
 
     def _get_group_permissions(self, user_obj):
         if user_obj.kind == User.Kind.PLATFORM:
             return super()._get_group_permissions(user_obj)
+        if user_obj.kind == User.Kind.AGENT:
+            from agents.models import agent_user_may_work, current_membership
+
+            if not agent_user_may_work(user_obj):
+                return Permission.objects.none()
+            role = current_membership(user_obj).role_code()
+            return Permission.objects.filter(group__role__code=role).distinct()
         current = Assignment.objects.on().filter(user=user_obj)
         return Permission.objects.filter(group__role__assignments__in=current).distinct()

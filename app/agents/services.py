@@ -1,6 +1,7 @@
 """
 Действия с агентом: прикрепить к подразделению, перевести, прекратить
-соглашение (модель: docs/users-model.md, «Агенты (этап B)»).
+соглашение; завести и отключить пользователя агента (модель:
+docs/users-model.md, «Агенты (этап B)»).
 
 Как и кадровые действия с сотрудниками (accounts/personnel.py), они
 делаются только через эти функции: экран лишь собирает данные. Каждое
@@ -11,8 +12,12 @@ import datetime
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.utils import timezone
 
-from .models import Agreement, Placement
+from accounts import personnel
+from accounts.models import User
+
+from .models import Agreement, Member, Placement
 
 
 def _save(record, by):
@@ -63,16 +68,71 @@ def terminate(agreement, *, last_day, reason, by):
     """
     Прекратить соглашение досрочно: последний день и причина. «По» из
     договора остаётся как было. Агент перестаёт «работать» на следующий
-    день после last_day; пользователи агента (часть B3) - тоже.
+    день после last_day; его пользователи не входят со следующего дня,
+    а если last_day сегодня или прошёл - блокируются сразу.
     """
     if agreement.terminated_on is not None:
         raise ValidationError({"last_day": f"Соглашение уже прекращено {agreement.terminated_on:%d.%m.%Y}."})
     agreement.terminated_on = last_day
     agreement.termination_reason = reason
     try:
-        return _save(agreement, by)
+        _save(agreement, by)
     except ValidationError as error:
         # Ошибки дат - к полю «последний день» формы.
         if hasattr(error, "error_dict") and "terminated_on" in error.error_dict:
             raise ValidationError({"last_day": error.error_dict["terminated_on"]}) from error
         raise
+    if last_day <= timezone.localdate():
+        # Последний день сегодня или прошёл - пользователи агента блокируются
+        # сразу (иначе вход закроется сам на следующий день после него).
+        for member in agreement.agent.members.on(last_day).select_related("user"):
+            _block(member.user, by)
+    return agreement
+
+
+def _block(user, by):
+    if user.is_active:
+        user.is_active = False
+        user.save(by=by)
+
+
+@transaction.atomic
+def add_member(agent, *, username, last_name, first_name, by, valid_from, patronymic="", phone="",
+               email="", is_director=False):
+    """
+    Завести пользователя агента: учётная запись вида «агент» в страховой
+    агента и связь с агентом с даты. Пароль придумывает система (как
+    у сотрудников): возвращается (связь, временный пароль) - пароль
+    показывают один раз и нигде не хранят; при первом входе человек
+    задаёт свой.
+    """
+    user = User(
+        username=username, last_name=last_name, first_name=first_name, patronymic=patronymic,
+        phone=phone, email=email, kind=User.Kind.AGENT, insurance_company_id=agent.insurance_company_id,
+    )
+    password = personnel.generate_password(user)
+    user.set_password(password)
+    user.must_change_password = True
+    user.full_clean(exclude=["password"])
+    user.save(by=by)
+    member = _save(Member(user=user, agent=agent, is_director=is_director, valid_from=valid_from), by)
+    return member, password
+
+
+@transaction.atomic
+def disable_member(member, *, last_day, by):
+    """
+    Отключить пользователя агента: связь закрывается последним днём.
+    Если этот день сегодня или прошёл - учётная запись блокируется сразу;
+    если впереди - вход закроется сам на следующий день после него.
+    Учётная запись не удаляется: продажи остаются за человеком.
+    """
+    if member.valid_to is not None and member.valid_to < last_day:
+        raise ValidationError({"last_day": f"Связь уже закрыта {member.valid_to:%d.%m.%Y}."})
+    if last_day < member.valid_from:
+        raise ValidationError({"last_day": f"Связь действует с {member.valid_from:%d.%m.%Y}: последний день - не раньше."})
+    member.valid_to = last_day
+    _save(member, by)
+    if last_day <= timezone.localdate():
+        _block(member.user, by)
+    return member

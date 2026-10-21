@@ -92,8 +92,13 @@ class StarterListsTests(AssignmentCase):
             "employee": "Сотрудник",
             "platform_admin": "Администратор платформы",  # A4
             "agents": "Работа с агентами",  # B2 (agents/0005)
+            "agent": "Агент",  # B3 (agents/0007)
+            "agent_director": "Директор агента",  # B3
         })
-        self.assertTrue(all(role.audience == "company" for role in Role.objects.exclude(code="platform_admin")))
+        self.assertEqual(set(Role.objects.filter(audience="agent").values_list("code", flat=True)),
+                         {"agent", "agent_director"})
+        self.assertTrue(all(role.audience == "company"
+                            for role in Role.objects.exclude(code__in=["platform_admin", "agent", "agent_director"])))
 
 
 class JobPositionTests(AssignmentCase):

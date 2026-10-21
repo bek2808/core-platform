@@ -75,7 +75,10 @@ class User(AbstractUser, TrackedModel):
     patronymic = models.CharField("отчество", max_length=150, blank=True)
     kind = models.CharField(
         "вид", max_length=16, choices=Kind.choices, default=Kind.EMPLOYEE,
-        help_text="Штатный сотрудник, работник по ГПХ, агент или администратор платформы.",
+        help_text=(
+            "Штатный сотрудник или работник по ГПХ. Пользователь агента заводится в карточке "
+            "агента, администратор платформы - платформой."
+        ),
     )
     phone = models.CharField(
         "телефон",
@@ -230,6 +233,19 @@ class Visibility(models.TextChoices):
     COMPANY = "company", "вся страховая"
 
 
+class RoleVisibility(models.TextChoices):
+    """
+    Видимость по умолчанию в каталоге ролей: как у сотрудников (Visibility)
+    плюс «агентство» - у директора агента (этап B). У прикрепления сотрудника
+    «агентства» нет, поэтому это отдельный перечень.
+    """
+
+    OWN = "own", "свои"
+    DEPARTMENT = "department", "своё подразделение"
+    COMPANY = "company", "вся страховая"
+    AGENCY = "agency", "агентство"
+
+
 class Role(models.Model):
     """
     Роль - что человек может делать. Роль = группа прав Django + описание.
@@ -250,7 +266,7 @@ class Role(models.Model):
     code = models.SlugField("код", max_length=32, unique=True, help_text="Латиница, не меняется.")
     audience = models.CharField("для кого", max_length=16, choices=Audience.choices)
     default_visibility = models.CharField(
-        "видимость по умолчанию", max_length=16, choices=Visibility.choices, blank=True,
+        "видимость по умолчанию", max_length=16, choices=RoleVisibility.choices, blank=True,
     )
     description = models.TextField("что умеет", blank=True)
     sort_order = models.PositiveSmallIntegerField("порядок в списке", default=100)
@@ -453,6 +469,9 @@ class Assignment(TrackedModel):
 
         if user is not None and company_id is None:
             errors["department"] = "У пользователя без страховой прикреплений нет."
+        elif user is not None and user.kind == User.Kind.AGENT:
+            # Пользователь агента связан с агентом (agents.Member), а не с подразделением.
+            errors["department"] = "У пользователя агента прикреплений нет: он связан с агентом."
         if department is not None and company_id is not None:
             if department.insurance_company_id != company_id:
                 errors["department"] = "Это подразделение другой страховой."

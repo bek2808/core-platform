@@ -263,7 +263,8 @@ class UserAdminTests(UserCase):
         page = self.client.get(ADD_URL).content.decode()
         self.assertNotIn('name="insurance_company"', page)
         self.assertNotIn('value="platform"', page)
-        self.assertIn('value="agent"', page)
+        # Пользователь агента заводится только из карточки агента (этап B3).
+        self.assertNotIn('value="agent"', page)
 
     def test_platform_kind_refused_in_post(self):
         self.login_company_admin()

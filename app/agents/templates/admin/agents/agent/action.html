@@ -8,7 +8,14 @@
 <script src="{% url 'admin:jsi18n' %}"></script>
 {{ media }}
 {% endblock %}
-{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'admin/css/forms.css' %}"><link rel="stylesheet" href="{% static 'admin/css/widgets.css' %}">{% endblock %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'admin/css/forms.css' %}"><link rel="stylesheet" href="{% static 'admin/css/widgets.css' %}">
+<style>
+  /* «Ровность полей» (AGENTS.md): все поля ввода, даты и списки одной ширины. */
+  #content-main .form-row input[type="text"], #content-main .form-row input[type="email"],
+  #content-main .form-row input.vDateField, #content-main .form-row select,
+  #content-main .form-row textarea { width: 16em; box-sizing: border-box; }
+  #content-main .form-row p.date { margin: 0; padding-top: 0; }
+</style>{% endblock %}
 {% block bodyclass %}{{ block.super }} app-agents model-agent change-form{% endblock %}
 {% block breadcrumbs %}
 <ol class="breadcrumbs">

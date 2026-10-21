@@ -9,8 +9,10 @@
 - карточка: блоки «Соглашения» (правятся; прекращение - только кнопкой),
   «Места» (только для чтения: место меняется кнопками) и «Связь с ЕРСП»;
 - кнопки: «Прикрепить» (места нет), «Перевести» (место есть),
-  «Прекратить соглашение» (есть действующее соглашение). Сами действия -
-  в agents/services.py, экран лишь собирает данные.
+  «Прекратить соглашение» (есть действующее соглашение), «Завести
+  пользователя»; в блоке «Пользователи агента» у каждого - «Сбросить
+  пароль» и «Отключить». Сами действия - в agents/services.py, экран лишь
+  собирает данные.
 
 Мультиарендность: сотрудник видит и заводит агентов только своей
 страховой; суперпользователь (аварийная запись) - всех; администратор
@@ -30,6 +32,7 @@ from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils import timezone
+from django.utils.html import format_html_join
 
 from accounts.models import User
 from audit.admin import NoRelatedLinks, TrackedAdmin
@@ -38,7 +41,7 @@ from counterparties.models import BankAccount, Counterparty
 from integrations.models import ErspAgency
 
 from . import services
-from .models import Agent, Agreement, ErspLink, Placement
+from .models import Agent, Agreement, ErspLink, Member, Placement
 
 
 def own_rows(request, queryset, field="insurance_company_id"):
@@ -194,6 +197,50 @@ class PlacementInline(admin.TabularInline):
         return False
 
 
+class MemberInline(admin.TabularInline):
+    """Пользователи агента: заводятся кнопкой «Завести пользователя», правится только «директор»."""
+
+    model = Member
+    extra = 0
+    fields = ["person", "username", "is_director", "since", "until", "status", "actions"]
+    readonly_fields = ["person", "username", "since", "until", "status", "actions"]
+    verbose_name = "пользователь агента"
+    verbose_name_plural = "Пользователи агента - входят каждый под своим логином"
+
+    @admin.display(description="ФИО")
+    def person(self, member):
+        return member.user.full_name()
+
+    @admin.display(description="логин")
+    def username(self, member):
+        return member.user.get_username()
+
+    @admin.display(description="с")
+    def since(self, member):
+        return f"{member.valid_from:%d.%m.%Y}"
+
+    @admin.display(description="по")
+    def until(self, member):
+        return f"{member.valid_to:%d.%m.%Y}" if member.valid_to else "по сей день"
+
+    @admin.display(description="учётная запись")
+    def status(self, member):
+        return "работает" if member.user.is_active else "заблокирована"
+
+    @admin.display(description="действия")
+    def actions(self, member):
+        links = [(reverse("admin:agents_agent_member_password", args=[member.agent_id, member.pk]), "Сбросить пароль")]
+        if member.valid_to is None or member.valid_to >= _today():
+            links.append((reverse("admin:agents_agent_member_disable", args=[member.agent_id, member.pk]), "Отключить"))
+        return format_html_join(" · ", '<a href="{}">{}</a>', links)
+
+    def has_add_permission(self, request, obj=None):
+        return False  # кнопка «Завести пользователя»: там выдаётся временный пароль
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 # --- Агент ------------------------------------------------------------------------
 
 
@@ -292,7 +339,7 @@ class AgentAdmin(NoRelatedLinks, TrackedAdmin):
     def get_inlines(self, request, obj):
         if obj is None:
             return []
-        return [AgreementInline, PlacementInline, AgentErspLinkInline]
+        return [AgreementInline, PlacementInline, MemberInline, AgentErspLinkInline]
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         company_id = request.user.insurance_company_id
@@ -381,6 +428,12 @@ class AgentAdmin(NoRelatedLinks, TrackedAdmin):
                  name="agents_agent_transfer"),
             path("<path:object_id>/terminate/", self.admin_site.admin_view(self.terminate_view),
                  name="agents_agent_terminate"),
+            path("<path:object_id>/add-member/", self.admin_site.admin_view(self.add_member_view),
+                 name="agents_agent_add_member"),
+            path("<path:object_id>/members/<int:member_id>/disable/", self.admin_site.admin_view(self.disable_member_view),
+                 name="agents_agent_member_disable"),
+            path("<path:object_id>/members/<int:member_id>/password/", self.admin_site.admin_view(self.member_password_view),
+                 name="agents_agent_member_password"),
         ]
         return own + super().get_urls()
 
@@ -396,6 +449,8 @@ class AgentAdmin(NoRelatedLinks, TrackedAdmin):
         agreement = agent.current_agreement()
         if agreement is not None and agreement.terminated_on is None:
             actions.append(("agents_agent_terminate", "Прекратить соглашение"))
+        if request.user.has_perm("agents.add_member"):
+            actions.append(("agents_agent_add_member", "Завести пользователя"))
         return [{"url": reverse(f"admin:{name}", args=[agent.pk]), "label": label} for name, label in actions]
 
     def change_view(self, request, object_id, form_url="", extra_context=None):
@@ -404,6 +459,10 @@ class AgentAdmin(NoRelatedLinks, TrackedAdmin):
         return super().change_view(request, object_id, form_url, extra_context)
 
     def _target(self, request, object_id):
+        # Сначала права, потом поиск: тому, кому агенты не положены (платформа),
+        # - однозначный отказ 403, а не «не найдено».
+        if not self.has_change_permission(request):
+            raise PermissionDenied
         agent = self.get_object(request, unquote(object_id))
         if agent is None:
             raise Http404("Агент не найден.")
@@ -428,16 +487,21 @@ class AgentAdmin(NoRelatedLinks, TrackedAdmin):
         }
         return TemplateResponse(request, "admin/agents/agent/action.html", context)
 
+    @staticmethod
+    def _errors_to_form(form, error):
+        """Ошибки правил (ValidationError) - к полям формы, остальные - общей ошибкой."""
+        if hasattr(error, "error_dict"):
+            for field, errors in error.error_dict.items():
+                form.add_error(field if field in form.fields else None, errors)
+        else:
+            form.add_error(None, error)
+
     def _run(self, request, agent, form, action, done):
         """Выполнить действие; ошибки правил - к полям формы."""
         try:
             action()
         except ValidationError as error:
-            if hasattr(error, "error_dict"):
-                for field, errors in error.error_dict.items():
-                    form.add_error(field if field in form.fields else None, errors)
-            else:
-                form.add_error(None, error)
+            self._errors_to_form(form, error)
             return None
         messages.success(request, done)
         return redirect("admin:agents_agent_change", agent.pk)
@@ -502,6 +566,102 @@ class AgentAdmin(NoRelatedLinks, TrackedAdmin):
         ])
 
 
+    # --- пользователи агента ---
+
+    def _member(self, request, agent, member_id):
+        if not request.user.has_perm("agents.change_member"):
+            raise PermissionDenied
+        member = agent.members.select_related("user").filter(pk=member_id).first()
+        if member is None:
+            raise Http404("Пользователь агента не найден.")
+        return member
+
+    def _render_password(self, request, agent, user, password):
+        context = {
+            **self.admin_site.each_context(request),
+            "opts": self.opts,
+            "title": "Временный пароль",
+            "target": agent,
+            "person": user,
+            "password": password,
+            "change_url": reverse("admin:agents_agent_change", args=[agent.pk]),
+        }
+        response = TemplateResponse(request, "admin/agents/agent/password_issued.html", context)
+        response["Cache-Control"] = "no-store"
+        return response
+
+    def add_member_view(self, request, object_id):
+        agent = self._target(request, object_id)
+        if not request.user.has_perm("agents.add_member"):
+            raise PermissionDenied
+        form = MemberAddForm(request.POST or None)
+        if request.method == "POST" and form.is_valid():
+            try:
+                member, password = services.add_member(agent, by=request.user, **form.cleaned_data)
+            except ValidationError as error:
+                self._errors_to_form(form, error)
+            else:
+                user = member.user
+                messages.success(request, f"{agent}: заведён пользователь {user.full_name()} (логин {user.get_username()}).")
+                return self._render_password(request, agent, user, password)
+        return self._render_action(request, agent, form, "Завести пользователя", "Завести", [
+            "Учётная запись сотрудника агентства: каждый входит под своим логином. Директор агента видит "
+            "все продажи агентства, остальные - только свои.",
+            "Пароль придумает система и покажет один раз; при первом входе человек задаст свой.",
+            "Войти он сможет, пока у агента действует соглашение (кабинет агента появится вместе с договорами).",
+        ])
+
+    def disable_member_view(self, request, object_id, member_id):
+        agent = self._target(request, object_id)
+        member = self._member(request, agent, member_id)
+        form = DisableForm(request.POST or None)
+        if request.method == "POST" and form.is_valid():
+            day = form.cleaned_data["last_day"]
+            done = self._run(request, agent, form, lambda: services.disable_member(member, last_day=day, by=request.user),
+                             f"{member.user.full_name()}: отключён(а), последний день - {day:%d.%m.%Y}.")
+            if done:
+                return done
+        return self._render_action(request, agent, form, f"Отключить {member.user.full_name()}", "Отключить", [
+            "Связь с агентом закроется последним днём. Если он сегодня или прошёл - учётная запись блокируется "
+            "сразу; если впереди - вход закроется сам на следующий день.",
+            "Учётная запись не удаляется: продажи остаются за человеком.",
+        ])
+
+    def member_password_view(self, request, object_id, member_id):
+        agent = self._target(request, object_id)
+        member = self._member(request, agent, member_id)
+        if request.method == "POST":
+            from accounts import personnel
+
+            password = personnel.issue_temporary_password(member.user, by=request.user)
+            return self._render_password(request, agent, member.user, password)
+        return self._render_action(request, agent, forms.Form(), f"Сбросить пароль: {member.user.full_name()}",
+                                   "Выдать временный пароль", [
+            "Система придумает временный пароль и покажет его один раз. Нынешний пароль человека перестанет "
+            "действовать; при входе он задаст свой.",
+        ])
+
+
+class MemberAddForm(forms.Form):
+    username = forms.CharField(label="Логин", max_length=150)
+    last_name = forms.CharField(label="Фамилия", max_length=150)
+    first_name = forms.CharField(label="Имя", max_length=150)
+    patronymic = forms.CharField(label="Отчество", max_length=150, required=False)
+    # Длину телефона по цифрам проверяет модель: здесь «+998 (90) 123-45-67» не режем (ловушка ввода, AGENTS.md).
+    phone = forms.CharField(label="Телефон", max_length=40, required=False, help_text="С кодом страны, например 998901234567.")
+    email = forms.EmailField(label="Эл. почта", required=False)
+    is_director = forms.BooleanField(label="Директор агента", required=False,
+                                     help_text="Видит все продажи агентства.")
+    valid_from = forms.DateField(label="Работает с", initial=_today, widget=AdminDateWidget)
+
+
+class DisableForm(forms.Form):
+    last_day = forms.DateField(
+        label="Последний день", initial=_today, widget=AdminDateWidget,
+        help_text="Включительно. Сегодня или раньше - учётная запись блокируется сразу.",
+    )
+
+
 class PlaceForm(forms.Form):
     department = forms.ModelChoiceField(label="Подразделение", queryset=Department.objects.none(), empty_label="—")
     valid_from = forms.DateField(label="С даты", initial=_today, widget=AdminDateWidget)
@@ -520,4 +680,4 @@ class TerminateForm(forms.Form):
         label="Последний день", initial=_today, widget=AdminDateWidget,
         help_text="Включительно. Со следующего дня агент не работает.",
     )
-    reason = forms.CharField(label="Причина", max_length=500, widget=forms.Textarea(attrs={"rows": 2, "cols": 60}))
+    reason = forms.CharField(label="Причина", max_length=500, widget=forms.Textarea(attrs={"rows": 3}))
