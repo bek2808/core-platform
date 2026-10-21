@@ -64,6 +64,7 @@ from companies.models import Department
 from . import personnel
 from .forms import DismissForm, HireForm, OwnPasswordChangeForm, TransferForm, UserAddForm
 from .models import Assignment, JobPosition, Role, User, current_assignment
+from .visibility import roles_visibility_error
 
 # Смена своего пароля: в журнал - от имени самого человека, отметка
 # «сменить пароль при входе» снимается.
@@ -151,6 +152,16 @@ class AssignmentForm(forms.ModelForm):
     class Meta:
         model = Assignment
         fields = "__all__"
+
+    def clean(self):
+        data = super().clean()
+        # «Работа с агентами» и видимость «свои» вместе не сохраняются (B4).
+        roles = data["roles"] if "roles" in data else (self.instance.roles.all() if self.instance.pk else [])
+        visibility = data.get("visibility", self.instance.visibility)
+        problem = roles_visibility_error(roles, visibility)
+        if problem and "visibility" in self.fields and "visibility" not in self.errors:
+            self.add_error("visibility", problem)
+        return data
 
     def validate_constraints(self):
         exclude = self._get_validation_exclusions() | {"user"}

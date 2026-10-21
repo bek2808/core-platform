@@ -33,6 +33,7 @@ from django.db.models.functions import Coalesce
 from django.utils import timezone
 
 from accounts.models import Assignment, DateRange, User
+from accounts.visibility import Kind
 from audit.models import TrackedModel, TrackedQuerySet
 from companies.models import Department
 from counterparties.models import BankAccount, Counterparty
@@ -828,3 +829,53 @@ def agency_id_for_department(department, environment):
 def agency_id_for_agent(agent, environment):
     """agencyId продажи агента в среде environment (None - связи нет или запись ЕРСП не живая)."""
     return _live_agency_id(ErspLink.objects.filter(agent=agent, environment=environment))
+
+
+# --- Видимость агентов (часть B4, решение 25) ----------------------------------------
+
+
+def agents_placed_in(department_ids, day=None):
+    """
+    Условие видимости «своё подразделение» для агентов: агент, у которого
+    место в одном из этих подразделений действует на дату или начнётся позже.
+
+    Будущее место - чтобы сотрудник, прикрепивший агента с завтрашнего дня
+    (или переводящий к себе), видел его сразу, а не получал «не найден».
+    До даты перевода агента видят и прежнее подразделение, и новое.
+    Агент, у которого место закончилось и новое не открыто, сюда не попадает:
+    он виден только при видимости «вся страховая».
+    """
+    day = day or timezone.localdate()
+    places = Placement.objects.filter(department_id__in=department_ids).filter(
+        Q(valid_to__isnull=True) | Q(valid_to__gte=day)
+    )
+    return Q(pk__in=places.values("agent_id"))
+
+
+def visible_agents(scope, queryset=None):
+    """Агенты, которых видит пользователь (scope - accounts.visibility.scope_for)."""
+    queryset = Agent.objects.all() if queryset is None else queryset
+    return scope.filter(queryset, department=agents_placed_in)
+
+
+def journal_hidden(scope):
+    """
+    Строки журнала, которые человек не должен видеть: изменения агентов,
+    которых он не видит (сам агент, его соглашения, места, связь с ЕРСП,
+    пользователи агента и их учётные записи). None - скрывать нечего.
+    """
+    from django.contrib.contenttypes.models import ContentType
+
+    if scope.kind not in (Kind.DEPARTMENTS, Kind.OWN):
+        return None
+    agent_type = ContentType.objects.get_for_model(Agent)
+    user_type = ContentType.objects.get_for_model(User)
+    hidden = Agent.objects.filter(insurance_company_id=scope.company_id).exclude(
+        pk__in=visible_agents(scope).values("pk")
+    ).values("pk")
+    hidden_users = Member.objects.filter(agent_id__in=hidden).values("user_id")
+    return (
+        Q(content_type=agent_type, object_id__in=hidden)
+        | Q(root_content_type=agent_type, root_object_id__in=hidden)
+        | Q(content_type=user_type, object_id__in=hidden_users)
+    )

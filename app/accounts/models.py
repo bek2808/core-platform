@@ -514,8 +514,17 @@ class Assignment(TrackedModel):
         return before != getattr(self, attname)
 
     def set_roles(self, roles, by=None, source=None):
-        """Задать роли и записать смену в журнал («было -> стало» названиями ролей)."""
+        """
+        Задать роли и записать смену в журнал («было -> стало» названиями ролей).
+        Сочетание ролей с видимостью, при котором человек не увидит своей
+        работы («Работа с агентами» и «свои», часть B4), не записывается.
+        """
+        from .visibility import roles_visibility_error
+
         roles = list(roles)
+        problem = roles_visibility_error(roles, self.visibility)
+        if problem:
+            raise ValidationError({"visibility": problem})
         before = sorted(str(role) for role in self.roles.all())
         after = sorted(str(role) for role in roles)
         self.roles.set(roles)

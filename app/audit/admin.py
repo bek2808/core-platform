@@ -200,7 +200,13 @@ class ChangeLogAdmin(admin.ModelAdmin):
         qs = super().get_queryset(request)
         company_id = request.user.insurance_company_id
         if company_id:
-            return qs.filter(Q(insurance_company_id=company_id) | Q(insurance_company__isnull=True))
+            qs = qs.filter(Q(insurance_company_id=company_id) | Q(insurance_company__isnull=True))
+            # Видимость (часть B4): изменения записей, которых человек не видит
+            # (агенты чужого подразделения), скрыты - и в «Истории» карточки тоже.
+            from accounts.visibility import journal_hidden, scope_for
+
+            hidden = journal_hidden(scope_for(request.user))
+            return qs.exclude(hidden) if hidden is not None else qs
         if request.user.is_superuser:
             return qs  # администратор системы видит всё
         if getattr(request.user, "kind", None) == "platform":

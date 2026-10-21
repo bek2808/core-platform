@@ -31,6 +31,7 @@ from django.urls import path, reverse
 from django.utils import timezone
 from django.utils.html import format_html
 
+from accounts.visibility import visible
 from audit.admin import NoRelatedLinks, TrackedAdmin
 
 from agents.admin import DepartmentErspLinkInline
@@ -145,13 +146,12 @@ class InsuranceCompanyAdmin(NoRelatedLinks, TrackedAdmin):
 
 
 def own_departments(request, queryset):
-    """Своя страховая; суперпользователь - все; иначе - ничего."""
-    company_id = request.user.insurance_company_id
-    if company_id:
-        return queryset.filter(insurance_company_id=company_id)
-    if request.user.is_superuser:
-        return queryset
-    return queryset.none()
+    """
+    Своя страховая; суперпользователь - все; иначе - ничего. Список подразделений
+    виден всей страховой при любой видимости (accounts/visibility.py): по нему
+    люди выбирают, куда перевести сотрудника.
+    """
+    return visible(request, queryset)
 
 
 class DepartmentForm(forms.ModelForm):

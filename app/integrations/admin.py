@@ -37,6 +37,7 @@ from django.utils import timezone
 from django.utils.formats import date_format
 from django.utils.html import format_html
 
+from accounts.visibility import visible
 from audit.admin import TrackedAdmin
 from companies.models import InsuranceCompany
 
@@ -44,14 +45,13 @@ from . import ersp
 from .models import Environment, ErspAgency, ErspConnection, ErspCredentials, Exchange
 
 
-def own_companies(request, queryset, field="insurance_company_id"):
-    """Мультиарендность: своя страховая; администратор системы - все; иначе - ничего."""
-    company_id = request.user.insurance_company_id
-    if company_id:
-        return queryset.filter(**{field: company_id})
-    if request.user.is_superuser:
-        return queryset
-    return queryset.none()
+def own_companies(request, queryset):
+    """
+    Мультиарендность: своя страховая; администратор системы - все; иначе - ничего.
+    Таблицы интеграций видны всей страховой при любой видимости
+    (accounts/visibility.py).
+    """
+    return visible(request, queryset)
 
 
 def moment(seconds):

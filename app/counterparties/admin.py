@@ -23,6 +23,7 @@ from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils.html import format_html, format_html_join
 
+from accounts.visibility import visible
 from audit.admin import NoRelatedLinks, TrackedAdmin
 from audit.models import Source
 from integrations.ersp import PROVIDER, ErspClient, ErspError
@@ -266,13 +267,9 @@ class CounterpartyAdmin(NoRelatedLinks, TrackedAdmin):
         return count
 
     def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        company_id = request.user.insurance_company_id
-        if company_id:
-            return qs.filter(insurance_company_id=company_id)
-        if request.user.is_superuser:
-            return qs  # администратор системы видит все страховые
-        return qs.none()
+        # Клиентскую базу своей страховой видят все её сотрудники при любой
+        # видимости (решение 3); администратор системы - все страховые.
+        return visible(request, super().get_queryset(request))
 
     def get_fields(self, request, obj=None):
         fields = ["phone", "email", "region", "address", "status"]

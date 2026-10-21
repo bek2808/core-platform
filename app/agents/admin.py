@@ -14,8 +14,11 @@
   пароль» и «Отключить». Сами действия - в agents/services.py, экран лишь
   собирает данные.
 
-Мультиарендность: сотрудник видит и заводит агентов только своей
-страховой; суперпользователь (аварийная запись) - всех; администратор
+Мультиарендность и видимость (часть B4, accounts/visibility.py): сотрудник
+видит агентов своей страховой по своей видимости - «вся страховая» - всех,
+«своё подразделение» - с местом в его подразделении (решение 25), «свои» -
+никого (куратора нет); прикрепить и перевести агента можно только в видимые
+подразделения. Суперпользователь (аварийная запись) - всех; администратор
 платформы - никого (и прав у него нет).
 
 Блок «Связь с ЕРСП» (ErspLinkInline) - общий для агента и подразделения:
@@ -35,33 +38,31 @@ from django.utils import timezone
 from django.utils.html import format_html_join
 
 from accounts.models import User
+from accounts.visibility import scope_for, visible
 from audit.admin import NoRelatedLinks, TrackedAdmin
 from companies.models import Department
 from counterparties.models import BankAccount, Counterparty
 from integrations.models import ErspAgency
 
 from . import services
-from .models import Agent, Agreement, ErspLink, Member, Placement
-
-
-def own_rows(request, queryset, field="insurance_company_id"):
-    """Своя страховая; суперпользователь - все; иначе (платформа) - ничего."""
-    company_id = request.user.insurance_company_id
-    if company_id:
-        return queryset.filter(**{field: company_id})
-    if request.user.is_superuser:
-        return queryset
-    return queryset.none()
+from .models import Agent, Agreement, ErspLink, Member, Placement, visible_agents
 
 
 def _today():
     return timezone.localdate()
 
 
-def department_choices(company_id):
-    return Department.objects.filter(
-        insurance_company_id=company_id, status=Department.Status.ACTIVE,
-    ).select_related("parent")
+def department_choices(request, company_id=None):
+    """
+    Действующие подразделения, к которым человек может прикрепить или перевести
+    агента: только те, что он видит (часть B4) - иначе агент пропал бы у него
+    сразу после перевода. company_id - страховая агента (у суперпользователя
+    без страховой список иначе был бы общим).
+    """
+    departments = Department.objects.filter(status=Department.Status.ACTIVE).select_related("parent")
+    if company_id is not None:
+        departments = departments.filter(insurance_company_id=company_id)
+    return scope_for(request.user).departments(departments)
 
 
 # --- Связь с ЕРСП (общий блок агента и подразделения) ----------------------------
@@ -108,7 +109,7 @@ class ErspLinkInline(NoRelatedLinks, admin.TabularInline):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "ersp_agency":
             # Справочник ЕРСП своей страховой (загружается командой load_ersp_agencies).
-            kwargs["queryset"] = own_rows(request, ErspAgency.objects.all()).order_by("environment", "ersp_id")
+            kwargs["queryset"] = visible(request, ErspAgency.objects.all()).order_by("environment", "ersp_id")
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def has_delete_permission(self, request, obj=None):
@@ -291,7 +292,14 @@ class AgentAdmin(NoRelatedLinks, TrackedAdmin):
         css = {"all": ["agents/agents.css"]}
 
     def get_queryset(self, request):
-        return own_rows(request, super().get_queryset(request))
+        # Видимость - по месту агента (решение 25, accounts/visibility.py):
+        # чужой агент не открывается и по прямой ссылке (кнопки тоже берут
+        # агента отсюда).
+        return visible_agents(scope_for(request.user), super().get_queryset(request))
+
+    def has_add_permission(self, request):
+        # Кто не видит ни одного подразделения, не прикрепит и нового агента.
+        return super().has_add_permission(request) and scope_for(request.user).sees_departments
 
     # --- список ---
 
@@ -345,11 +353,11 @@ class AgentAdmin(NoRelatedLinks, TrackedAdmin):
         company_id = request.user.insurance_company_id
         if db_field.name == "counterparty":
             # Действующие юрлица своей страховой, ещё не заведённые агентами.
-            kwargs["queryset"] = own_rows(request, Counterparty.objects.filter(
+            kwargs["queryset"] = visible(request, Counterparty.objects.filter(
                 kind=Counterparty.Kind.LEGAL_ENTITY, status=Counterparty.Status.ACTIVE,
             )).exclude(agents__isnull=False).order_by("display_name")
         elif db_field.name == "head_agent":
-            kwargs["queryset"] = own_rows(request, Agent.objects.filter(is_head_electronic=True))
+            kwargs["queryset"] = Agent.objects.none()  # видимые агенты - в _prepare_form
         elif db_field.name == "commission_account":
             kwargs["queryset"] = BankAccount.objects.none()  # своё у каждого агента - в get_form
         elif db_field.name == "area_type":
@@ -366,12 +374,16 @@ class AgentAdmin(NoRelatedLinks, TrackedAdmin):
 
     def _prepare_form(self, request, form, obj):
         """Списки выбора, которые зависят от страховой и агента (и при отправке формы)."""
-        company_id = request.user.insurance_company_id
         if "department" in form.fields:
-            form.fields["department"].queryset = department_choices(company_id) if company_id else (
-                Department.objects.filter(status=Department.Status.ACTIVE).select_related("parent")
-            )
+            form.fields["department"].queryset = department_choices(request)
             form.fields["department"].label_from_instance = lambda d: d.full_name()
+        if "head_agent" in form.fields:
+            # Головные электронные агенты, которых человек видит, плюс уже
+            # выбранный (иначе карточку с невидимым головным нельзя сохранить).
+            heads = visible_agents(scope_for(request.user), Agent.objects.filter(is_head_electronic=True))
+            if obj is not None and obj.head_agent_id:
+                heads = heads | Agent.objects.filter(pk=obj.head_agent_id)
+            form.fields["head_agent"].queryset = heads.distinct()
         if obj is not None and "commission_account" in form.fields:
             form.fields["commission_account"].queryset = BankAccount.objects.filter(
                 counterparty_id=obj.counterparty_id, is_closed=False,
@@ -509,7 +521,7 @@ class AgentAdmin(NoRelatedLinks, TrackedAdmin):
     def place_view(self, request, object_id):
         agent = self._target(request, object_id)
         form = PlaceForm(request.POST or None)
-        form.fields["department"].queryset = department_choices(agent.insurance_company_id)
+        form.fields["department"].queryset = department_choices(request, agent.insurance_company_id)
         if request.method == "POST" and form.is_valid():
             data = form.cleaned_data
             done = self._run(request, agent, form, lambda: services.place(
@@ -525,7 +537,7 @@ class AgentAdmin(NoRelatedLinks, TrackedAdmin):
     def transfer_view(self, request, object_id):
         agent = self._target(request, object_id)
         form = PlaceForm(request.POST or None, label_from="Дата перевода")
-        form.fields["department"].queryset = department_choices(agent.insurance_company_id)
+        form.fields["department"].queryset = department_choices(request, agent.insurance_company_id)
         if request.method == "POST" and form.is_valid():
             data = form.cleaned_data
             done = self._run(request, agent, form, lambda: services.transfer(

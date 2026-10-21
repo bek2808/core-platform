@@ -15,6 +15,7 @@ from companies.models import Department
 
 from .apps import BLANK_CHOICE_LABEL
 from .models import Assignment, JobPosition, Role, User, Visibility
+from .visibility import roles_visibility_error
 
 
 def _today():
@@ -63,6 +64,9 @@ class PlaceFields(forms.Form):
         data = super().clean()
         if data.get("is_head") and data.get("visibility") == Visibility.OWN:
             self.add_error("visibility", "Руководитель видит не меньше своего подразделения.")
+        problem = roles_visibility_error(data.get("roles") or [], data.get("visibility"))
+        if problem and "visibility" not in self.errors:
+            self.add_error("visibility", problem)
         return data
 
     def place(self):
