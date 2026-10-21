@@ -1,0 +1,25 @@
+{% extends "admin/agents/agent/action.html" %}
+{% comment %}
+Скан агентского соглашения (AgentAdmin.scan_view): загрузить или заменить, ниже -
+версии. Форма и стиль - как у остальных действий (action.html).
+{% endcomment %}
+{% block after_form %}
+{% if versions %}
+<div class="module" id="scan-versions">
+  <table>
+    <caption>Версии скана</caption>
+    <thead><tr><th>Файл</th><th>Размер</th><th>Загружен</th><th></th></tr></thead>
+    <tbody>
+    {% for version in versions %}
+      <tr>
+        <td><a href="{{ version.url }}" target="_blank" rel="noopener">{{ version.name }}</a></td>
+        <td>{{ version.size }}</td>
+        <td>{{ version.uploaded }}</td>
+        <td>{% if version.current %}текущий{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

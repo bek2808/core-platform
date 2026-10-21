@@ -10,7 +10,9 @@
   «Места» (только для чтения: место меняется кнопками) и «Связь с ЕРСП»;
 - кнопки: «Прикрепить» (места нет), «Перевести» (место есть),
   «Прекратить соглашение» (есть действующее соглашение), «Завести
-  пользователя»; в блоке «Пользователи агента» у каждого - «Сбросить
+  пользователя»; у каждого соглашения - скан (PDF): ссылка на файл и «Загрузить
+  скан» / «Заменить скан» (отдельная страница, там же версии; файлы - приложение
+  files, docs/files-model.md); в блоке «Пользователи агента» у каждого - «Сбросить
   пароль» и «Отключить». Сами действия - в agents/services.py, экран лишь
   собирает данные.
 
@@ -35,13 +37,15 @@ from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils import timezone
-from django.utils.html import format_html_join
+from django.utils.html import format_html, format_html_join
+from django.utils.text import Truncator
 
 from accounts.models import User
 from accounts.visibility import scope_for, visible
 from audit.admin import NoRelatedLinks, TrackedAdmin
 from companies.models import Department
 from counterparties.models import BankAccount, Counterparty
+from files.display import size_text, uploaded_text
 from integrations.models import ErspAgency
 
 from . import services
@@ -138,13 +142,15 @@ class AgreementInline(NoRelatedLinks, admin.StackedInline):
         "signer_basis",
         ("power_of_attorney_number", "power_of_attorney_date"),
         ("terminated_on", "termination_reason"),
+        "scan_info",
     ]
-    readonly_fields = ["terminated_on", "termination_reason"]
+    readonly_fields = ["terminated_on", "termination_reason", "scan_info"]
     verbose_name = "соглашение"
     verbose_name_plural = "Соглашения"
     classes = ["agreements"]
 
     def get_formset(self, request, obj=None, **kwargs):
+        self.request = request  # нужен scan_info: показывать ли ссылки «Загрузить скан»
         formset = super().get_formset(request, obj, **kwargs)
         signer = formset.form.base_fields.get("signed_by")
         if signer is not None:
@@ -165,6 +171,31 @@ class AgreementInline(NoRelatedLinks, admin.StackedInline):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+    @admin.display(description="Скан")
+    def scan_info(self, agreement):
+        """Скан соглашения: ссылка на файл, кто загрузил, «Загрузить / Заменить», число версий."""
+        if agreement.pk is None:
+            return "Скан можно загрузить после сохранения соглашения."
+        page = reverse("admin:agents_agent_scan", args=[agreement.agent_id, agreement.pk])
+        parts = []
+        if agreement.scan_id:
+            scan = agreement.scan
+            # Длинное имя файла в карточке сокращается (иначе строка «Скан» переносится
+            # на вторую); полное - в подсказке и на странице версий.
+            parts.append(format_html(
+                '<a href="{}" target="_blank" rel="noopener" title="{}">{}</a> ({}, {})',
+                reverse("file-download", args=[scan.pk]), scan.original_name,
+                Truncator(scan.original_name).chars(45), size_text(scan.size), uploaded_text(scan),
+            ))
+        else:
+            parts.append("нет скана")
+        if self.request.user.has_perm("agents.change_agreement"):
+            parts.append(format_html('<a href="{}">{}</a>', page, "Заменить скан" if agreement.scan_id else "Загрузить скан"))
+        versions = services.agreement_scans(agreement).count()
+        if versions > 1:
+            parts.append(format_html('<a href="{}">Версии ({})</a>', page, versions))
+        return format_html_join(" · ", "{}", ((part,) for part in parts))
 
 
 class PlacementInline(admin.TabularInline):
@@ -440,6 +471,8 @@ class AgentAdmin(NoRelatedLinks, TrackedAdmin):
                  name="agents_agent_transfer"),
             path("<path:object_id>/terminate/", self.admin_site.admin_view(self.terminate_view),
                  name="agents_agent_terminate"),
+            path("<path:object_id>/agreements/<int:agreement_id>/scan/", self.admin_site.admin_view(self.scan_view),
+                 name="agents_agent_scan"),
             path("<path:object_id>/add-member/", self.admin_site.admin_view(self.add_member_view),
                  name="agents_agent_add_member"),
             path("<path:object_id>/members/<int:member_id>/disable/", self.admin_site.admin_view(self.disable_member_view),
@@ -578,6 +611,37 @@ class AgentAdmin(NoRelatedLinks, TrackedAdmin):
         ])
 
 
+    def scan_view(self, request, object_id, agreement_id):
+        agent = self._target(request, object_id)
+        if not request.user.has_perm("agents.change_agreement"):
+            raise PermissionDenied
+        agreement = agent.agreements.select_related("scan").filter(pk=agreement_id).first()
+        if agreement is None:
+            raise Http404("Соглашение не найдено.")
+        form = ScanForm(request.POST or None, request.FILES or None)
+        if request.method == "POST" and form.is_valid():
+            upload = form.cleaned_data["file"]
+            done = self._run(request, agent, form, lambda: services.attach_scan(agreement, upload, by=request.user),
+                             f"{agent}: скан соглашения {agreement} загружен.")
+            if done:
+                return done
+        versions = [
+            {"url": reverse("file-download", args=[scan.pk]), "name": scan.original_name,
+             "size": size_text(scan.size), "uploaded": uploaded_text(scan), "current": scan.pk == agreement.scan_id}
+            for scan in services.agreement_scans(agreement)
+        ]
+        intro = [f"Соглашение {agreement}, действует с {agreement.valid_from:%d.%m.%Y}"
+                 + (f" по {agreement.effective_to:%d.%m.%Y}." if agreement.effective_to else ", бессрочно."),
+                 "Принимается PDF до 5 МБ (так требует ЕРСП). Тип проверяется по содержимому файла."]
+        if agreement.scan_id:
+            intro.append("Новый скан станет текущим; прежний останется в списке версий ниже.")
+        response = self._render_action(
+            request, agent, form, "Скан соглашения", "Заменить скан" if agreement.scan_id else "Загрузить скан", intro)
+        response.template_name = "admin/agents/agent/scan.html"
+        response.context_data.update(multipart=True, versions=versions)
+        return response
+
+
     # --- пользователи агента ---
 
     def _member(self, request, agent, member_id):
@@ -685,6 +749,12 @@ class PlaceForm(forms.Form):
         if label_from:
             self.fields["valid_from"].label = label_from
             self.fields["valid_from"].help_text = "Первый день в новом подразделении. Нынешнее место закроется накануне."
+
+
+class ScanForm(forms.Form):
+    # Предел и тип проверяет хранилище (files.storage.store) по содержимому файла;
+    # accept лишь подсказывает браузеру окно выбора только с PDF.
+    file = forms.FileField(label="Файл скана", widget=forms.FileInput(attrs={"accept": "application/pdf,.pdf"}))
 
 
 class TerminateForm(forms.Form):

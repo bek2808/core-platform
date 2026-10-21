@@ -96,6 +96,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # Слишком большой запрос (файл) - отказ до разбора тела (files/middleware.py).
+    "files.middleware.RequestSizeLimitMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
@@ -207,6 +209,8 @@ STORAGES = {
 # это единственная папка, куда приложению можно писать.
 
 FILES_ROOT = Path(env("DJANGO_FILES_ROOT", "/data/files"))
+# Самый большой допустимый запрос, байт: файл до 15 МБ плюс поля формы (files/middleware.py).
+MAX_REQUEST_BODY = 20 * 1024 * 1024
 
 
 # --- ЕРСП (единый реестр страховых полисов, НАПП) -----------------------------------

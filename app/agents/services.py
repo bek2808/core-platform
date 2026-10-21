@@ -1,6 +1,6 @@
 """
 Действия с агентом: прикрепить к подразделению, перевести, прекратить
-соглашение; завести и отключить пользователя агента (модель:
+соглашение, загрузить скан соглашения; завести и отключить пользователя агента (модель:
 docs/users-model.md, «Агенты (этап B)»).
 
 Как и кадровые действия с сотрудниками (accounts/personnel.py), они
@@ -16,7 +16,11 @@ from django.utils import timezone
 
 from accounts import personnel
 from accounts.models import User
+from files import storage
+from files.models import StoredFile
+from files.storage import FileRejected
 
+from .apps import AGREEMENT_SCAN
 from .models import Agreement, Member, Placement
 
 
@@ -88,6 +92,31 @@ def terminate(agreement, *, last_day, reason, by):
         for member in agreement.agent.members.on(last_day).select_related("user"):
             _block(member.user, by)
     return agreement
+
+
+def agreement_scans(agreement):
+    """Все сканы соглашения, от новых к старым (текущий - agreement.scan)."""
+    return StoredFile.objects.filter(purpose=AGREEMENT_SCAN, owner_id=agreement.pk).select_related("uploaded_by")
+
+
+def attach_scan(agreement, upload, *, by):
+    """
+    Загрузить скан соглашения (первый или новый вместо прежнего). Новый файл
+    становится текущим; прежний остаётся в хранилище и открывается из списка
+    версий. Изменение ссылки пишется в журнал соглашения (было -> стало).
+    Не подошёл файл (не PDF, пустой, больше 5 МБ) - ValidationError к полю «file».
+    """
+    try:
+        stored = storage.store(
+            upload, purpose=AGREEMENT_SCAN, owner_id=agreement.pk, company=agreement.insurance_company, by=by,
+        )
+    except FileRejected as error:
+        raise ValidationError({"file": str(error)}) from error
+    # Только поле скана: прочие поля соглашения (даты, подписант) не перепроверяются -
+    # скан старого соглашения грузят и после того, как оно закончилось.
+    agreement.scan = stored
+    agreement.save(by=by, update_fields=["scan"])
+    return stored
 
 
 def _block(user, by):

@@ -294,6 +294,13 @@ class Agreement(TrackedModel):
     signer_basis = models.CharField("основание подписи", max_length=32, choices=SignerBasis.choices)
     power_of_attorney_number = models.CharField("доверенность: номер", max_length=100, blank=True)
     power_of_attorney_date = models.DateField("доверенность: дата", null=True, blank=True)
+    # Текущий скан (PDF; в ЕРСП уходит он). Прежние сканы остаются в хранилище
+    # файлов и открываются из страницы «Скан» (docs/files-model.md). Ставит только
+    # services.attach_scan: файл должен быть именно этого соглашения (держит и база).
+    scan = models.ForeignKey(
+        "files.StoredFile", on_delete=models.PROTECT, null=True, blank=True, editable=False,
+        related_name="+", verbose_name="скан",
+    )
 
     objects = AgreementQuerySet.as_manager()
 

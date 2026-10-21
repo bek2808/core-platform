@@ -1,8 +1,8 @@
 {% extends "admin/base_site.html" %}
 {% load static %}
 {% comment %}
-Действие в карточке агента: «Прикрепить», «Перевести», «Прекратить соглашение»
-(AgentAdmin.*_view). Правила - agents/services.py.
+Действие в карточке агента: «Прикрепить», «Перевести», «Прекратить соглашение»,
+«Скан соглашения» (AgentAdmin.*_view; у скана свой шаблон scan.html). Правила - agents/services.py.
 {% endcomment %}
 {% block extrahead %}{{ block.super }}
 <script src="{% url 'admin:jsi18n' %}"></script>
@@ -30,7 +30,7 @@
 <div id="content-main">
   {% if place %}<p>Сейчас: <strong>{{ place }}</strong>.</p>{% endif %}
   {% for line in intro %}<p>{{ line }}</p>{% endfor %}
-  <form method="post" novalidate>{% csrf_token %}
+  <form method="post" novalidate{% if multipart %} enctype="multipart/form-data"{% endif %}>{% csrf_token %}
     {% if form.errors %}<p class="errornote">Исправьте ошибки ниже.</p>{{ form.non_field_errors }}{% endif %}
     {% for fieldset in adminform %}
       {% include "admin/includes/fieldset.html" with heading_level=2 prefix="fieldset" id_prefix=0 id_suffix=forloop.counter0 %}
@@ -41,5 +41,6 @@
     </div>
   </form>
   <p class="help">Изменение записывается в журнал: кто, когда, было -> стало.</p>
+  {% block after_form %}{% endblock %}
 </div>
 {% endblock %}
