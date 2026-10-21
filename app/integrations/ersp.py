@@ -512,7 +512,7 @@ class ErspClient:
                 "В вашей учётной записи не заполнен ПИНФЛ: ЕРСП требует указать, кто запрашивает "
                 "данные физлица. Заполните ПИНФЛ в карточке пользователя."
             )
-        return {"transactionId": uuid.uuid4().hex, "isConsent": "Y", "senderPinfl": sender, **fields}
+        return {"transactionId": str(uuid.uuid4()), "isConsent": "Y", "senderPinfl": sender, **fields}
 
     def references_agencies(self):
         """
