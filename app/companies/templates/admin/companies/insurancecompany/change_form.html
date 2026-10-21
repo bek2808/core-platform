@@ -1,0 +1,14 @@
+{% extends "admin/change_form.html" %}
+{% comment %}
+Карточка страховой: кнопка «Завести администратора» (InsuranceCompanyAdmin.add_admin_view)
+и ссылка на её пользователей.
+{% endcomment %}
+{% block object-tools-items %}
+  {% if original %}
+    <li><a href="{% url 'admin:accounts_user_changelist' %}?insurance_company__id__exact={{ original.pk }}">Пользователи</a></li>
+  {% endif %}
+  {% if can_add_admin %}
+    <li><a href="{% url 'admin:companies_insurancecompany_add_admin' original.pk %}">Завести администратора</a></li>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}

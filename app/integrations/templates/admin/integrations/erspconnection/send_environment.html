@@ -4,13 +4,13 @@
 Переход на боевую - только с отметкой подтверждения.
 {% endcomment %}
 {% block breadcrumbs %}
-<div class="breadcrumbs">
-  <a href="{% url 'admin:index' %}">Начало</a>
-  &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
-  &rsaquo; <a href="{% url 'admin:integrations_erspconnection_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
-  &rsaquo; <a href="{{ change_url }}">{{ connection }}</a>
-  &rsaquo; Среда отправки полисов
-</div>
+<ol class="breadcrumbs">
+  <li><a href="{% url 'admin:index' %}">Начало</a></li>
+  <li><a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a></li>
+  <li><a href="{% url 'admin:integrations_erspconnection_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a></li>
+  <li><a href="{{ change_url }}">{{ connection }}</a></li>
+  <li aria-current="page">Среда отправки полисов</li>
+</ol>
 {% endblock %}
 
 {% block content %}

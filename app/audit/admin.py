@@ -203,6 +203,13 @@ class ChangeLogAdmin(admin.ModelAdmin):
             return qs.filter(Q(insurance_company_id=company_id) | Q(insurance_company__isnull=True))
         if request.user.is_superuser:
             return qs  # администратор системы видит всё
+        if getattr(request.user, "kind", None) == "platform":
+            # Администратор платформы - только таблицы платформы: страховые
+            # компании и должности сотрудников; данных страховых не видит (A4).
+            platform_tables = ContentType.objects.get_for_models(
+                apps.get_model("companies", "InsuranceCompany"), apps.get_model("accounts", "JobPosition"),
+            ).values()
+            return qs.filter(content_type__in=list(platform_tables))
         return qs.none()
 
     def has_add_permission(self, request):

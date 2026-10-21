@@ -28,6 +28,14 @@
 «Последний администратор»: блокировка, увольнение, перевод и смена ролей
 не должны оставить страховую без администратора (personnel.check_admin_remains).
 
+Администратор платформы (вид «платформа», не суперпользователь; часть A4,
+вариант «Б»): в списке видит пользователей всех страховых (без
+суперпользователей), открывает карточку только администраторов страховых
+(блокировка, личные данные, «Сбросить пароль») и людей платформы (только
+просмотр, кроме своей). Место работы и роли людей страховых не меняет;
+администратора страховой заводит из карточки страховой
+(companies.admin, «Завести администратора»).
+
 Прикрепления (где и кем человек работает, с какой даты по какую) - блок
 в карточке пользователя. Появляется после создания пользователя: сначала
 учётная запись, потом прикрепление. Роли в прикреплении пишутся в журнал
@@ -47,6 +55,7 @@ from django.http import Http404
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
+from django.utils.html import format_html
 from django.utils import timezone
 
 from audit.admin import NoRelatedLinks, TrackedAdmin
@@ -69,9 +78,15 @@ PLACE_FIELDS = ["valid_from", "valid_to", "department", "position"]
 PRIVILEGE_FIELDS = ["is_superuser", "groups", "user_permissions"]
 
 
+def is_platform(request):
+    """Администратор платформы (не суперпользователь)."""
+    return request.user.kind == User.Kind.PLATFORM and not request.user.is_superuser
+
+
 def own_users(request, queryset):
     """
-    Своя страховая (без суперпользователей); суперпользователь - все; иначе - никто.
+    Своя страховая (без суперпользователей); платформа - все страховые
+    (без суперпользователей); суперпользователь - все; иначе - никто.
     """
     if request.user.is_superuser:
         company_id = request.user.insurance_company_id
@@ -79,7 +94,40 @@ def own_users(request, queryset):
     company_id = request.user.insurance_company_id
     if company_id:
         return queryset.filter(insurance_company_id=company_id, is_superuser=False)
+    if is_platform(request):
+        return queryset.filter(is_superuser=False)
     return queryset.none()
+
+
+def is_company_admin(user):
+    """Администратор страховой: роль «Администратор страховой» в действующем прикреплении."""
+    assignments = getattr(user, "current_assignments", None)
+    if assignments is None:
+        assignments = list(Assignment.objects.on().filter(user=user).prefetch_related("roles"))
+    return any(personnel.is_admin_role_set(a.roles.all()) for a in assignments)
+
+
+def platform_may_open(user):
+    """Чью карточку открывает платформа: администраторов страховых и людей платформы."""
+    return user.kind == User.Kind.PLATFORM or is_company_admin(user)
+
+
+class RoleFilter(admin.SimpleListFilter):
+    """Фильтр «роль»: у людей страховой - по действующему прикреплению, у платформы - по группе."""
+
+    title = "роль"
+    parameter_name = "role"
+
+    def lookups(self, request, model_admin):
+        return [(role.code, str(role)) for role in Role.objects.select_related("group")]
+
+    def queryset(self, request, queryset):
+        if not self.value():
+            return queryset
+        current = Assignment.objects.on().filter(roles__code=self.value()).values("user_id")
+        return queryset.filter(
+            Q(pk__in=current) | Q(kind=User.Kind.PLATFORM, groups__role__code=self.value())
+        ).distinct()
 
 
 def overlaps(first, second):
@@ -259,7 +307,7 @@ ADD_PLACE_HINT = (
 class UserAdmin(TrackedAdmin, BaseUserAdmin):
     inlines = [AssignmentInline]
     list_display = ["username", "full_name", "place", "kind", "insurance_company", "is_active", "is_staff"]
-    list_filter = ["kind", "is_active", "insurance_company"]
+    list_filter = ["kind", "is_active", RoleFilter, "insurance_company"]
     search_fields = ["username", "first_name", "last_name", "patronymic", "email", "phone", "pinfl"]
     ordering = ["username"]
 
@@ -284,10 +332,53 @@ class UserAdmin(TrackedAdmin, BaseUserAdmin):
     def get_queryset(self, request):
         current = Prefetch(
             "assignments",
-            queryset=Assignment.objects.on().select_related("department__parent", "position"),
+            queryset=Assignment.objects.on().select_related("department__parent", "position").prefetch_related("roles"),
             to_attr="current_assignments",
         )
         return own_users(request, super().get_queryset(request)).prefetch_related(current)
+
+    # --- платформа (A4, вариант «Б») ---
+
+    def get_list_display(self, request):
+        if is_platform(request):
+            # Вид - в фильтре справа: иначе таблица шире окна и «карточка» уходит за край.
+            return ["username", "full_name", "insurance_company", "is_active", "last_login_short", "card_link"]
+        return self.list_display
+
+    def get_list_display_links(self, request, list_display):
+        if is_platform(request):
+            return None  # карточки открываются не у всех - ссылка в колонке «карточка»
+        return super().get_list_display_links(request, list_display)
+
+    @admin.display(description="последний вход", ordering="last_login")
+    def last_login_short(self, user):
+        if user.last_login is None:
+            return "—"
+        return timezone.localtime(user.last_login).strftime("%d.%m.%Y %H:%M")
+
+    @admin.display(description="карточка")
+    def card_link(self, user):
+        if not platform_may_open(user):
+            return "—"
+        return format_html('<a href="{}">открыть</a>', reverse("admin:accounts_user_change", args=[user.pk]))
+
+    def has_view_permission(self, request, obj=None):
+        if obj is not None and is_platform(request) and not platform_may_open(obj):
+            return False
+        return super().has_view_permission(request, obj)
+
+    def has_change_permission(self, request, obj=None):
+        if obj is not None and is_platform(request):
+            if not platform_may_open(obj):
+                return False
+            if obj.kind == User.Kind.PLATFORM and obj.pk != request.user.pk:
+                return False  # людей платформы меняет только суперпользователь (решение 19)
+        return super().has_change_permission(request, obj)
+
+    def has_add_permission(self, request):
+        if is_platform(request):
+            return False  # администратора страховой - из карточки страховой
+        return super().has_add_permission(request)
 
     @admin.display(description="работает сейчас")
     def place(self, user):
@@ -441,8 +532,9 @@ class UserAdmin(TrackedAdmin, BaseUserAdmin):
 
     @staticmethod
     def _personnel_allowed(request, user):
-        # Место работы - у людей страховой; своё администратор страховой не меняет.
-        return user.insurance_company_id is not None and not is_own_card(request, user)
+        # Место работы - у людей страховой; своё администратор страховой не меняет;
+        # платформа места не меняет вовсе (этим ведает сама страховая).
+        return user.insurance_company_id is not None and not is_own_card(request, user) and not is_platform(request)
 
     def _target(self, request, object_id, personnel_action=True):
         user = self.get_object(request, unquote(object_id))

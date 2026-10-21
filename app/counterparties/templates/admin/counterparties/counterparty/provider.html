@@ -16,13 +16,13 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-<div class="breadcrumbs">
-  <a href="{% url 'admin:index' %}">Начало</a>
-  &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
-  &rsaquo; <a href="{% url 'admin:counterparties_counterparty_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
-  {% if card %}&rsaquo; <a href="{{ change_url }}">{{ card }}</a>{% endif %}
-  &rsaquo; {% if card %}Сверка с провайдером{% else %}Новый по ИНН{% endif %}
-</div>
+<ol class="breadcrumbs">
+  <li><a href="{% url 'admin:index' %}">Начало</a></li>
+  <li><a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a></li>
+  <li><a href="{% url 'admin:counterparties_counterparty_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a></li>
+  {% if card %}<li><a href="{{ change_url }}">{{ card }}</a></li>{% endif %}
+  <li aria-current="page">{% if card %}Сверка с провайдером{% else %}Новый по ИНН{% endif %}</li>
+</ol>
 {% endblock %}
 
 {% block content %}

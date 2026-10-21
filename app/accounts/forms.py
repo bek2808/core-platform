@@ -147,3 +147,31 @@ class OwnPasswordChangeForm(AdminPasswordChangeForm):
         if commit:
             self.user.save(by=self.user)
         return self.user
+
+
+class CompanyAdminForm(forms.ModelForm):
+    """
+    Первый (или новый) администратор страховой - из карточки страховой (часть A4).
+    Место - головной офис, роль «Администратор страховой» ставится сама;
+    пароль - временный, от системы.
+    """
+
+    # Телефон и ПИНФЛ человек вводит с пробелами и скобками - лишнее уберёт
+    # User.normalize, длину по цифрам проверит модель (ловушка из AGENTS.md).
+    phone = forms.CharField(label="Телефон", max_length=40, required=False,
+                            help_text="С кодом страны, без «+». Пробелы, скобки и дефисы уберутся сами.")
+    pinfl = forms.CharField(label="ПИНФЛ", max_length=40, required=False, help_text="14 цифр.")
+    position = forms.ModelChoiceField(label="Должность", queryset=JobPosition.objects.none(),
+                                      empty_label=BLANK_CHOICE_LABEL)
+    valid_from = forms.DateField(label="С даты", initial=_today, widget=AdminDateWidget)
+
+    class Meta:
+        model = User
+        fields = ["username", "last_name", "first_name", "patronymic", "email", "phone", "pinfl"]
+        field_classes = {"username": UsernameField}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["position"].queryset = JobPosition.objects.filter(is_active=True)
+        self.fields["last_name"].required = True
+        self.fields["first_name"].required = True

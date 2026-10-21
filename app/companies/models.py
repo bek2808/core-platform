@@ -6,7 +6,9 @@
 с самого начала, чтобы вторая компания не потребовала переделки.
 
 Запись не удаляется (на неё ссылаются сотрудники, контрагенты, полисы);
-если компания перестала работать - снимается отметка «работает».
+если компания перестала работать - снимается отметка «работает»: её
+сотрудники больше не входят (accounts/backends.py), данные остаются.
+Изменения карточки страховой - в журнале (кто завёл, сменил, выключил; A4).
 
 Подразделения страховой (Department): головной офис (есть всегда, создаётся
 вместе со страховой), филиалы и отделы. Модель: docs/users-model.md.
@@ -26,7 +28,7 @@ from references.models import ErspInsurer, ErspRegion
 UZBEKISTAN = "UZ"
 
 
-class InsuranceCompany(models.Model):
+class InsuranceCompany(TrackedModel):
     name = models.CharField("название", max_length=255)
     code = models.SlugField(
         "краткий код",
@@ -64,9 +66,11 @@ class InsuranceCompany(models.Model):
             "контрагентов. Для Узбекистана обязателен."
         ),
     )
-    is_active = models.BooleanField("работает", default=True)
-    created_at = models.DateTimeField("создана", auto_now_add=True)
-    updated_at = models.DateTimeField("изменена", auto_now=True)
+    is_active = models.BooleanField(
+        "работает",
+        default=True,
+        help_text="Снята - сотрудники страховой не входят в систему; данные остаются.",
+    )
 
     class Meta:
         verbose_name = "страховая компания"
@@ -76,13 +80,18 @@ class InsuranceCompany(models.Model):
     def __str__(self):
         return self.name
 
-    def save(self, *args, **kwargs):
+    @property
+    def insurance_company_id(self):
+        # Для журнала изменений: строки о карточке страховой видны её сотрудникам.
+        return self.pk
+
+    def save(self, *args, by=None, **kwargs):
         # Головной офис есть у каждой страховой всегда: создаётся вместе с ней.
         adding = self._state.adding
         with transaction.atomic():
-            super().save(*args, **kwargs)
+            super().save(*args, by=by, **kwargs)
             if adding:
-                Department.head_office_for(self)
+                Department.head_office_for(self, by=by)
 
     def clean(self):
         # Компания из Узбекистана работает с ЕРСП, поэтому без записи

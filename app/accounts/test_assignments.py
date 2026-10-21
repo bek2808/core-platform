@@ -90,8 +90,9 @@ class StarterListsTests(AssignmentCase):
             "references_admin": "Администратор справочников",
             "integrations_admin": "Администратор интеграций",
             "employee": "Сотрудник",
+            "platform_admin": "Администратор платформы",  # A4
         })
-        self.assertTrue(all(role.audience == "company" for role in Role.objects.all()))
+        self.assertTrue(all(role.audience == "company" for role in Role.objects.exclude(code="platform_admin")))
 
 
 class JobPositionTests(AssignmentCase):

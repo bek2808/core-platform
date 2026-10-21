@@ -9,6 +9,8 @@ from django.db import IntegrityError, transaction
 from django.db.models import ProtectedError
 from django.test import TestCase
 
+from audit.models import UntrackedChangeError
+
 from accounts.models import User
 from config.testing import refusal_expected
 from references.loader import load_from_files
@@ -79,9 +81,12 @@ class InsuranceCompanyTests(TestCase):
         company.save()
         user = User.objects.create_user("ivanov", password=STRONG_PASSWORD, insurance_company=company)
         self.assertEqual(list(company.users.all()), [user])
-        # Компанию с сотрудниками удалить нельзя даже из кода.
-        with self.assertRaises(ProtectedError):
+        # Страховую удалить нельзя даже из кода: таблица с журналом (A4)
+        # запрещает удаление, а в базе её держат ссылки сотрудников.
+        with self.assertRaises(UntrackedChangeError):
             company.delete()
+        with self.assertRaises(ProtectedError):
+            InsuranceCompany._base_manager.filter(pk=company.pk).delete()
 
 
 class InsuranceCompanyAdminTests(TestCase):

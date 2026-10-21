@@ -317,15 +317,18 @@ class UserAdminTests(UserCase):
             page = self.client.get(f"{LIST_URL}{user.pk}/delete/")
         self.assertEqual(page.status_code, 403)
 
-    def test_user_without_company_sees_nothing(self):
-        # Будущий администратор платформы: без страховой и не суперпользователь.
-        self.make("own_user")
+    def test_platform_sees_list_but_not_ordinary_cards(self):
+        # Администратор платформы (A4, вариант «Б»): список людей страховых виден,
+        # карточка обычного сотрудника - нет (подробно - test_platform.py).
+        own = self.make("own_user")
         platform = User.objects.create_user(
             "platform", password=STRONG_PASSWORD, is_staff=True, kind=User.Kind.PLATFORM,
         )
         platform.user_permissions.set(Permission.objects.filter(content_type__app_label="accounts", codename="view_user"))
         self.client.force_login(platform)
-        self.assertNotContains(self.client.get(LIST_URL), "own_user")
+        self.assertContains(self.client.get(LIST_URL), "own_user")
+        with refusal_expected(self):
+            self.assertEqual(self.client.get(f"{LIST_URL}{own.pk}/change/").status_code, 403)
 
     def test_superuser_sees_all_and_chooses_company(self):
         self.make("foreign_user", company="other")

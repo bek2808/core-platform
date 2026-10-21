@@ -1,0 +1,38 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% comment %}
+Новый администратор страховой (InsuranceCompanyAdmin.add_admin_view):
+место - головной офис, роль «Администратор страховой», пароль - временный от системы.
+{% endcomment %}
+{% block extrahead %}{{ block.super }}
+<script src="{% url 'admin:jsi18n' %}"></script>
+{{ media }}
+{% endblock %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'admin/css/forms.css' %}">{% endblock %}
+{% block bodyclass %}{{ block.super }} app-companies model-insurancecompany change-form{% endblock %}
+{% block breadcrumbs %}
+<ol class="breadcrumbs">
+  <li><a href="{% url 'admin:index' %}">Начало</a></li>
+  <li><a href="{% url 'admin:companies_insurancecompany_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a></li>
+  <li><a href="{{ change_url }}">{{ company }}</a></li>
+  <li aria-current="page">Завести администратора</li>
+</ol>
+{% endblock %}
+{% block content %}
+<div id="content-main">
+  <p>Новый пользователь страховой <strong>{{ company }}</strong> с ролью «Администратор страховой».
+     Место работы - головной офис. Пароль придумает система и покажет один раз; при первом
+     входе человек задаст свой. Дальше людей страховой он заводит сам.</p>
+  <form method="post" novalidate>{% csrf_token %}
+    {% if form.errors %}<p class="errornote">Исправьте ошибки ниже.</p>{{ form.non_field_errors }}{% endif %}
+    {% for fieldset in adminform %}
+      {% include "admin/includes/fieldset.html" with heading_level=2 prefix="fieldset" id_prefix=0 id_suffix=forloop.counter0 %}
+    {% endfor %}
+    <div class="submit-row">
+      <input type="submit" class="default" value="Завести">
+      <a href="{{ change_url }}" class="closelink">Отмена</a>
+    </div>
+  </form>
+  <p class="help">Изменение записывается в журнал: кто, когда, было -> стало.</p>
+</div>
+{% endblock %}

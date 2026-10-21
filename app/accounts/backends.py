@@ -11,6 +11,9 @@
 неё, принятый с будущей даты начинает входить с неё. Суперпользователь
 и администратор платформы - без этого правила (прикреплений у них нет).
 
+Выключенная страховая (снята отметка «работает», часть A4): её сотрудники
+не входят, открытые сессии перестают действовать; данные остаются.
+
 Группы в учётной записи действуют только у администратора платформы
 (вид «платформа»): у него нет страховой и прикреплений.
 
@@ -33,6 +36,8 @@ class AssignmentBackend(ModelBackend):
             return False
         if user.is_superuser or user.kind == User.Kind.PLATFORM:
             return True
+        if user.insurance_company_id is not None and not user.insurance_company.is_active:
+            return False
         return Assignment.objects.on().filter(user=user).exists()
 
     def _get_group_permissions(self, user_obj):
