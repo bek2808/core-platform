@@ -49,6 +49,7 @@ import os
 import ssl
 import threading
 import time
+import secrets
 import uuid
 import urllib.error
 import urllib.request
@@ -503,7 +504,8 @@ class ErspClient:
         """
         Тело запроса о физлице: общие поля провайдера + свои. senderPinfl -
         ПИНФЛ того, кто запрашивает (решение Бекзода 21.10): берётся из учётной
-        записи сотрудника. Согласие isConsent - «Y»: запрашивает сотрудник страховой
+        записи сотрудника. transactionId - короткое число (проверено на Swagger 22.10:
+        на UUID провайдер отвечает 503, на «321» - данными). Согласие isConsent - «Y»: запрашивает сотрудник страховой
         по паспортным данным из подписанного соглашения.
         """
         sender = getattr(self.user, "pinfl", "") if self.user is not None else ""
@@ -512,7 +514,7 @@ class ErspClient:
                 "В вашей учётной записи не заполнен ПИНФЛ: ЕРСП требует указать, кто запрашивает "
                 "данные физлица. Заполните ПИНФЛ в карточке пользователя."
             )
-        return {"transactionId": str(uuid.uuid4()), "isConsent": "Y", "senderPinfl": sender, **fields}
+        return {"transactionId": str(secrets.randbelow(2_000_000_000 - 100_000_000) + 100_000_000), "isConsent": "Y", "senderPinfl": sender, **fields}
 
     def references_agencies(self):
         """

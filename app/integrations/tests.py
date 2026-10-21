@@ -318,7 +318,7 @@ class ClientTests(ErspMixin, TestCase):
         self.assertEqual(body["birthDate"], "1990-01-01")
         self.assertEqual(body["senderPinfl"], "30202020202020")  # кто запрашивает
         self.assertEqual(body["isConsent"], "Y")
-        self.assertTrue(body["transactionId"])
+        self.assertTrue(body["transactionId"].isdigit() and len(body["transactionId"]) <= 10)  # не UUID: он даёт 503
         exchange = Exchange.objects.get(operation=Exchange.Operation.PROVIDER_PASSPORT)
         self.assertEqual(exchange.subject, "AD0000000")
         self.assertEqual(exchange.response_body["result"], person)
