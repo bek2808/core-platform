@@ -160,7 +160,7 @@ class BuildTests(SendCase):
         self.assertEqual((fields["parentId"], fields["agencyType"], fields["areaTypeId"]), ("53", "2", "1"))
         self.assertEqual((fields["agentAgreementNumber"], fields["agentAgreementDate"]), ("AZM/21-000", "2021-04-14"))
         self.assertEqual((fields["formationDate"], fields["isElectronAgency"], fields["isHeadElectronAgency"]),
-                         ("2015-03-01", "false", "false"))
+                         ("2015-03-01", "0", "0"))
         base = "agency[organization]"
         self.assertEqual(fields[f"{base}[inn]"], INN)
         self.assertEqual(fields[f"{base}[name]"], 'ООО "InRe"')
@@ -270,6 +270,12 @@ class GapTests(SendCase):
         scan = agent.current_agreement().scan
         (Path(self._files.name) / scan.path).unlink()
         self.assertIn("файла нет на диске", self.gaps(agent))
+
+    def test_scan_too_big_for_ersp(self):
+        agent = self.complete_organization()
+        services.attach_scan(agent.current_agreement(), upload(PDF_BYTES + b" " * 1_000_001, "Большой.pdf"),
+                             by=self.director)
+        self.assertIn("слишком большой", self.gaps(agent))
 
     def test_no_agreement(self):
         agent = self.agent(self.inre)

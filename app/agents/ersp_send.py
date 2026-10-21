@@ -40,6 +40,8 @@ from references.models import ErspResidentType
 from .models import ErspLink, agency_id_for_department
 
 # Только песочница (решение 31).
+# Принято на практике 22.10: 0,69 МБ прошёл, 1,38 МБ - 413 от nginx. Берём с запасом на остальные поля.
+MAX_FILE_BYTES = 1_000_000
 ENVIRONMENT = Environment.SANDBOX
 FILE_FIELD = "agencyAgreementFile"
 NO_MIDDLE_NAME = "ХХХ"  # кириллические «Х»: так требует ЕРСП («при отсутствии указать ХХХ»)
@@ -97,7 +99,8 @@ def _text(value):
 
 
 def _flag(value):
-    return "true" if value else "false"
+    """ЕРСП (Laravel) принимает в форме 1 / 0; строки «true» / «false» - ошибка 422 (проверено 22.10)."""
+    return "1" if value else "0"
 
 
 def _date(value):
@@ -163,6 +166,12 @@ def build(agent):
                     "сообщите администратору (команда files_check)."
                 )
             else:
+                if len(content) > MAX_FILE_BYTES:
+                    gaps.append(
+                        f"Скан соглашения {agreement.number} слишком большой: {len(content) / 1_000_000:.2f} МБ. "
+                        "Сервер ЕРСП не принимает запросы больше примерно 1 МБ (413) - сожмите PDF "
+                        "и загрузите скан заново («Заменить скан»)."
+                    )
                 request.file = (FILE_FIELD, scan.original_name, content, scan.content_type)
 
     # --- Куда привязан -------------------------------------------------------------------
