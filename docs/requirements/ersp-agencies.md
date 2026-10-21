@@ -1,0 +1,132 @@
+# Агенты и филиалы в ЕРСП: требования
+
+Записано по сообщению Бекзода 21.10.2026 (близко к его словам). Это
+требования, а не модель: модель агентов — `docs/users-model.md`,
+раздел «Агенты (этап B)».
+
+Личные данные из примеров Бекзода (ПИНФЛ, паспорт, адрес) сюда
+не переносились: вместо них — условные значения.
+
+## Справочник «Агенты/филиалы» в ЕРСП
+
+- Метод `GET /api/references/agencies` (Агенты/филиалы). В нём не только
+  агенты, но и филиалы (если зарегистрированы) и головной офис.
+- В ЕРСП есть раздел «Агент/Филиал» (веб-интерфейс администратора
+  страховщика, `erspadmin.e-osgo.uz`, раздел ref-agency). Открывается
+  только из сети страховой (по IP, у Бекзода — через VPN), вход через
+  OneID и только с правами администратора страховщика. Там можно
+  создать агента и привязать его к филиалу или головному офису.
+- Агент может быть физическим лицом или «электронным» — онлайн-платформа
+  юрлица тоже может быть агентом страховщика, если соблюдает нормативы
+  (законы — на lex.uz).
+- Агента можно создать и методом API: завести у себя в системе,
+  отправить в ЕРСП и получить `agencyId`. `agencyId` нужен во всех
+  остальных запросах: создание договора, полиса, подтверждение оплаты
+  и т. д.
+
+Поля записи справочника (по ответу для Mosaic):
+
+| Поле | Что |
+|---|---|
+| `id` | `agencyId` — указывается в запросах создания договора и т. п. |
+| `name` | наименование («Агент: …», «Broker: …», «Головной Офис») |
+| `inn` | ИНН |
+| `parentId` | к кому привязан; у Mosaic 1600 — головной офис: соглашение заключено с головным офисом (генеральным директором). У головного офиса поля нет |
+| `agencyType` | 1 — филиал, 2 — агент |
+| `areaTypeId` | тип местности, справочник `/api/references/area-types` |
+| `formationDate` | дата образования |
+| `agentAgreementNumber`, `agentAgreementDate` | номер и дата агентского соглашения |
+| `isElectronAgency` | электронный агент (true / false) |
+| `isHeadElectronAgency` | головной электронный агент |
+| `insuranceTypesAndComissions` | виды страхования и комиссии (головного электронного агента) |
+| `person` / `organization` | данные физлица или юрлица (заполнено одно) |
+| `organization` | `type`, `inn`, `name`, `representativeName`, `address`, `position`, `checkingAccount`, `phone`, `regionId`, `oked`, `ownershipFormId`, `email` |
+
+Что видно в ответе для Mosaic (10 записей): головной офис (1600),
+«Головной Офис (резерв)» (1599, вид «филиал»), два брокера («Broker: ООО
+"InRe"», СП ООО «MOI Insurance Brokers Asia»), агенты-ИП и ЧП, один
+электронный агент (ИП), одна запись «Агент: … ИП» с видом «филиал»
+и ИНН самой Mosaic (1598). ИП в ЕРСП отправлены как `organization`
+(форма собственности 320).
+
+## Справочники ЕРСП, нужные для агентов
+
+| Метод | Что | Пример |
+|---|---|---|
+| `/api/references/area-types` | типы местности | 1 городская, 2 сельская, 3 ЕПИГУ |
+| `/api/references/insurance-types` | типы обязательного страхования | 2 ОСАГО, 3 ОСГОР, 4 ОСГОП, …, 999 Другие (19 записей) |
+| `/api/references/resident-types` | типы резидентства | 1 гражданин, 2 иностранец, 3 ЛБГ, 4 военный, 5 иностранный резидент, 6 ребёнок |
+| `/api/references/countries` | страны | 210 Узбекистан, 9999 «Все страны», 239 «Неизвестна» и др. (~250 записей) |
+
+## Добавление агента: `POST /api/agencies/add`
+
+Примечания ЕРСП:
+- агент/филиал с таким ПИНФЛ или ИНН может быть только один у одной СК;
+- ПИНФЛ и ИНН добавляемого агента/филиала не должны быть в чёрном списке;
+- заполняется только одна группа полей: `agency[person][...]` или
+  `agency[organization][...]`.
+
+Поля (* — обязательные):
+
+| Поле | Что |
+|---|---|
+| `name` * | наименование агента |
+| `parentId` * | к кому привязан (справочник `/api/references/agencies`) |
+| `agencyType` * | 1 — филиал, 2 — агент |
+| `areaTypeId` * | тип местности |
+| `agentAgreementNumber`, `agentAgreementDate` | номер и дата агентского соглашения |
+| `agencyAgreementFile` * | файл агентского соглашения, PDF до 5 МБ |
+| `formationDate` * | дата образования |
+| `isElectronAgency` * | электронный агент |
+| `isHeadElectronAgency` | головной электронный агент; обязательно для электронного |
+| `insuranceTypesAndComissions[i][insuranceTypeId]`, `[comission]` | виды страхования (не повторяются) и комиссия головного электронного агента |
+| `electronAgencyApiUrl`, `electronAgencyApiToken` | адрес API и токен головного электронного агента |
+| `agency[person][...]` | `regionId` *, `birthDate` *, `address` *, `residentType` *, `countryId` *, `phone` * (998XXXXXXXXX), `passportData[pinfl]`, `passportData[seria]`, `passportData[number]`, `fullName[firstname]`, `[lastname]`, `[middlename]` |
+| `agency[organization][...]` | `inn` *, `name` *, `representativeName` *, `address` *, `position` *, `checkingAccount` *, `phone` * (998XXXXXXXXX), `regionId` *, `oked` *, `ownershipFormId` |
+
+Метод редактирования агента/филиала в Swagger есть; его поля Бекзод
+пришлёт отдельно.
+
+## Провайдер данных физлиц
+
+Два метода, ответ у обоих одинаковый (это два способа получить одни
+и те же данные):
+
+- `POST /api/provider/passport-birth-date-v2` — по паспорту и дате
+  рождения: `transactionId`, `isConsent` ("Y"), `senderPinfl`,
+  `document` (серия и номер), `birthDate`;
+- `POST /api/provider/pinfl-v2` — по ПИНФЛ: `transactionId`, `isConsent`,
+  `senderPinfl`, `document`, `pinfl`.
+
+Ответ (`result`): `currentPinfl`, `pinfls` (все ПИНФЛ), `currentDocument`,
+`documents` (все документы: `document`, `type`, `docgiveplace`,
+`docgiveplaceid`, `datebegin`, `dateend`, `status`), `lastNameLatin`,
+`firstNameLatin`, `middleNameLatin` (при отсутствии — ХХХ), `birthDate`,
+`birthPlace`, `birthCountry`, `gender` (1 — мужчина, 2 — женщина),
+`address` (прописка), `regionId`, `districtId`.
+
+Пример формы ответа (значения условные):
+
+```json
+{
+  "currentPinfl": "30101990000000",
+  "pinfls": ["30101990000000"],
+  "currentDocument": "AD0000000",
+  "documents": [
+    {"document": "FA0000000", "type": "IDMS_RECV_IP_DOCUMENTS", "datebegin": "2024-06-25", "dateend": "2034-06-24", "status": 2},
+    {"document": "AD0000000", "type": "IDMS_RECV_MVD_IDCARD_CITIZEN", "datebegin": "2022-08-30", "dateend": "2032-08-29", "status": 2},
+    {"document": "AA0000000", "type": "IDMS_RECV_CITIZ_DOCUMENTS", "datebegin": "2012-08-29", "dateend": "2022-08-28", "status": 5}
+  ],
+  "lastNameLatin": "FAMILIYA", "firstNameLatin": "ISM", "middleNameLatin": "OTCHESTVO",
+  "birthDate": "1990-01-01", "gender": "1", "regionId": 10, "districtId": 1001
+}
+```
+
+Проверено Бекзодом на своих данных: в ответе несколько документов разных
+видов (ID-карта, загранпаспорт, старый паспорт со статусом 5) и регион
+с районом.
+
+- `senderPinfl` — ПИНФЛ того, кто запрашивает данные: берётся из учётной
+  записи сотрудника, который работает в системе.
+- У каждой учётной записи сотрудника страховой будут храниться паспортные
+  данные, в том числе ПИНФЛ (требование Бекзода 21.10).
