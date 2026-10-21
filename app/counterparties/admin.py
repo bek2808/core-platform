@@ -594,7 +594,7 @@ class CounterpartyAdmin(NoRelatedLinks, TrackedAdmin):
         try:
             client = ErspClient.for_purpose(PROVIDER, company, user=request.user)
             if form["pinfl"]:
-                client.provider_pinfl(form["pinfl"])
+                client.provider_pinfl(form["pinfl"], form.get("passport") or "")
             else:
                 client.provider_passport(form["passport"], form["birth_date"])
         except ErspError as error:

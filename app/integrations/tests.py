@@ -331,6 +331,12 @@ class ClientTests(ErspMixin, TestCase):
         self.assertEqual(fake.calls[1]["body"]["pinfl"], "30101990000000")
         self.assertEqual(Exchange.objects.get(operation=Exchange.Operation.PROVIDER_PINFL).subject, "30101990000000")
 
+    def test_provider_pinfl_sends_document_when_known(self):
+        fake = FakeErsp(token_answer(), provider_answer({"currentPinfl": "30101990000000"}))
+        self.bekzod.pinfl = "30202020202020"
+        self.client_for(fake, company=self.mosaic, user=self.bekzod).provider_pinfl("30101990000000", "AD0000000")
+        self.assertEqual(fake.calls[1]["body"]["document"], "AD0000000")
+
     def test_person_request_needs_sender_pinfl(self):
         """Без ПИНФЛ запрашивающего запрос не уходит совсем (ни входа, ни журнала)."""
         fake = FakeErsp()

@@ -463,12 +463,17 @@ class ErspClient:
         )
         return payload["result"]
 
-    def provider_pinfl(self, pinfl):
+    def provider_pinfl(self, pinfl, document=""):
         """
         Сведения о физлице по ПИНФЛ (метод провайдера /api/provider/pinfl-v2).
+        По описанию метода в теле есть и document (серия и номер): если он известен,
+        отправляем (ЕРСП ответил 422 «You must submit valid form» без него).
         Возвращает словарь "result".
         """
-        body = self._person_request({"pinfl": pinfl})
+        fields = {"pinfl": pinfl}
+        if document:
+            fields["document"] = document
+        body = self._person_request(fields)
         payload, _ = self._call(
             Exchange.Operation.PROVIDER_PINFL, "/api/provider/pinfl-v2", body, subject=pinfl,
         )
