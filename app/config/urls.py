@@ -4,6 +4,8 @@ from django.http import HttpResponse
 from django.urls import path
 from django.views.decorators.http import require_GET
 
+from files.views import download as download_file
+
 
 @require_GET
 def healthz(request):
@@ -18,4 +20,5 @@ admin.site.index_title = "Администрирование"
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("healthz/", healthz),
+    path("files/<uuid:pk>/", download_file, name="file-download"),
 ]

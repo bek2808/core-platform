@@ -91,6 +91,7 @@ INSTALLED_APPS = [
     "counterparties",  # справочник контрагентов: банки, основания, должности
     "integrations",    # обмен с ЕРСП: клиент, журнал обмена
     "agents",          # агенты; связь подразделений и агентов с agencyId ЕРСП
+    "files",           # хранилище файлов (сканы соглашений и др.)
 ]
 
 MIDDLEWARE = [
@@ -199,6 +200,13 @@ STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
 }
+
+
+# --- Файлы (docs/files-model.md) ------------------------------------------------------
+# Папка хранилища - том Podman core-files (quadlet/core-files.volume), в контейнере
+# это единственная папка, куда приложению можно писать.
+
+FILES_ROOT = Path(env("DJANGO_FILES_ROOT", "/data/files"))
 
 
 # --- ЕРСП (единый реестр страховых полисов, НАПП) -----------------------------------
