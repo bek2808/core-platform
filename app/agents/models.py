@@ -79,6 +79,7 @@ class Agent(TrackedModel):
     и контрагент после создания не меняются (проверяет и база).
     Данные для ЕРСП (тип местности, дата образования, «электронный»)
     хранятся здесь: в ЕРСП они обязательны при регистрации агента.
+    Контрагент - организация или физлицо (с 22.10, решение 41).
     """
 
     class Kind(models.TextChoices):
@@ -108,7 +109,7 @@ class Agent(TrackedModel):
     )
     formation_date = models.DateField(
         "дата образования", null=True, blank=True,
-        help_text="В ЕРСП обязательна. Пусто - система возьмёт дату свидетельства о регистрации юрлица.",
+        help_text="В ЕРСП обязательна. У юрлица пусто - система возьмёт дату свидетельства о регистрации; у физлица - вводится вручную.",
     )
     is_electronic = models.BooleanField("электронный агент", default=False)
     is_head_electronic = models.BooleanField("головной электронный", default=False)
@@ -190,10 +191,19 @@ class Agent(TrackedModel):
         if counterparty is not None:
             if company_id and counterparty.insurance_company_id != company_id:
                 errors["counterparty"] = "Это контрагент другой страховой."
-            elif counterparty.kind != Counterparty.Kind.LEGAL_ENTITY:
-                errors["counterparty"] = (
-                    "Сейчас агентом заводится только юрлицо. Физлица и ИП - после этапа «Физлица»."
-                )
+            elif counterparty.kind == Counterparty.Kind.INDIVIDUAL:
+                # Агент-физлицо (решение 41): данные - в counterparties.Individual,
+                # брокером бывает только организация, дату образования вводят вручную.
+                if not hasattr(counterparty, "individual"):
+                    errors["counterparty"] = "У физлица нет данных (ФИО, ПИНФЛ): заполните карточку."
+                if self.kind == self.Kind.BROKER:
+                    errors["kind"] = "Брокером бывает только организация; физлицо - агент."
+                if self.formation_date is None:
+                    errors["formation_date"] = (
+                        "У агента-физлица укажите дату образования вручную (в ЕРСП она обязательна)."
+                    )
+            if "counterparty" in errors:
+                pass
             elif self.pk is None and company_id and type(self).objects.filter(
                 insurance_company_id=company_id, counterparty=counterparty
             ).exists():

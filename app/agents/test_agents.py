@@ -31,7 +31,7 @@ from accounts.testing import give_roles
 from audit.models import ChangeLog, UntrackedChangeError
 from companies.models import Department, InsuranceCompany
 from config.testing import refusal_expected
-from counterparties.models import BankAccount, Counterparty, LegalEntity
+from counterparties.models import BankAccount, Counterparty, Individual, LegalEntity
 from integrations.models import Environment, ErspAgency
 from references.loader import load_from_files
 
@@ -55,6 +55,16 @@ def legal_entity(company, inn, name, reg_date=None):
     return card
 
 
+def individual(company, pinfl, last_name="FAMILIYA", first_name="ISM"):
+    """Контрагент-физлицо с данными, как его заводит справочник."""
+    card = Counterparty(insurance_company=company, kind=Counterparty.Kind.INDIVIDUAL)
+    card.save()
+    Individual(counterparty=card, last_name=last_name, first_name=first_name, pinfl=pinfl,
+               birth_date=D(1990, 1, 1)).save()
+    card.refresh_from_db()
+    return card
+
+
 class AgentCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -73,8 +83,10 @@ class AgentCase(TestCase):
         cls.moi = legal_entity(cls.mosaic, "305861871", 'СП ООО "MOI Insurance Brokers Asia"')
         cls.merolla = legal_entity(cls.mosaic, "304935233", 'ЧП "MEROLLA"')
         cls.foreign = legal_entity(cls.other, "999999999", "Чужая организация")
+        # Карточка физлица без данных (ФИО, ПИНФЛ) - агентом быть не может; с данными - может.
         cls.person = Counterparty(insurance_company=cls.mosaic, kind=Counterparty.Kind.INDIVIDUAL)
         cls.person.save()
+        cls.person_with_data = individual(cls.mosaic, "30101990000000")
         # Генеральный директор: в системе с 2000 года (give_roles - прикрепление с 01.01.2000).
         cls.director = User.objects.create_user("director", insurance_company=cls.mosaic, last_name="Халилов")
         give_roles(cls.director)
@@ -122,9 +134,36 @@ class AgentRulesTests(AgentCase):
         self.assertEqual(agent.formation_date, D(2015, 3, 1))  # дата свидетельства юрлица
         self.assertEqual(str(agent), 'ООО "InRe"')
 
-    def test_only_legal_entity_for_now(self):
-        errors = self.errors(Agent(counterparty=self.person, area_type_id=URBAN))
-        self.assertIn("только юрлицо", errors["counterparty"][0])
+    def test_individual_without_data_refused(self):
+        errors = self.errors(Agent(counterparty=self.person, area_type_id=URBAN, formation_date=D(2026, 1, 1)))
+        self.assertIn("нет данных", errors["counterparty"][0])
+
+    def test_individual_agent(self):
+        agent = self.agent(self.person_with_data, formation_date=D(2026, 1, 1))
+        self.assertEqual(agent.insurance_company, self.mosaic)
+        self.assertEqual(agent.formation_date, D(2026, 1, 1))
+        self.assertEqual(str(agent), "FAMILIYA ISM")
+
+    def test_individual_needs_formation_date_by_hand(self):
+        errors = self.errors(Agent(counterparty=self.person_with_data, area_type_id=URBAN))
+        self.assertIn("дату образования", errors["formation_date"][0])
+
+    def test_individual_cannot_be_broker(self):
+        errors = self.errors(Agent(counterparty=self.person_with_data, area_type_id=URBAN, kind="broker",
+                                   formation_date=D(2026, 1, 1)))
+        self.assertIn("только организация", errors["kind"][0])
+
+    def test_individual_one_agent_per_counterparty(self):
+        self.agent(self.person_with_data, formation_date=D(2026, 1, 1))
+        errors = self.errors(Agent(counterparty=self.person_with_data, area_type_id=URBAN,
+                                   formation_date=D(2026, 1, 1)))
+        self.assertIn("уже заведён агентом", errors["counterparty"][0])
+
+    def test_individual_of_other_company_refused(self):
+        stranger = individual(self.other, "30101990000099")
+        agent = Agent(counterparty=stranger, area_type_id=URBAN, insurance_company=self.mosaic,
+                      formation_date=D(2026, 1, 1))
+        self.assertIn("другой страховой", self.errors(agent)["counterparty"][0])
 
     def test_other_company_counterparty_refused(self):
         agent = Agent(counterparty=self.foreign, area_type_id=URBAN, insurance_company=self.mosaic)
@@ -473,6 +512,27 @@ class AgentScreenTests(AgentCase):
                          (self.head, D(2021, 4, 1), user))
         self.assertEqual(agent.formation_date, D(2015, 3, 1))
 
+    def test_add_individual_agent(self):
+        self.login("Администратор страховой")
+        page = self.add(counterparty=str(self.person_with_data.pk), kind="agent", formation_date="2026-01-15")
+        agent = Agent.objects.get(counterparty=self.person_with_data)
+        self.assertRedirects(page, self.change_url(agent), fetch_redirect_response=False)
+        self.assertEqual(agent.formation_date, D(2026, 1, 15))
+
+    def test_add_individual_agent_without_date_shows_message(self):
+        self.login("Администратор страховой")
+        page = self.add(counterparty=str(self.person_with_data.pk), kind="agent")
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, "укажите дату образования вручную")
+        self.assertFalse(Agent.objects.exists())
+
+    def test_search_agent_by_pinfl(self):
+        agent = self.agent(self.person_with_data, formation_date=D(2026, 1, 1))
+        self.agent(self.inre)
+        self.login("Администратор страховой")
+        found = self.client.get(AGENTS_URL, {"q": "30101990000000"})
+        self.assertEqual(list(found.context["cl"].result_list), [agent])
+
     def test_agents_role_can_work(self):
         self.login("Работа с агентами", username="director_sales")
         self.assertEqual(self.add().status_code, 302)
@@ -487,7 +547,9 @@ class AgentScreenTests(AgentCase):
         choices = choices[:choices.index("</select>")]
         self.assertIn(f'value="{self.inre.pk}"', choices)
         self.assertNotIn(f'value="{self.moi.pk}"', choices)      # уже агент
-        self.assertNotIn(f'value="{self.person.pk}"', choices)   # физлицо - позже
+        self.assertNotIn(f'value="{self.person.pk}"', choices)   # физлицо без данных
+        self.assertIn(f'value="{self.person_with_data.pk}"', choices)  # физлицо с данными
+        self.assertIn("FAMILIYA ISM (физлицо)", choices)
         self.assertNotIn(f'value="{self.foreign.pk}"', choices)  # чужая страховая
         self.assertNotIn("Select an option", page)              # пустой пункт - «—»
 

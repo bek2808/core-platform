@@ -32,6 +32,7 @@ from django.contrib.admin.utils import unquote
 from django.contrib.admin.widgets import AdminDateWidget
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
+from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
@@ -311,7 +312,8 @@ class WorkingFilter(admin.SimpleListFilter):
 class AgentAdmin(NoRelatedLinks, TrackedAdmin):
     list_display = ["__str__", "kind", "working", "place_now", "agency_ids"]
     list_filter = [WorkingFilter, "kind", "is_electronic"]
-    search_fields = ["counterparty__display_name", "counterparty__legal_entity__inn"]
+    search_fields = ["counterparty__display_name", "counterparty__legal_entity__inn",
+                     "counterparty__individual__pinfl"]
     list_select_related = ["counterparty"]
 
     ADD_FIELDS = ["counterparty", "kind", "department", "place_from", "place_basis",
@@ -383,9 +385,12 @@ class AgentAdmin(NoRelatedLinks, TrackedAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         company_id = request.user.insurance_company_id
         if db_field.name == "counterparty":
-            # Действующие юрлица своей страховой, ещё не заведённые агентами.
+            # Действующие юрлица и физлица (с заполненными данными) своей страховой,
+            # ещё не заведённые агентами.
             kwargs["queryset"] = visible(request, Counterparty.objects.filter(
-                kind=Counterparty.Kind.LEGAL_ENTITY, status=Counterparty.Status.ACTIVE,
+                Q(kind=Counterparty.Kind.LEGAL_ENTITY)
+                | Q(kind=Counterparty.Kind.INDIVIDUAL, individual__isnull=False),
+                status=Counterparty.Status.ACTIVE,
             )).exclude(agents__isnull=False).order_by("display_name")
         elif db_field.name == "head_agent":
             kwargs["queryset"] = Agent.objects.none()  # видимые агенты - в _prepare_form
@@ -394,8 +399,11 @@ class AgentAdmin(NoRelatedLinks, TrackedAdmin):
         elif db_field.name == "area_type":
             kwargs["queryset"] = db_field.related_model.objects.filter(is_present=True)
         field = super().formfield_for_foreignkey(db_field, request, **kwargs)
-        if db_field.name == "counterparty" and company_id is None and field is not None:
-            field.label_from_instance = lambda c: f"{c.insurance_company}: {c}"
+        if db_field.name == "counterparty" and field is not None:
+            def label(counterparty):
+                name = f"{counterparty} (физлицо)" if counterparty.kind == Counterparty.Kind.INDIVIDUAL else str(counterparty)
+                return f"{counterparty.insurance_company}: {name}" if company_id is None else name
+            field.label_from_instance = label
         return field
 
     def get_changeform_initial_data(self, request):
