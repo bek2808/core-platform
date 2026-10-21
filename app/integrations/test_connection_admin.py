@@ -52,8 +52,8 @@ class ScreenCase(ErspMixin, TestCase):
             username, password=STRONG_PASSWORD, is_staff=True,
             insurance_company=self.mosaic if company == "mosaic" else company,
         )
-        if group:
-            give_roles(user, group)
+        # Место работы - всегда (без него не войти, A3); роль - если задана.
+        give_roles(user, *([group] if group else []))
         self.client.force_login(user)
         return user
 

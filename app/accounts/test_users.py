@@ -21,10 +21,13 @@ from django.db import IntegrityError, transaction
 from django.test import TestCase
 
 from audit.models import ChangeLog, UntrackedChangeError
-from companies.models import InsuranceCompany
+from django.utils import timezone
+
+from companies.models import Department, InsuranceCompany
 from config.testing import refusal_expected
 
-from .models import User
+from .models import JobPosition, User
+from .testing import give_roles
 
 STRONG_PASSWORD = "Kx7#mQ2v!pLr9zT"
 LIST_URL = "/admin/accounts/user/"
@@ -161,6 +164,7 @@ class JournalTests(UserCase):
 
     def test_login_neither_logs_nor_overwrites_author(self):
         user = self.make(by=self.root)
+        give_roles(user)  # место работы: без него сотрудник страховой не входит (A3)
         before = ChangeLog.objects.count()
         self.assertTrue(self.client.login(username="ivanov", password=STRONG_PASSWORD))
         user.refresh_from_db()
@@ -199,6 +203,7 @@ class ProtectionTests(UserCase):
 def user_with_permissions(company, username="company_admin", *codenames):
     user = User.objects.create_user(username, password=STRONG_PASSWORD, is_staff=True, insurance_company=company)
     user.user_permissions.set(Permission.objects.filter(content_type__app_label="accounts", codename__in=codenames))
+    give_roles(user)  # место работы без ролей: без места сотрудник страховой не входит (A3)
     return user
 
 
@@ -211,12 +216,15 @@ class UserAdminTests(UserCase):
         self.client.force_login(user)
         return user
 
-    def new_user_data(self, **extra):
+    def new_user_data(self, company=None, **extra):
+        # С части A3 пароль не вводят (его выдаёт система), а место работы - сразу.
+        department = Department.head_office_for(company or self.mosaic)
         return {
-            "username": "karimov", "usable_password": "true",
-            "password1": STRONG_PASSWORD, "password2": STRONG_PASSWORD,
+            "username": "karimov",
             "last_name": "Каримов", "first_name": "Акмал", "patronymic": "Ботирович",
-            "email": "", "phone": "+998 90 123-45-67", "pinfl": "", "kind": "employee", **extra,
+            "email": "", "phone": "+998 90 123-45-67", "pinfl": "", "kind": "employee",
+            "valid_from": timezone.localdate().strftime("%d.%m.%Y"), "department": department.pk,
+            "position": JobPosition.objects.get(name="Бизнес-аналитик").pk, "visibility": "company", **extra,
         }
 
     def test_list_shows_only_own_company(self):
@@ -237,17 +245,17 @@ class UserAdminTests(UserCase):
     def test_create_gets_own_company_and_is_logged(self):
         admin_user = self.login_company_admin()
         page = self.client.post(ADD_URL, self.new_user_data())
-        self.assertEqual(page.status_code, 302, re.findall(r'errorlist.*?</ul>', page.content.decode(), re.S))
+        self.assertEqual(page.status_code, 200, re.findall(r'errorlist.*?</ul>', page.content.decode(), re.S))
         user = User.objects.get(username="karimov")
         self.assertEqual(user.insurance_company, self.mosaic)
         self.assertEqual((user.phone, user.created_by), ("998901234567", admin_user))
-        self.assertTrue(user.check_password(STRONG_PASSWORD))
+        self.assertTrue(user.check_password(page.context["password"]))  # временный, от системы
         self.assertTrue(ChangeLog.objects.filter(object_id=user.pk, field="phone", user=admin_user).exists())
 
     def test_foreign_company_in_post_ignored(self):
         self.login_company_admin()
         page = self.client.post(ADD_URL, self.new_user_data(insurance_company=str(self.other.pk)))
-        self.assertEqual(page.status_code, 302, page.content.decode()[:3000])
+        self.assertEqual(page.status_code, 200)
         self.assertEqual(User.objects.get(username="karimov").insurance_company, self.mosaic)
 
     def test_add_form_hides_company_and_privileges_and_platform_kind(self):
@@ -324,8 +332,9 @@ class UserAdminTests(UserCase):
         self.client.force_login(self.root)
         self.assertContains(self.client.get(LIST_URL), "foreign_user")
         self.assertContains(self.client.get(ADD_URL), 'name="insurance_company"')
-        page = self.client.post(ADD_URL, self.new_user_data(insurance_company=str(self.other.pk)))
-        self.assertEqual(page.status_code, 302, page.content.decode()[:3000])
+        page = self.client.post(ADD_URL, self.new_user_data(company=self.other, insurance_company=str(self.other.pk)))
+        self.assertEqual(page.status_code, 200, re.findall(r'errorlist.*?</ul>', page.content.decode(), re.S))
+        self.assertIn("password", page.context)
         self.assertEqual(User.objects.get(username="karimov").insurance_company, self.other)
 
     def test_history_button_leads_to_journal(self):

@@ -91,6 +91,14 @@ class User(AbstractUser, TrackedModel):
         validators=[RegexValidator(PINFL_REGEX, "ПИНФЛ - 14 цифр.")],
         help_text="14 цифр. Понадобится для входа через OneID.",
     )
+    must_change_password = models.BooleanField(
+        "сменить пароль при входе",
+        default=False,
+        help_text=(
+            "Ставит система, когда выдаёт временный пароль (новый пользователь, «Сбросить пароль»). "
+            "Пока человек не задаст свой пароль, другие страницы не открываются."
+        ),
+    )
 
     objects = UserManager()
 

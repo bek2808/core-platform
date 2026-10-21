@@ -28,6 +28,7 @@ from audit.models import ChangeLog, UntrackedChangeError
 from companies.models import Department, InsuranceCompany
 
 from .models import Assignment, JobPosition, Role, User, Visibility, current_assignment
+from .testing import give_roles
 
 STRONG_PASSWORD = "Kx7#mQ2v!pLr9zT"
 D = datetime.date
@@ -415,13 +416,14 @@ class AssignmentAdminTests(AssignmentCase):
         self.assertContains(page, str(assignment)[:20])
 
     def test_company_admin_without_rights_sees_no_block(self):
-        # Права на прикрепления администратору страховой - в части A3.
+        # Без прав на прикрепления (только на пользователей) блока не видно.
         company_admin = User.objects.create_user(
             "company_admin", password=STRONG_PASSWORD, is_staff=True, insurance_company=self.mosaic,
         )
         company_admin.user_permissions.set(
             Permission.objects.filter(content_type__app_label="accounts", codename__in=["view_user", "change_user"])
         )
+        give_roles(company_admin)  # место без ролей: без места не войти (A3)
         self.client.force_login(company_admin)
         page = self.client.get(f"{USER_URL}{self.bekzod.pk}/change/")
         self.assertEqual(page.status_code, 200)

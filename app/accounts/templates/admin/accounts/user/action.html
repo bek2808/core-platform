@@ -1,0 +1,38 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% comment %}
+Кадровое действие в карточке пользователя: «Принять», «Перевести», «Уволить»,
+«Сбросить пароль» (UserAdmin.*_view). Правила - accounts/personnel.py.
+{% endcomment %}
+{% block extrahead %}{{ block.super }}
+<script src="{% url 'admin:jsi18n' %}"></script>
+{{ media }}
+{% endblock %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'admin/css/forms.css' %}">{% endblock %}
+{% block bodyclass %}{{ block.super }} app-accounts model-user change-form{% endblock %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">Начало</a>
+  &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+  &rsaquo; <a href="{% url 'admin:accounts_user_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+  &rsaquo; <a href="{{ change_url }}">{{ target.full_name }}</a>
+  &rsaquo; {{ title }}
+</div>
+{% endblock %}
+{% block content %}
+<div id="content-main">
+  {% if place %}<p>Сейчас: <strong>{{ place }}</strong>.</p>{% endif %}
+  {% for line in intro %}<p>{{ line }}</p>{% endfor %}
+  <form method="post" novalidate>{% csrf_token %}
+    {% if form.errors %}<p class="errornote">Исправьте ошибки ниже.</p>{{ form.non_field_errors }}{% endif %}
+    {% for fieldset in adminform %}
+      {% include "admin/includes/fieldset.html" with heading_level=2 prefix="fieldset" id_prefix=0 id_suffix=forloop.counter0 %}
+    {% endfor %}
+    <div class="submit-row">
+      <input type="submit" class="default" value="{{ submit_label }}">
+      <a href="{{ change_url }}" class="closelink">Отмена</a>
+    </div>
+  </form>
+  <p class="help">Изменение записывается в журнал: кто, когда, было -> стало.</p>
+</div>
+{% endblock %}

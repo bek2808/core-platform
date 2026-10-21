@@ -1,0 +1,12 @@
+{% extends "admin/change_form.html" %}
+{% comment %}
+Карточка пользователя: кадровые кнопки (UserAdmin.personnel_actions) -
+«Принять», «Перевести», «Уволить», «Сбросить пароль». Какие видны -
+решает экран: свою карточку администратор страховой кнопками не меняет.
+{% endcomment %}
+{% block object-tools-items %}
+  {% for action in personnel_actions %}
+    <li><a href="{{ action.url }}">{{ action.label }}</a></li>
+  {% endfor %}
+  {{ block.super }}
+{% endblock %}

@@ -126,6 +126,7 @@ class AssignmentRightsTests(RightsCase):
 
     def test_screen_follows_roles(self):
         user = self.make_user()
+        give_roles(user)  # место без ролей
         self.client.force_login(user)
         self.assertNotContains(self.client.get("/admin/"), "/admin/counterparties/counterparty/")
         give_roles(user, "Администратор справочников")
