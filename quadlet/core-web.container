@@ -29,6 +29,11 @@ Secret=django_secret_key
 # Ключ заводится ДО установки этого файла: без секрета контейнер не запустится.
 Secret=core_encryption_key
 
+# Файлы (docs/files-model.md): том core-files - единственная папка контейнера,
+# куда приложению можно писать. Всё остальное по-прежнему только для чтения
+# (ReadOnly=true ниже). Quadlet сам создаст том до запуска контейнера.
+Volume=core-files.volume:/data/files
+
 # Настройки среды (см. app/config/settings.py).
 Environment=DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
 Environment=DJANGO_DB_HOST=core-postgres

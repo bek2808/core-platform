@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Резервное копирование PostgreSQL Core-системы.
 # Запускается от пользователя core (вручную через core-run или по таймеру systemd).
-# Результат: /home/core/backups/<дата UTC>/ с файлами globals.sql и <база>.dump
+# Результат: /home/core/backups/<дата UTC>/ с файлами globals.sql, <база>.dump
+# и files.tar (том core-files, если он есть)
 
 set -euo pipefail
 
@@ -27,11 +28,18 @@ for db in $DBS; do
   podman exec "$CONTAINER" pg_dump -U postgres -Fc "$db" > "$TMP/$db.dump"
 done
 
-# 3. Всё прошло успешно - копия становится "настоящей"
+# 3. Файлы Core-системы (том core-files, docs/files-model.md) - архивом files.tar.
+#    Файлы в томе не меняются, поэтому архив можно снимать на ходу.
+#    Пока тома нет (до установки хранилища) - шаг пропускается.
+if podman volume exists core-files; then
+  podman volume export core-files > "$TMP/files.tar"
+fi
+
+# 4. Всё прошло успешно - копия становится "настоящей"
 mv "$TMP" "$DEST"
 trap - ERR
 
-# 4. Удаляем копии старше KEEP_DAYS дней
+# 5. Удаляем копии старше KEEP_DAYS дней
 find "$BACKUP_DIR" -mindepth 1 -maxdepth 1 -type d -name '20*Z' -mtime +"$KEEP_DAYS" -exec rm -rf {} +
 
 echo "OK: $DEST"

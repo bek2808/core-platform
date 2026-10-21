@@ -24,7 +24,8 @@ Core-система страховой компании: продажи, пол�
 | Сеть | `core-net` 10.89.10.0/24; контейнеры находят друг друга по имени | `quadlet/core.network` |
 | База | PostgreSQL 18.6, контейнер `core-postgres`, база `core`, роль приложения `core_app` (не суперпользователь) | `quadlet/core-postgres.*`, `postgres/pg_hba.conf` |
 | Приложение | Django 6.1 + gunicorn, контейнер `core-web`, порт 127.0.0.1:8000 | `app/`, `quadlet/core-web.container` |
-| Резервные копии | `pg_dump` каждой базы, ежедневно 02:00 по Ташкенту, 14 дней | `bin/pg-backup`, `systemd/` |
+| Файлы | том `core-files`, в `core-web` - `/data/files` (единственная папка с записью) | `quadlet/core-files.volume`, `docs/files-model.md` |
+| Резервные копии | `pg_dump` каждой базы и архив тома файлов, ежедневно 02:00 по Ташкенту, 14 дней | `bin/pg-backup`, `systemd/` |
 
 Сейчас одна среда (будущая промышленная). Цель: разработка -> тест -> промышленная.
 
@@ -81,7 +82,7 @@ bin/                     скрипты для сервера (запускаю�
   test                   прогнать автотесты в образе core-web
   pg-backup              резервная копия (ставится в /home/core/.local/bin/)
   encryption-key         завести ключ шифрования секретов в базе (core_encryption_key)
-quadlet/                 описания контейнеров, тома и сети для Podman Quadlet
+quadlet/                 описания контейнеров, томов (база, файлы) и сети для Podman Quadlet
 systemd/                 служба и таймер резервного копирования
 postgres/                правила доступа к PostgreSQL
 docs/                    требования аналитика и согласованные модели данных
