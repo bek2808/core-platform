@@ -1,0 +1,120 @@
+{
+  "error": 0,
+  "error_message": "",
+  "result": [
+    {
+      "id": 10,
+      "name": "ОСПОА",
+      "nameUz": null,
+      "nameUzc": null
+    },
+    {
+      "id": 11,
+      "name": "ОСПОТБ",
+      "nameUz": null,
+      "nameUzc": null
+    },
+    {
+      "id": 12,
+      "name": "ОСП от НС",
+      "nameUz": null,
+      "nameUzc": null
+    },
+    {
+      "id": 13,
+      "name": "ОГСВиН",
+      "nameUz": null,
+      "nameUzc": null
+    },
+    {
+      "id": 14,
+      "name": "ОСЖЗСССиСФ",
+      "nameUz": null,
+      "nameUzc": null
+    },
+    {
+      "id": 15,
+      "name": "ОСГОТ",
+      "nameUz": null,
+      "nameUzc": null
+    },
+    {
+      "id": 18,
+      "name": "ОГС ЖЗГСЭ",
+      "nameUz": null,
+      "nameUzc": null
+    },
+    {
+      "id": 17,
+      "name": "ГОА",
+      "nameUz": null,
+      "nameUzc": null
+    },
+    {
+      "id": 19,
+      "name": "СЕЛЬХОЗ",
+      "nameUz": "СЕЛЬХОЗ",
+      "nameUzc": "СЕЛЬХОЗ"
+    },
+    {
+      "id": 999,
+      "name": "Другие",
+      "nameUz": "Boshqalar",
+      "nameUzc": "Бошкалар"
+    },
+    {
+      "id": 16,
+      "name": "ОГС ЖЗС",
+      "nameUz": null,
+      "nameUzc": null
+    },
+    {
+      "id": 2,
+      "name": "ОСАГО",
+      "nameUz": "TVE FJMS",
+      "nameUzc": "ТВЭ ФЖМС"
+    },
+    {
+      "id": 8,
+      "name": "ОСГО СЭ",
+      "nameUz": null,
+      "nameUzc": null
+    },
+    {
+      "id": 9,
+      "name": "ОСГОР Аннуитет",
+      "nameUz": null,
+      "nameUzc": null
+    },
+    {
+      "id": 5,
+      "name": "СМР",
+      "nameUz": "Qurilish FJMS",
+      "nameUzc": "Курилиш ФЖМС"
+    },
+    {
+      "id": 4,
+      "name": "ОСГОП",
+      "nameUz": "Tashuvchi FJMS",
+      "nameUzc": "Ташувчи ФЖМС"
+    },
+    {
+      "id": 6,
+      "name": "ОПО",
+      "nameUz": "Xavfli ishlab chiqarish FJMS",
+      "nameUzc": "Хавфли ишлаб чикариш ФЖМС"
+    },
+    {
+      "id": 7,
+      "name": "ОСГОН",
+      "nameUz": null,
+      "nameUzc": null
+    },
+    {
+      "id": 3,
+      "name": "ОСГОР",
+      "nameUz": "Ish beruvchi FJMS",
+      "nameUzc": "Иш берувчи ФЖМС"
+    }
+  ]
+}

@@ -22,12 +22,16 @@ from django.db import transaction
 from django.utils import timezone
 
 from .models import (
+    ErspAreaType,
+    ErspCountry,
     ErspCurrency,
     ErspDistrict,
+    ErspInsuranceType,
     ErspInsurer,
     ErspOked,
     ErspOwnershipForm,
     ErspRegion,
+    ErspResidentType,
 )
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
@@ -163,6 +167,15 @@ def currency_fields(row):
     }
 
 
+def named_fields(row):
+    """Справочник вида {"id", "name", "nameUz", "nameUzc"} (типы местности, страны и др.)."""
+    return {
+        "name": _clean(row, "name", required=True),
+        "name_uz": _clean(row, "nameUz"),
+        "name_uzc": _clean(row, "nameUzc"),
+    }
+
+
 def oked_fields(row):
     return {
         "name": _clean(row, "name", required=True),
@@ -219,7 +232,8 @@ def sync_reference(model, rows, to_fields, now=None, id_of=_row_id, raw_of=None)
 
 
 def sync_all(
-    regions, ownership_forms, insurers, soato_regions, districts, currencies, okeds, now=None
+    regions, ownership_forms, insurers, soato_regions, districts, currencies, okeds,
+    area_types, insurance_types, resident_types, countries, now=None,
 ):
     """Загрузить справочники ЕРСП одной транзакцией: всё или ничего."""
     now = now or timezone.now()
@@ -252,6 +266,12 @@ def sync_all(
             ),
             "валюты": sync_reference(ErspCurrency, currencies, currency_fields, now),
             "ОКЭД": sync_reference(ErspOked, okeds, oked_fields, now, id_of=_oked_id),
+            "типы местности": sync_reference(ErspAreaType, area_types, named_fields, now),
+            "типы обязательного страхования": sync_reference(
+                ErspInsuranceType, insurance_types, named_fields, now
+            ),
+            "типы резидентства": sync_reference(ErspResidentType, resident_types, named_fields, now),
+            "страны": sync_reference(ErspCountry, countries, named_fields, now),
         }
         return results
 
@@ -267,4 +287,8 @@ def load_from_files(data_dir=DATA_DIR):
         districts=read_ersp_response(ersp_dir / "districts.json"),
         currencies=read_ersp_response(ersp_dir / "currencies.json"),
         okeds=read_ersp_response(ersp_dir / "okeds.json"),
+        area_types=read_ersp_response(ersp_dir / "area_types.json"),
+        insurance_types=read_ersp_response(ersp_dir / "insurance_types.json"),
+        resident_types=read_ersp_response(ersp_dir / "resident_types.json"),
+        countries=read_ersp_response(ersp_dir / "countries.json"),
     )

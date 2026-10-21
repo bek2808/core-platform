@@ -1,0 +1,24 @@
+{
+  "error": 0,
+  "error_message": "",
+  "result": [
+    {
+      "id": 3,
+      "name": "ЕПИГУ",
+      "nameUz": null,
+      "nameUzc": null
+    },
+    {
+      "id": 1,
+      "name": "Городская местность",
+      "nameUz": "Shahar hududi",
+      "nameUzc": "Шаҳар ҳудуди"
+    },
+    {
+      "id": 2,
+      "name": "Сельская местность",
+      "nameUz": "Qishloq hududi",
+      "nameUzc": "Қишлоқ ҳудуди\r"
+    }
+  ]
+}

@@ -90,7 +90,10 @@ class FakeErsp:
         self.calls = []
 
     def __call__(self, method, url, headers, body, timeout):
-        self.calls.append({"url": url, "headers": headers, "body": json.loads(body)})
+        self.calls.append({
+            "method": method, "url": url, "headers": headers,
+            "body": json.loads(body) if body is not None else None,
+        })
         answer = self.answers.pop(0)
         if isinstance(answer, Exception):
             raise answer

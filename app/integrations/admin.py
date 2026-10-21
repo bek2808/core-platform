@@ -41,7 +41,7 @@ from audit.admin import TrackedAdmin
 from companies.models import InsuranceCompany
 
 from . import ersp
-from .models import Environment, ErspConnection, ErspCredentials, Exchange
+from .models import Environment, ErspAgency, ErspConnection, ErspCredentials, Exchange
 
 
 def own_companies(request, queryset, field="insurance_company_id"):
@@ -352,3 +352,47 @@ class ExchangeAdmin(admin.ModelAdmin):
     @admin.display(description="ответ")
     def response(self, exchange):
         return pretty(exchange.response_body)
+
+
+@admin.register(ErspAgency)
+class ErspAgencyAdmin(admin.ModelAdmin):
+    """
+    Справочник ЕРСП «Агенты/филиалы» своей страховой: только просмотр, даже
+    у суперпользователя. Меняется только загрузкой (load_ersp_agencies).
+    Связь с нашими подразделениями (и позже агентами) - на их экранах.
+    """
+
+    list_display = ["ersp_id", "name", "agency_type", "parent_ersp_id", "environment", "linked_to", "marks"]
+    list_filter = ["environment", "agency_type", "is_deleted", "is_present"]
+    search_fields = ["=ersp_id", "name", "inn"]
+    readonly_fields = ["linked_to", "raw_pretty"]
+    exclude = ["raw"]
+
+    def get_queryset(self, request):
+        return own_companies(request, super().get_queryset(request)).select_related("link__department")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    @admin.display(description="связано с")
+    def linked_to(self, agency):
+        link = getattr(agency, "link", None)
+        if link is None:
+            return "—"
+        target = link.target()
+        return f"{target}" + ("" if link.is_active else " (связь снята)")
+
+    @admin.display(description="отметки")
+    def marks(self, agency):
+        marks = [m for m, on in (("удалён", agency.is_deleted), ("нет в ЕРСП", not agency.is_present)) if on]
+        return ", ".join(marks) or "—"
+
+    @admin.display(description="ответ ЕРСП")
+    def raw_pretty(self, agency):
+        return format_html("<pre>{}</pre>", json.dumps(agency.raw, ensure_ascii=False, indent=2))

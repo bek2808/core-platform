@@ -418,18 +418,31 @@ class ErspClient:
         payload, _ = self._call(Exchange.Operation.PROVIDER_INN, "/api/provider/inn", {"inn": inn}, subject=inn)
         return payload["result"]
 
-    def _call(self, operation, path, body, subject=""):
+    def references_agencies(self):
+        """
+        Справочник «Агенты/филиалы» своей страховой (GET /api/references/agencies):
+        головной офис, филиалы и агенты с их agencyId. Возвращает список строк
+        "result"; ответ целиком - в журнале обмена. id в песочнице и в боевой
+        среде разные - берите клиент той среды, куда уходят полисы (SEND).
+        """
+        payload, _ = self._call(
+            Exchange.Operation.REFERENCES_AGENCIES, "/api/references/agencies", None,
+            method="GET", result_type=list,
+        )
+        return payload["result"]
+
+    def _call(self, operation, path, body, subject="", **send_options):
         """Запрос с токеном; на 401 - новый вход и один повтор."""
         token = self._token()
         try:
-            return self._send(operation, path, body, subject=subject, token=token)
+            return self._send(operation, path, body, subject=subject, token=token, **send_options)
         except _Unauthorized:
             with self.store.locked(self.token_name):
                 # Стираем только отвергнутый токен: если соседний процесс уже
                 # вошёл заново, его свежий токен остаётся.
                 self.store.drop(self.token_name, token)
             try:
-                return self._send(operation, path, body, subject=subject, token=self._token())
+                return self._send(operation, path, body, subject=subject, token=self._token(), **send_options)
             except _Unauthorized as again:
                 self._fail(
                     again.exchange, None,
@@ -437,17 +450,19 @@ class ErspClient:
                     f"Проверьте данные для входа: {SCREEN}.",
                 )
 
-    def _send(self, operation, path, body, subject="", token=None, authorized=True):
+    def _send(self, operation, path, body, subject="", token=None, authorized=True,
+              method="POST", result_type=dict):
         """
         Отправить запрос, записать его в журнал обмена и разобрать ответ.
+        method - POST (тело - JSON) или GET (тела нет, body=None: справочники).
+        result_type - каким должен быть "result" в ответе: dict (одна запись)
+        или list (справочник).
         Возвращает (ответ JSON, строка журнала) или бросает ErspError.
         """
         url = self.base_url + path
-        headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "User-Agent": "core-platform",
-        }
+        headers = {"Accept": "application/json", "User-Agent": "core-platform"}
+        if body is not None:
+            headers["Content-Type"] = "application/json"
         if authorized:
             headers["Authorization"] = f"Bearer {token}"
         log = Exchange(
@@ -456,14 +471,15 @@ class ErspClient:
             environment=self.environment,
             operation=operation,
             subject=str(subject)[:100],
-            method="POST",
+            method=method,
             url=url,
-            request_body=mask(body),
+            request_body=mask(body) if body is not None else None,
         )
         self.last_exchange = log
         started = time.monotonic()
         try:
-            status, raw = self.transport("POST", url, headers, json.dumps(body).encode("utf-8"), settings.ERSP_TIMEOUT_S)
+            data = json.dumps(body).encode("utf-8") if body is not None else None
+            status, raw = self.transport(method, url, headers, data, settings.ERSP_TIMEOUT_S)
         except OSError as error:  # нет связи, тайм-аут, ошибка сертификата
             log.duration_ms = int((time.monotonic() - started) * 1000)
             self._fail(log, Exchange.Outcome.NETWORK_ERROR, f"Нет связи с ЕРСП ({self.environment}): {error}")
@@ -499,7 +515,7 @@ class ErspClient:
         if operation == Exchange.Operation.TOKEN:
             if not token_result(payload).get("access_token"):
                 self._fail(log, Exchange.Outcome.BAD_RESPONSE, "В ответе ЕРСП нет токена (access_token).")
-        elif not isinstance(payload.get("result"), dict):
+        elif not isinstance(payload.get("result"), result_type):
             self._fail(log, Exchange.Outcome.BAD_RESPONSE, "В ответе ЕРСП нет данных (result).")
 
         log.outcome = Exchange.Outcome.OK

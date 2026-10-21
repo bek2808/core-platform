@@ -1,6 +1,7 @@
 """
 Справочники ЕРСП (единый реестр страховых полисов): регионы, районы, формы
-собственности, страховщики, валюты, ОКЭД. И перечень банков Центрального
+собственности, страховщики, валюты, ОКЭД, типы местности, типы обязательного
+страхования, типы резидентства, страны. И перечень банков Центрального
 банка (CbuBank, в конце файла) - по тем же правилам.
 
 Откуда данные. Это копии справочников ЕРСП: их не правят руками, а загружают
@@ -195,6 +196,74 @@ class ErspOked(ErspReference):
 
     def __str__(self):
         return f"{self.id} - {self.name_uz or self.name}"
+
+
+class ErspNamedReference(ErspReference):
+    """
+    Справочник ЕРСП, где у записи только id и название на трёх языках
+    (ответ вида {"id", "name", "nameUz", "nameUzc"}). Пробелы и переводы
+    строк по краям названий убираются (у сельской местности в ЕРСП «\\r»
+    в конце узбекского названия); в raw строка остаётся как пришла.
+    """
+
+    name = models.CharField("название", max_length=255)
+    name_uz = models.CharField("название (узб., латиница)", max_length=255, blank=True)
+    name_uzc = models.CharField("название (узб., кириллица)", max_length=255, blank=True)
+
+    class Meta:
+        abstract = True
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+class ErspAreaType(ErspNamedReference):
+    """
+    Тип местности по справочнику ЕРСП /api/references/area-types
+    (городская, сельская, ЕПИГУ). Обязателен у агента и филиала в ЕРСП.
+    """
+
+    class Meta(ErspNamedReference.Meta):
+        verbose_name = "тип местности ЕРСП"
+        verbose_name_plural = "типы местности ЕРСП"
+
+
+class ErspInsuranceType(ErspNamedReference):
+    """
+    Тип обязательного страхования по справочнику ЕРСП
+    /api/references/insurance-types (ОСАГО, ОСГОР, ОСГОП, ..., 999 «Другие»).
+    Нужен для комиссий головного электронного агента.
+    """
+
+    class Meta(ErspNamedReference.Meta):
+        verbose_name = "тип обязательного страхования ЕРСП"
+        verbose_name_plural = "типы обязательного страхования ЕРСП"
+
+
+class ErspResidentType(ErspNamedReference):
+    """
+    Тип резидентства по справочнику ЕРСП /api/references/resident-types
+    (гражданин, иностранец, ЛБГ и др.). Для агента-физлица и физлиц вообще.
+    """
+
+    class Meta(ErspNamedReference.Meta):
+        verbose_name = "тип резидентства ЕРСП"
+        verbose_name_plural = "типы резидентства ЕРСП"
+
+
+class ErspCountry(ErspNamedReference):
+    """
+    Страна по справочнику ЕРСП /api/references/countries. Номер страны
+    в ЕРСП - свой (Узбекистан - 210), не код ISO. Есть и особые записи:
+    9999 «Все страны», 239 «Неизвестна», 249 «Евросоюз».
+    """
+
+    UZBEKISTAN = 210
+
+    class Meta(ErspNamedReference.Meta):
+        verbose_name = "страна ЕРСП"
+        verbose_name_plural = "страны ЕРСП"
 
 
 class CbuBank(models.Model):

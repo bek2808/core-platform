@@ -15,7 +15,8 @@ from references.loader import DATA_DIR, LoadError, load_from_files
 class Command(BaseCommand):
     help = (
         "Загрузить справочники ЕРСП (регионы, районы, формы собственности, "
-        "страховщики, валюты, ОКЭД) из файлов."
+        "страховщики, валюты, ОКЭД, типы местности, типы обязательного страхования, "
+        "типы резидентства, страны) из файлов."
     )
 
     def add_arguments(self, parser):

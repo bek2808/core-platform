@@ -87,6 +87,7 @@ class AccessTests(ScreenCase):
         self.assertEqual(codenames, {
             "view_erspconnection", "change_erspconnection", "view_erspcredentials",
             "change_erspcredentials", "view_exchange", "view_changelog",
+            "view_erspagency",  # справочник агентов ЕРСП - только просмотр (agents/0002)
         })
 
     def test_company_user_goes_straight_to_own_card(self):

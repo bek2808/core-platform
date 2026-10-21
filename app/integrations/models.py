@@ -36,6 +36,7 @@ class Exchange(models.Model):
     class Operation(models.TextChoices):
         TOKEN = "token", "получение токена"
         PROVIDER_INN = "provider_inn", "провайдер: организация по ИНН"
+        REFERENCES_AGENCIES = "references_agencies", "справочник: агенты и филиалы"
 
     class Outcome(models.TextChoices):
         OK = "ok", "успешно"
@@ -300,3 +301,84 @@ class ErspCredentials(TrackedModel):
             "username": self.username,
             "password": self.secret("password"),
         }
+
+
+# --- Справочник «Агенты/филиалы» ЕРСП --------------------------------------------
+
+class ErspAgency(models.Model):
+    """
+    Запись справочника ЕРСП «Агенты/филиалы» (/api/references/agencies):
+    головной офис, филиал или агент страховой с его agencyId. agencyId
+    уходит в ЕРСП в каждом договоре, полисе, подтверждении оплаты.
+    Модель: docs/users-model.md, «Связь с ЕРСП: agencyId».
+
+    Список у каждой страховой свой (ЕРСП отдаёт только агентов своей СК),
+    и в песочнице id другие, чем в боевой среде, - поэтому ключ записи -
+    тройка «страховая + среда + id ЕРСП».
+
+    Это копия справочника, как другие справочники ЕРСП: людьми не правится,
+    загружается командой load_ersp_agencies (integrations/agencies.py),
+    хранится как прислал ЕРСП (ответ целиком - в raw). Записи не удаляются:
+    пропавшая из ответа получает отметку «нет в ЕРСП», удалённая в ЕРСП
+    (кнопка «Delete», статус «Удалён») - отметку «удалён». И та и другая
+    больше не предлагаются для связи: их agencyId ЕРСП не принимает.
+    """
+
+    class AgencyType(models.IntegerChoices):
+        # agencyType в ЕРСП. Головной офис в ЕРСП - тоже «филиал» (1).
+        BRANCH = 1, "филиал"
+        AGENT = 2, "агент"
+
+    insurance_company = models.ForeignKey(
+        "companies.InsuranceCompany",
+        on_delete=models.PROTECT,
+        related_name="ersp_agencies",
+        verbose_name="страховая компания",
+    )
+    environment = models.CharField("среда", max_length=16, choices=Environment.choices)
+    ersp_id = models.PositiveIntegerField("agencyId", help_text="id записи в ЕРСП - уходит в запросы.")
+    name = models.CharField("название", max_length=500)
+    inn = models.CharField("ИНН", max_length=20, blank=True)
+    pinfl = models.CharField("ПИНФЛ", max_length=20, blank=True)
+    agency_type = models.PositiveSmallIntegerField(
+        "вид в ЕРСП", choices=AgencyType.choices, null=True, blank=True,
+        help_text="Как запись заведена в ЕРСП. Бывают ошибки ввода: агент, заведённый филиалом.",
+    )
+    parent_ersp_id = models.PositiveIntegerField(
+        "входит в (agencyId)", null=True, blank=True,
+        help_text="parentId в ЕРСП: головной офис, филиал или головной электронный агент. У головного офиса пусто.",
+    )
+    is_deleted = models.BooleanField(
+        "удалён в ЕРСП", default=False,
+        help_text="Отметка удаления ЕРСП: такой agencyId в запросах больше не принимается.",
+    )
+    is_present = models.BooleanField(
+        "есть в ЕРСП", default=True, help_text="Была ли запись в последней загрузке справочника."
+    )
+    raw = models.JSONField("ответ ЕРСП", help_text="Строка ответа ЕРСП целиком, как пришла.")
+    synced_at = models.DateTimeField(
+        "обновлено из ЕРСП", help_text="Когда запись последний раз создана или изменена загрузкой."
+    )
+
+    class Meta:
+        verbose_name = "запись справочника «Агенты/филиалы» ЕРСП"
+        verbose_name_plural = "агенты и филиалы в ЕРСП"
+        ordering = ["insurance_company__name", "environment", "ersp_id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["insurance_company", "environment", "ersp_id"],
+                name="integrations_erspagency_unique_id",
+                violation_error_message="Эта запись ЕРСП уже есть в справочнике страховой.",
+            ),
+            models.CheckConstraint(
+                condition=Q(environment__in=["prod", "sandbox"]),
+                name="integrations_erspagency_environment_known",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.ersp_id} - {self.name}"
+
+    def can_be_linked(self):
+        """Можно ли связать с нашей записью: есть в ЕРСП и не удалена там."""
+        return self.is_present and not self.is_deleted

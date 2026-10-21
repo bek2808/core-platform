@@ -1,0 +1,1488 @@
+{
+  "error": 0,
+  "error_message": "",
+  "result": [
+    {
+      "id": 46,
+      "name": "Британские Виргинские Острова",
+      "nameUz": "Britaniya Virjiniya Orollari",
+      "nameUzc": "Британия Виржиния Ороллари"
+    },
+    {
+      "id": 241,
+      "name": "Южная Георгия и Южные Сандвичевы острова",
+      "nameUz": "Janubiy Jorjiya va Janubiy Sandvich orollari",
+      "nameUzc": "Жанубий Жоржия ва Жанубий Сандвич ороллари"
+    },
+    {
+      "id": 155,
+      "name": "О-в Рождества",
+      "nameUz": "Oh-Rojdestvo kuni",
+      "nameUzc": "Оҳ-Рождество куни"
+    },
+    {
+      "id": 101,
+      "name": "Кокосовые острова",
+      "nameUz": "Hindiston yong'og'i orollari",
+      "nameUzc": "Ҳиндистон ёнғоғи ороллари"
+    },
+    {
+      "id": 133,
+      "name": "Микронезия",
+      "nameUz": "Mikroneziya",
+      "nameUzc": "Микронезия"
+    },
+    {
+      "id": 222,
+      "name": "Херд и Макдональд",
+      "nameUz": "Xerd va Makdonald",
+      "nameUzc": "Херд ва Макдоналд"
+    },
+    {
+      "id": 176,
+      "name": "Сан - томе и Принсипи",
+      "nameUz": "San-Tome va prinsipi",
+      "nameUzc": "Сан-Томе ва принсипи"
+    },
+    {
+      "id": 125,
+      "name": "Малые тихоок. Острова",
+      "nameUz": "Kichik tixook. Orollar",
+      "nameUzc": "Кичик тихоок. Ороллар"
+    },
+    {
+      "id": 245,
+      "name": "Сербия",
+      "nameUz": "Serbiya",
+      "nameUzc": "Сербия"
+    },
+    {
+      "id": 9999,
+      "name": "Все страны",
+      "nameUz": "Hamma davlatlar",
+      "nameUzc": "Хамма давлатлар"
+    },
+    {
+      "id": 157,
+      "name": "О-ва Кука",
+      "nameUz": "Kuk orollari",
+      "nameUzc": "Кук ороллари"
+    },
+    {
+      "id": 243,
+      "name": "Палестинская территория",
+      "nameUz": "Falastin hududi",
+      "nameUzc": "Фаластин ҳудуди"
+    },
+    {
+      "id": 53,
+      "name": "Гамбия",
+      "nameUz": "Gambiya",
+      "nameUzc": "Гамбия"
+    },
+    {
+      "id": 214,
+      "name": "Фарерские острова",
+      "nameUz": "Farer orollari",
+      "nameUzc": "Фарер ороллари"
+    },
+    {
+      "id": 106,
+      "name": "Кот-д'Ивуар",
+      "nameUz": "Kot-dIvuar",
+      "nameUzc": "Кот-дИвуар"
+    },
+    {
+      "id": 195,
+      "name": "Гонконг",
+      "nameUz": "Gonkong",
+      "nameUzc": "Гонконг"
+    },
+    {
+      "id": 186,
+      "name": "Сирия",
+      "nameUz": "Suriya",
+      "nameUzc": "Сурия"
+    },
+    {
+      "id": 36,
+      "name": "Остров Буве",
+      "nameUz": "Bouvet Oroli",
+      "nameUzc": "Боувет Ороли"
+    },
+    {
+      "id": 57,
+      "name": "Гвиана",
+      "nameUz": "Gviana",
+      "nameUzc": "Гвиана"
+    },
+    {
+      "id": 151,
+      "name": "Норфолк",
+      "nameUz": "Norfolk",
+      "nameUzc": "Норфолк"
+    },
+    {
+      "id": 139,
+      "name": "Мьянма",
+      "nameUz": "Myanma",
+      "nameUzc": "Мянма"
+    },
+    {
+      "id": 117,
+      "name": "Люксембург",
+      "nameUz": "Lyuksemburg shahri",
+      "nameUzc": "Люксембург шаҳри"
+    },
+    {
+      "id": 246,
+      "name": "Гернси",
+      "nameUz": "Gernsi",
+      "nameUzc": "Гернси"
+    },
+    {
+      "id": 164,
+      "name": "Питкэрн",
+      "nameUz": "Pitkarn",
+      "nameUzc": "Питкарн"
+    },
+    {
+      "id": 147,
+      "name": "Ниуэ",
+      "nameUz": "Niue",
+      "nameUzc": "Ниуе"
+    },
+    {
+      "id": 20,
+      "name": "Багамы",
+      "nameUz": "Bagama orollari",
+      "nameUzc": "Багама ороллари"
+    },
+    {
+      "id": 97,
+      "name": "Кипр",
+      "nameUz": "Kipr",
+      "nameUzc": "Кипр"
+    },
+    {
+      "id": 56,
+      "name": "Гватемала",
+      "nameUz": "Gvatemala",
+      "nameUzc": "Гватемала"
+    },
+    {
+      "id": 15,
+      "name": "Макао",
+      "nameUz": "Makao",
+      "nameUzc": "Макао"
+    },
+    {
+      "id": 7,
+      "name": "Алжир",
+      "nameUz": "Jazoir",
+      "nameUzc": "Жазоир"
+    },
+    {
+      "id": 116,
+      "name": "Лихтенштейн",
+      "nameUz": "Lixtenshteyn",
+      "nameUzc": "Лихтенштейн"
+    },
+    {
+      "id": 41,
+      "name": "Ватикан",
+      "nameUz": "Vatikan shahri",
+      "nameUzc": "Ватикан шаҳри"
+    },
+    {
+      "id": 204,
+      "name": "Тринидад и Тобаго",
+      "nameUz": "Trinidad va Tobago",
+      "nameUzc": "Тринидад ва Тобаго"
+    },
+    {
+      "id": 189,
+      "name": "Соломоновы о-ва",
+      "nameUz": "Solomonovlar oroli",
+      "nameUzc": "Соломоновлар ороли"
+    },
+    {
+      "id": 98,
+      "name": "Кыргызстан",
+      "nameUz": "Qirg'iziston",
+      "nameUzc": "Қирғизистон"
+    },
+    {
+      "id": 188,
+      "name": "Словения",
+      "nameUz": "Sloveniya",
+      "nameUzc": "Словения"
+    },
+    {
+      "id": 217,
+      "name": "Финляндия",
+      "nameUz": "Finlyandiya",
+      "nameUzc": "Финляндия"
+    },
+    {
+      "id": 168,
+      "name": "Корея",
+      "nameUz": "Koreya",
+      "nameUzc": "Корея"
+    },
+    {
+      "id": 159,
+      "name": "Палау",
+      "nameUz": "Palau",
+      "nameUzc": "Палау"
+    },
+    {
+      "id": 3,
+      "name": "Австрия",
+      "nameUz": "Avstriya",
+      "nameUzc": "Австрия"
+    },
+    {
+      "id": 33,
+      "name": "Бразилия",
+      "nameUz": "Braziliya",
+      "nameUzc": "Бразилия"
+    },
+    {
+      "id": 122,
+      "name": "Малави",
+      "nameUz": "Malavi",
+      "nameUzc": "Малави"
+    },
+    {
+      "id": 152,
+      "name": "Объединённые Арабские Эмираты",
+      "nameUz": "Birlashgan Arab Amirliklari",
+      "nameUzc": "Бирлашган Араб Амирликлари"
+    },
+    {
+      "id": 197,
+      "name": "Таиланд",
+      "nameUz": "Tailand",
+      "nameUzc": "Таиланд"
+    },
+    {
+      "id": 184,
+      "name": "Сент-Люсия",
+      "nameUz": "Sent-Lusiya",
+      "nameUzc": "Цент-Лусия"
+    },
+    {
+      "id": 102,
+      "name": "Колумбия",
+      "nameUz": "Kolumbiya",
+      "nameUzc": "Колумбия"
+    },
+    {
+      "id": 47,
+      "name": "Восточное Самоа",
+      "nameUz": "Sharqiy Samoa",
+      "nameUzc": "Шарқий Самоа"
+    },
+    {
+      "id": 104,
+      "name": "Корейская Народно-Демократическая Республика",
+      "nameUz": "Koreya Xalq Demokratik Respublikasi",
+      "nameUzc": "Корея Халқ Демократик Республикаси"
+    },
+    {
+      "id": 198,
+      "name": "Тайвань",
+      "nameUz": "Tayvan",
+      "nameUzc": "Тайван"
+    },
+    {
+      "id": 239,
+      "name": "Неизвестна",
+      "nameUz": "Noma'lum",
+      "nameUzc": "Номаълум"
+    },
+    {
+      "id": 12,
+      "name": "Антарктида",
+      "nameUz": "Antarktida",
+      "nameUzc": "Антарктида"
+    },
+    {
+      "id": 121,
+      "name": "Македония",
+      "nameUz": "Makedoniya",
+      "nameUzc": "Македония"
+    },
+    {
+      "id": 221,
+      "name": "Фр. Южные территории",
+      "nameUz": "FR. Janubiy hududlar",
+      "nameUzc": "ФР. Жанубий ҳудудлар"
+    },
+    {
+      "id": 249,
+      "name": "Евросоюз",
+      "nameUz": "Yevropa Ittifoqi",
+      "nameUzc": "Европа Иттифоқи"
+    },
+    {
+      "id": 248,
+      "name": "Разные",
+      "nameUz": "Turli xil",
+      "nameUzc": "Турли хил"
+    },
+    {
+      "id": 9,
+      "name": "Ангилья",
+      "nameUz": "Angilya",
+      "nameUzc": "Ангиля"
+    },
+    {
+      "id": 23,
+      "name": "Бахрейн",
+      "nameUz": "Bahrayn",
+      "nameUzc": "Баҳрайн"
+    },
+    {
+      "id": 172,
+      "name": "Руанда",
+      "nameUz": "Ruanda",
+      "nameUzc": "Руанда"
+    },
+    {
+      "id": 58,
+      "name": "Гвинея",
+      "nameUz": "Gvineya",
+      "nameUzc": "Гвинея"
+    },
+    {
+      "id": 85,
+      "name": "Исландия",
+      "nameUz": "Islandiya",
+      "nameUzc": "Исландия"
+    },
+    {
+      "id": 209,
+      "name": "Уганда",
+      "nameUz": "Uganda",
+      "nameUzc": "Уганда"
+    },
+    {
+      "id": 228,
+      "name": "Швейцария",
+      "nameUz": "Shveytsariya",
+      "nameUzc": "Швейцария"
+    },
+    {
+      "id": 190,
+      "name": "Сомали",
+      "nameUz": "Somali",
+      "nameUzc": "Сомали"
+    },
+    {
+      "id": 37,
+      "name": "Буркина - Фасо",
+      "nameUz": "Burkina-Faso",
+      "nameUzc": "Буркина-Фасо"
+    },
+    {
+      "id": 92,
+      "name": "Камбоджа",
+      "nameUz": "Kambodja",
+      "nameUzc": "Камбоджа"
+    },
+    {
+      "id": 103,
+      "name": "Коморы",
+      "nameUz": "Komorlar",
+      "nameUzc": "Коморлар"
+    },
+    {
+      "id": 87,
+      "name": "Италия",
+      "nameUz": "Italiya",
+      "nameUzc": "Италия"
+    },
+    {
+      "id": 140,
+      "name": "Намибия",
+      "nameUz": "Namibiya",
+      "nameUzc": "Намибия"
+    },
+    {
+      "id": 91,
+      "name": "Кайман",
+      "nameUz": "Kayman",
+      "nameUzc": "Кайман"
+    },
+    {
+      "id": 179,
+      "name": "Сейшелы",
+      "nameUz": "Seyshellar",
+      "nameUzc": "Сейшеллар"
+    },
+    {
+      "id": 27,
+      "name": "Бенин",
+      "nameUz": "Benin",
+      "nameUzc": "Бенин"
+    },
+    {
+      "id": 60,
+      "name": "Германия",
+      "nameUz": "Germaniya",
+      "nameUzc": "Германия"
+    },
+    {
+      "id": 80,
+      "name": "Индонезия",
+      "nameUz": "Indoneziya",
+      "nameUzc": "Индонезия"
+    },
+    {
+      "id": 59,
+      "name": "Гвинея - Бисау",
+      "nameUz": "Gvineya-Bisau",
+      "nameUzc": "Гвинея-Бисау"
+    },
+    {
+      "id": 4,
+      "name": "Азербайджан",
+      "nameUz": "Ozarbayjon",
+      "nameUzc": "Озарбайжон"
+    },
+    {
+      "id": 29,
+      "name": "Болгария",
+      "nameUz": "Bolgariya",
+      "nameUzc": "Болгария"
+    },
+    {
+      "id": 94,
+      "name": "Канада",
+      "nameUz": "Kanada",
+      "nameUzc": "Канада"
+    },
+    {
+      "id": 202,
+      "name": "Токелау",
+      "nameUz": "Tokelau",
+      "nameUzc": "Токелау"
+    },
+    {
+      "id": 187,
+      "name": "Словакия",
+      "nameUz": "Slovakiya",
+      "nameUzc": "Словакия"
+    },
+    {
+      "id": 49,
+      "name": "Вьетнам",
+      "nameUz": "Vetnam",
+      "nameUzc": "Ветнам"
+    },
+    {
+      "id": 111,
+      "name": "Лесото",
+      "nameUz": "Lesoto",
+      "nameUzc": "Лесото"
+    },
+    {
+      "id": 146,
+      "name": "Никарагуа",
+      "nameUz": "Nikaragua",
+      "nameUzc": "Никарагуа"
+    },
+    {
+      "id": 48,
+      "name": "Тимор-Лесте",
+      "nameUz": "Timor-Leste",
+      "nameUzc": "Тимор-Лесте"
+    },
+    {
+      "id": 210,
+      "name": "Узбекистан",
+      "nameUz": "O'zbekiston",
+      "nameUzc": "Ўзбекистон"
+    },
+    {
+      "id": 45,
+      "name": "Виргинские Острова",
+      "nameUz": "Virjiniya Orollari",
+      "nameUzc": "Виржиния Ороллари"
+    },
+    {
+      "id": 233,
+      "name": "Эритрея",
+      "nameUz": "Eritreya",
+      "nameUzc": "Эритрея"
+    },
+    {
+      "id": 161,
+      "name": "Папуа - новая Гвинея",
+      "nameUz": "Papua - yangi Gvineya",
+      "nameUzc": "Папуа - янги Гвинея"
+    },
+    {
+      "id": 218,
+      "name": "Фолклендские острова",
+      "nameUz": "Folklend orollari",
+      "nameUzc": "Фолкленд ороллари"
+    },
+    {
+      "id": 196,
+      "name": "Таджикистан",
+      "nameUz": "Tojikiston",
+      "nameUzc": "Тожикистон"
+    },
+    {
+      "id": 81,
+      "name": "Иордания",
+      "nameUz": "Iordaniya",
+      "nameUzc": "Иордания"
+    },
+    {
+      "id": 123,
+      "name": "Малайзия",
+      "nameUz": "Malayziya",
+      "nameUzc": "Малайзия"
+    },
+    {
+      "id": 75,
+      "name": "Западная сахара",
+      "nameUz": "G'arbiy Sahara",
+      "nameUzc": "Ғарбий Саҳара"
+    },
+    {
+      "id": 10,
+      "name": "Ангола",
+      "nameUz": "Angola",
+      "nameUzc": "Ангола"
+    },
+    {
+      "id": 223,
+      "name": "Хорватия",
+      "nameUz": "Xorvatiya",
+      "nameUzc": "Хорватия"
+    },
+    {
+      "id": 135,
+      "name": "Молдова",
+      "nameUz": "Moldova",
+      "nameUzc": "Молдова"
+    },
+    {
+      "id": 148,
+      "name": "Новая Зеландия",
+      "nameUz": "Yangi Zelandiya",
+      "nameUzc": "Янги Зеландия"
+    },
+    {
+      "id": 165,
+      "name": "Польша",
+      "nameUz": "Polsha",
+      "nameUzc": "Полша"
+    },
+    {
+      "id": 77,
+      "name": "Зимбабве",
+      "nameUz": "Zimbabve",
+      "nameUzc": "Зимбабве"
+    },
+    {
+      "id": 95,
+      "name": "Катар",
+      "nameUz": "Qatar",
+      "nameUzc": "Қатар"
+    },
+    {
+      "id": 153,
+      "name": "Оман",
+      "nameUz": "Ummon",
+      "nameUzc": "Уммон"
+    },
+    {
+      "id": 32,
+      "name": "Ботсвана",
+      "nameUz": "Botsvana",
+      "nameUzc": "Боцвана"
+    },
+    {
+      "id": 240,
+      "name": "Майотта",
+      "nameUz": "Mayotta",
+      "nameUzc": "Маётта"
+    },
+    {
+      "id": 110,
+      "name": "Латвия",
+      "nameUz": "Latviya",
+      "nameUzc": "Латвия"
+    },
+    {
+      "id": 167,
+      "name": "Пуэрто-Рико",
+      "nameUz": "Puerto-Riko",
+      "nameUzc": "Пуерто-Рико"
+    },
+    {
+      "id": 76,
+      "name": "Самоа",
+      "nameUz": "Samoa",
+      "nameUzc": "Самоа"
+    },
+    {
+      "id": 70,
+      "name": "Доминика",
+      "nameUz": "Dominika",
+      "nameUzc": "Доминика"
+    },
+    {
+      "id": 236,
+      "name": "Южная Африка",
+      "nameUz": "Janubiy Afrika",
+      "nameUzc": "Жанубий Африка"
+    },
+    {
+      "id": 63,
+      "name": "Гренада",
+      "nameUz": "Grenada",
+      "nameUzc": "Гренада"
+    },
+    {
+      "id": 79,
+      "name": "Индия",
+      "nameUz": "Hindiston",
+      "nameUzc": "Ҳиндистон"
+    },
+    {
+      "id": 112,
+      "name": "Либерия",
+      "nameUz": "Liberiya",
+      "nameUzc": "Либерия"
+    },
+    {
+      "id": 136,
+      "name": "Монако",
+      "nameUz": "Monako",
+      "nameUzc": "Монако"
+    },
+    {
+      "id": 160,
+      "name": "Панама",
+      "nameUz": "Panama shahri",
+      "nameUzc": "Панама шаҳри"
+    },
+    {
+      "id": 162,
+      "name": "Парагвай",
+      "nameUz": "Paragvay",
+      "nameUzc": "Парагвай"
+    },
+    {
+      "id": 185,
+      "name": "Сингапур",
+      "nameUz": "Singapur",
+      "nameUzc": "Цингапур"
+    },
+    {
+      "id": 38,
+      "name": "Бурунди",
+      "nameUz": "Burundi",
+      "nameUzc": "Бурунди"
+    },
+    {
+      "id": 71,
+      "name": "Доминиканская Республика",
+      "nameUz": "Dominikan Respublikasi",
+      "nameUzc": "Доминикан Республикаси"
+    },
+    {
+      "id": 50,
+      "name": "Габон",
+      "nameUz": "Gabon",
+      "nameUzc": "Габон"
+    },
+    {
+      "id": 156,
+      "name": "Святая Елена",
+      "nameUz": "Aziz Elena",
+      "nameUzc": "Азиз Элена"
+    },
+    {
+      "id": 224,
+      "name": "Центрально Африканская Республика",
+      "nameUz": "Markaziy Afrika Respublikasi",
+      "nameUzc": "Марказий Африка Республикаси"
+    },
+    {
+      "id": 44,
+      "name": "Венесуэла",
+      "nameUz": "Venesuela",
+      "nameUzc": "Венесуела"
+    },
+    {
+      "id": 31,
+      "name": "Босния и Герцеговина",
+      "nameUz": "Bosniya va Gersegovina",
+      "nameUzc": "Босния ва Герцеговина"
+    },
+    {
+      "id": 68,
+      "name": "Дания",
+      "nameUz": "Daniya",
+      "nameUzc": "Дания"
+    },
+    {
+      "id": 14,
+      "name": "Нидерландские Антилы",
+      "nameUz": "Niderlandiya Antillari",
+      "nameUzc": "Нидерландия Антиллари"
+    },
+    {
+      "id": 206,
+      "name": "Тунис",
+      "nameUz": "Tunis",
+      "nameUzc": "Тунис"
+    },
+    {
+      "id": 17,
+      "name": "Армения",
+      "nameUz": "Armaniston",
+      "nameUzc": "Арманистон"
+    },
+    {
+      "id": 166,
+      "name": "Португалия",
+      "nameUz": "Portugaliya",
+      "nameUzc": "Португалия"
+    },
+    {
+      "id": 64,
+      "name": "Гренландия",
+      "nameUz": "Grenlandiya",
+      "nameUzc": "Гренландия"
+    },
+    {
+      "id": 66,
+      "name": "Грузия",
+      "nameUz": "Gruziya",
+      "nameUzc": "Грузия"
+    },
+    {
+      "id": 6,
+      "name": "Албания",
+      "nameUz": "Albaniya",
+      "nameUzc": "Албания"
+    },
+    {
+      "id": 137,
+      "name": "Монголия",
+      "nameUz": "Mo'g'uliston",
+      "nameUzc": "Мўғулистон"
+    },
+    {
+      "id": 212,
+      "name": "Уоллис и Футуна",
+      "nameUz": "Uollis va Futuna",
+      "nameUzc": "Уоллис ва Футуна"
+    },
+    {
+      "id": 177,
+      "name": "Саудовская Аравия",
+      "nameUz": "Saudiya Arabistoni",
+      "nameUzc": "Саудия Арабистони"
+    },
+    {
+      "id": 170,
+      "name": "Реюньон",
+      "nameUz": "Reyunyon",
+      "nameUzc": "Реюнён"
+    },
+    {
+      "id": 86,
+      "name": "Испания",
+      "nameUz": "Ispaniya",
+      "nameUzc": "Испания"
+    },
+    {
+      "id": 142,
+      "name": "Непал",
+      "nameUz": "Nepal",
+      "nameUzc": "Непал"
+    },
+    {
+      "id": 149,
+      "name": "Новая Каледония",
+      "nameUz": "Yangi Kaledoniya",
+      "nameUzc": "Янги Каледония"
+    },
+    {
+      "id": 200,
+      "name": "Теркс и Кайкос",
+      "nameUz": "Turks va Kaykos",
+      "nameUzc": "Туркс ва Кайкос"
+    },
+    {
+      "id": 115,
+      "name": "Литва",
+      "nameUz": "Litva",
+      "nameUzc": "Литва"
+    },
+    {
+      "id": 42,
+      "name": "Великобритания (Соединенное королевство)",
+      "nameUz": "Buyuk Britaniya (Buyuk Britaniya)",
+      "nameUzc": "Буюк Британия (Буюк Британия)"
+    },
+    {
+      "id": 180,
+      "name": "Сен-Пьер и Микелон",
+      "nameUz": "Sent-Pyer va Mikelon",
+      "nameUzc": "Цент-Пер ва Микелон"
+    },
+    {
+      "id": 242,
+      "name": "Эландские острова",
+      "nameUz": "Eland orollari",
+      "nameUzc": "Эланд ороллари"
+    },
+    {
+      "id": 230,
+      "name": "Шпицберген и Ян - Майен",
+      "nameUz": "Svalbard va Yan-Mayen",
+      "nameUzc": "Свалбард ва Ян-Маен"
+    },
+    {
+      "id": 182,
+      "name": "Сент - Винсент и Гренадин",
+      "nameUz": "Sent-Vinsent va Grenadin",
+      "nameUzc": "Цент-ВинЦент ва Гренадин"
+    },
+    {
+      "id": 124,
+      "name": "Мали",
+      "nameUz": "Mali",
+      "nameUzc": "Мали"
+    },
+    {
+      "id": 69,
+      "name": "Джибути",
+      "nameUz": "Jibuti",
+      "nameUzc": "Жибути"
+    },
+    {
+      "id": 219,
+      "name": "Франция",
+      "nameUz": "Frantsiya",
+      "nameUzc": "Франция"
+    },
+    {
+      "id": 237,
+      "name": "Ямайка",
+      "nameUz": "Yamayka",
+      "nameUzc": "Ямайка"
+    },
+    {
+      "id": 82,
+      "name": "Ирак",
+      "nameUz": "Iroq",
+      "nameUzc": "Ироқ"
+    },
+    {
+      "id": 25,
+      "name": "Беларусь",
+      "nameUz": "Belarus",
+      "nameUzc": "Беларус"
+    },
+    {
+      "id": 207,
+      "name": "Туркменистан",
+      "nameUz": "Turkmaniston",
+      "nameUzc": "Туркманистон"
+    },
+    {
+      "id": 244,
+      "name": "Черногория",
+      "nameUz": "Chernogoriya",
+      "nameUzc": "Черногория"
+    },
+    {
+      "id": 99,
+      "name": "Кирибати",
+      "nameUz": "Kiribati",
+      "nameUzc": "Кирибати"
+    },
+    {
+      "id": 131,
+      "name": "Маршалловы",
+      "nameUz": "Marshalllar",
+      "nameUzc": "Маршалллар"
+    },
+    {
+      "id": 163,
+      "name": "Перу",
+      "nameUz": "Peru",
+      "nameUzc": "Перу"
+    },
+    {
+      "id": 154,
+      "name": "о-в Мэн",
+      "nameUz": "Meyn haqida",
+      "nameUzc": "Мейн ҳақида"
+    },
+    {
+      "id": 84,
+      "name": "Ирландия",
+      "nameUz": "Irlandiya",
+      "nameUzc": "Ирландия"
+    },
+    {
+      "id": 18,
+      "name": "Аруба",
+      "nameUz": "Aruba",
+      "nameUzc": "Аруба"
+    },
+    {
+      "id": 55,
+      "name": "Гваделупа",
+      "nameUz": "Gvadelupa",
+      "nameUzc": "Гваделупа"
+    },
+    {
+      "id": 73,
+      "name": "Конго",
+      "nameUz": "Kongo",
+      "nameUzc": "Конго"
+    },
+    {
+      "id": 225,
+      "name": "Чад",
+      "nameUz": "Chad",
+      "nameUzc": "Чад"
+    },
+    {
+      "id": 150,
+      "name": "Норвегия",
+      "nameUz": "Norvegiya",
+      "nameUzc": "Норвегия"
+    },
+    {
+      "id": 21,
+      "name": "Бангладеш",
+      "nameUz": "Bangladesh",
+      "nameUzc": "Бангладеш"
+    },
+    {
+      "id": 114,
+      "name": "Ливия",
+      "nameUz": "Liviya",
+      "nameUzc": "Ливия"
+    },
+    {
+      "id": 119,
+      "name": "Мавритания",
+      "nameUz": "Mavritaniya",
+      "nameUzc": "Мавритания"
+    },
+    {
+      "id": 227,
+      "name": "Чили",
+      "nameUz": "Chili",
+      "nameUzc": "Чили"
+    },
+    {
+      "id": 173,
+      "name": "Румыния",
+      "nameUz": "Ruminiya",
+      "nameUzc": "Руминия"
+    },
+    {
+      "id": 203,
+      "name": "Тонга",
+      "nameUz": "Tonga",
+      "nameUzc": "Тонга"
+    },
+    {
+      "id": 40,
+      "name": "Вануату",
+      "nameUz": "Vanuatu",
+      "nameUzc": "Вануату"
+    },
+    {
+      "id": 138,
+      "name": "Монсеррат",
+      "nameUz": "Monserrat",
+      "nameUzc": "Монсеррат"
+    },
+    {
+      "id": 105,
+      "name": "Коста-Рика",
+      "nameUz": "Kosta-Rika",
+      "nameUzc": "Коста-Рика"
+    },
+    {
+      "id": 215,
+      "name": "Фиджи",
+      "nameUz": "Fidji",
+      "nameUzc": "Фиджи"
+    },
+    {
+      "id": 72,
+      "name": "Египет",
+      "nameUz": "Misr",
+      "nameUzc": "Миср"
+    },
+    {
+      "id": 141,
+      "name": "Науру",
+      "nameUz": "Nauru",
+      "nameUzc": "Науру"
+    },
+    {
+      "id": 90,
+      "name": "Казахстан",
+      "nameUz": "Qozog'iston",
+      "nameUzc": "Қозоғистон"
+    },
+    {
+      "id": 144,
+      "name": "Нигерия",
+      "nameUz": "Nigeriya",
+      "nameUzc": "Нигерия"
+    },
+    {
+      "id": 229,
+      "name": "Швеция",
+      "nameUz": "Shvetsiya",
+      "nameUzc": "Швеция"
+    },
+    {
+      "id": 118,
+      "name": "Маврикий",
+      "nameUz": "Mavrikiy",
+      "nameUzc": "Маврикий"
+    },
+    {
+      "id": 89,
+      "name": "Кабо-Верде",
+      "nameUz": "Kabo-Verde",
+      "nameUzc": "Кабо-Верде"
+    },
+    {
+      "id": 51,
+      "name": "Гаити",
+      "nameUz": "Gaiti",
+      "nameUzc": "Гаити"
+    },
+    {
+      "id": 199,
+      "name": "Танзания",
+      "nameUz": "Tanzaniya",
+      "nameUzc": "Танзания"
+    },
+    {
+      "id": 93,
+      "name": "Камерун",
+      "nameUz": "Kamerun",
+      "nameUzc": "Камерун"
+    },
+    {
+      "id": 129,
+      "name": "Марокко",
+      "nameUz": "Marokash",
+      "nameUzc": "Марокаш"
+    },
+    {
+      "id": 171,
+      "name": "Россия",
+      "nameUz": "Rossiya",
+      "nameUzc": "Россия"
+    },
+    {
+      "id": 174,
+      "name": "Эль-Сальвадор",
+      "nameUz": "El-Salvador",
+      "nameUzc": "Эл-Салвадор"
+    },
+    {
+      "id": 54,
+      "name": "Гана",
+      "nameUz": "Gana",
+      "nameUzc": "Гана"
+    },
+    {
+      "id": 127,
+      "name": "Мальта",
+      "nameUz": "Malta",
+      "nameUzc": "Малта"
+    },
+    {
+      "id": 132,
+      "name": "Мексика",
+      "nameUz": "Meksika",
+      "nameUzc": "Мексика"
+    },
+    {
+      "id": 100,
+      "name": "Китай",
+      "nameUz": "Xitoy",
+      "nameUzc": "Хитой"
+    },
+    {
+      "id": 28,
+      "name": "Бермуды",
+      "nameUz": "Bermuda",
+      "nameUzc": "Бермуда"
+    },
+    {
+      "id": 22,
+      "name": "Барбадос",
+      "nameUz": "Barbados",
+      "nameUzc": "Барбадос"
+    },
+    {
+      "id": 19,
+      "name": "Афганистан",
+      "nameUz": "Afg'oniston",
+      "nameUzc": "Афғонистон"
+    },
+    {
+      "id": 78,
+      "name": "Израиль",
+      "nameUz": "Isroil",
+      "nameUzc": "Исроил"
+    },
+    {
+      "id": 145,
+      "name": "Нидерланды",
+      "nameUz": "Niderlandiya",
+      "nameUzc": "Нидерландия"
+    },
+    {
+      "id": 193,
+      "name": "Соединенные Штаты Америки",
+      "nameUz": "Amerika Qo'shma Shtatlari",
+      "nameUzc": "Америка Қўшма Штатлари"
+    },
+    {
+      "id": 143,
+      "name": "Нигер",
+      "nameUz": "Niger",
+      "nameUzc": "Нигер"
+    },
+    {
+      "id": 16,
+      "name": "Аргентина",
+      "nameUz": "Argentina",
+      "nameUzc": "Аргентина"
+    },
+    {
+      "id": 220,
+      "name": "Французская Полинезия",
+      "nameUz": "Frantsiya Polineziyasi",
+      "nameUzc": "Франция Полинезияси"
+    },
+    {
+      "id": 247,
+      "name": "Джерси",
+      "nameUz": "Jersi",
+      "nameUzc": "Жерси"
+    },
+    {
+      "id": 213,
+      "name": "Уругвай",
+      "nameUz": "Urugvay",
+      "nameUzc": "Уругвай"
+    },
+    {
+      "id": 126,
+      "name": "Мальдивы",
+      "nameUz": "Maldiv orollari",
+      "nameUzc": "Малдив ороллари"
+    },
+    {
+      "id": 235,
+      "name": "Эфиопия",
+      "nameUz": "Efiopiya",
+      "nameUzc": "Эфиопия"
+    },
+    {
+      "id": 107,
+      "name": "Куба",
+      "nameUz": "Kuba",
+      "nameUzc": "Куба"
+    },
+    {
+      "id": 30,
+      "name": "Боливия",
+      "nameUz": "Boliviya",
+      "nameUzc": "Боливия"
+    },
+    {
+      "id": 39,
+      "name": "Бутан",
+      "nameUz": "Butan",
+      "nameUzc": "Бутан"
+    },
+    {
+      "id": 183,
+      "name": "Сент-Китс и Невис",
+      "nameUz": "Sent-Kits va Nevis",
+      "nameUzc": "Цент-Киц ва Невис"
+    },
+    {
+      "id": 211,
+      "name": "Украина",
+      "nameUz": "Ukraina",
+      "nameUzc": "Украина"
+    },
+    {
+      "id": 232,
+      "name": "Эквадор",
+      "nameUz": "Ekvador",
+      "nameUzc": "Эквадор"
+    },
+    {
+      "id": 181,
+      "name": "Сенегал",
+      "nameUz": "Senegal",
+      "nameUzc": "Сенегал"
+    },
+    {
+      "id": 194,
+      "name": "Сьерра - Леоне",
+      "nameUz": "Syerra-Leone",
+      "nameUzc": "Серра-Леоне"
+    },
+    {
+      "id": 43,
+      "name": "Венгрия",
+      "nameUz": "Vengriya",
+      "nameUzc": "Венгрия"
+    },
+    {
+      "id": 67,
+      "name": "Гуам",
+      "nameUz": "Guam",
+      "nameUzc": "Гуам"
+    },
+    {
+      "id": 128,
+      "name": "Марианские острова",
+      "nameUz": "Mariana orollari",
+      "nameUzc": "Мариана ороллари"
+    },
+    {
+      "id": 130,
+      "name": "Мартиника",
+      "nameUz": "Martinika",
+      "nameUzc": "Мартиника"
+    },
+    {
+      "id": 191,
+      "name": "Судан",
+      "nameUz": "Sudan",
+      "nameUzc": "Судан"
+    },
+    {
+      "id": 74,
+      "name": "Замбия",
+      "nameUz": "Zambiya",
+      "nameUzc": "Замбия"
+    },
+    {
+      "id": 109,
+      "name": "Лаос",
+      "nameUz": "Laos",
+      "nameUzc": "Лаос"
+    },
+    {
+      "id": 52,
+      "name": "Гайана",
+      "nameUz": "Gayana",
+      "nameUzc": "Гаяна"
+    },
+    {
+      "id": 234,
+      "name": "Эстония",
+      "nameUz": "Estoniya",
+      "nameUzc": "Эстония"
+    },
+    {
+      "id": 24,
+      "name": "Белиз",
+      "nameUz": "Beliz",
+      "nameUzc": "Белиз"
+    },
+    {
+      "id": 13,
+      "name": "Антигуа и Барбуда",
+      "nameUz": "Antigua va Barbuda",
+      "nameUzc": "Антигуа ва Барбуда"
+    },
+    {
+      "id": 108,
+      "name": "Кувейт",
+      "nameUz": "Quvayt",
+      "nameUzc": "Қувайт"
+    },
+    {
+      "id": 134,
+      "name": "Мозамбик",
+      "nameUz": "Mozambik",
+      "nameUzc": "Мозамбик"
+    },
+    {
+      "id": 231,
+      "name": "Шри-Ланка",
+      "nameUz": "Shri-Lanka",
+      "nameUzc": "Шри-Ланка"
+    },
+    {
+      "id": 61,
+      "name": "Гибралтар",
+      "nameUz": "Gibraltar",
+      "nameUzc": "Гибралтар"
+    },
+    {
+      "id": 175,
+      "name": "Сан-Марино",
+      "nameUz": "San-Marino",
+      "nameUzc": "Сан-Марино"
+    },
+    {
+      "id": 88,
+      "name": "Йемен",
+      "nameUz": "Yaman",
+      "nameUzc": "Яман"
+    },
+    {
+      "id": 205,
+      "name": "Тувалу",
+      "nameUz": "Tuvalu",
+      "nameUzc": "Тувалу"
+    },
+    {
+      "id": 158,
+      "name": "Пакистан",
+      "nameUz": "Pokiston",
+      "nameUzc": "Покистон"
+    },
+    {
+      "id": 120,
+      "name": "Мадагаскар",
+      "nameUz": "Madagaskar",
+      "nameUzc": "Мадагаскар"
+    },
+    {
+      "id": 201,
+      "name": "Того",
+      "nameUz": "Togo",
+      "nameUzc": "Того"
+    },
+    {
+      "id": 169,
+      "name": "Экваториальная Гвинея",
+      "nameUz": "Ekvatorial Gvineya",
+      "nameUzc": "Экваториал Гвинея"
+    },
+    {
+      "id": 192,
+      "name": "Суринам",
+      "nameUz": "Surinam",
+      "nameUzc": "Суринам"
+    },
+    {
+      "id": 96,
+      "name": "Кения",
+      "nameUz": "Keniya",
+      "nameUzc": "Кения"
+    },
+    {
+      "id": 226,
+      "name": "Чехия",
+      "nameUz": "Chexiya",
+      "nameUzc": "Чехия"
+    },
+    {
+      "id": 26,
+      "name": "Бельгия",
+      "nameUz": "Belgiya",
+      "nameUzc": "Бельгия"
+    },
+    {
+      "id": 238,
+      "name": "Япония",
+      "nameUz": "Yaponiya",
+      "nameUzc": "Япония"
+    },
+    {
+      "id": 178,
+      "name": "Свазиленд",
+      "nameUz": "Svazilend",
+      "nameUzc": "Свазиленд"
+    },
+    {
+      "id": 35,
+      "name": "Бруней",
+      "nameUz": "Bruney",
+      "nameUzc": "Бруней"
+    },
+    {
+      "id": 83,
+      "name": "Иран",
+      "nameUz": "Eron",
+      "nameUzc": "Эрон"
+    },
+    {
+      "id": 1,
+      "name": "Австралия",
+      "nameUz": "Avstraliya",
+      "nameUzc": "Австралия"
+    },
+    {
+      "id": 216,
+      "name": "Филиппины",
+      "nameUz": "Filippin",
+      "nameUzc": "Филиппин"
+    },
+    {
+      "id": 113,
+      "name": "Ливан",
+      "nameUz": "Livan",
+      "nameUzc": "Ливан"
+    },
+    {
+      "id": 62,
+      "name": "Гондурас",
+      "nameUz": "Gonduras",
+      "nameUzc": "Гондурас"
+    },
+    {
+      "id": 65,
+      "name": "Греция",
+      "nameUz": "Gretsiya",
+      "nameUzc": "Греция"
+    },
+    {
+      "id": 11,
+      "name": "Андорра",
+      "nameUz": "Andorra",
+      "nameUzc": "Андорра"
+    },
+    {
+      "id": 34,
+      "name": "Британская Территория В Индийском Океане",
+      "nameUz": "Hind Okeanidagi Britaniya Hududi",
+      "nameUzc": "Ҳинд Океанидаги Британия Ҳудуди"
+    },
+    {
+      "id": 208,
+      "name": "Турция",
+      "nameUz": "Turkiya",
+      "nameUzc": "Туркия"
+    }
+  ]
+}

@@ -12,12 +12,16 @@ from django.utils.html import format_html
 
 from .models import (
     CbuBank,
+    ErspAreaType,
+    ErspCountry,
     ErspCurrency,
     ErspDistrict,
+    ErspInsuranceType,
     ErspInsurer,
     ErspOked,
     ErspOwnershipForm,
     ErspRegion,
+    ErspResidentType,
 )
 
 
@@ -79,6 +83,31 @@ class ErspCurrencyAdmin(ErspReferenceAdmin):
 class ErspOkedAdmin(ErspReferenceAdmin):
     list_display = ["id", "name_uz", "name", "is_present"]
     search_fields = ["id", "name", "name_uz", "name_uzc"]
+
+
+class ErspNamedReferenceAdmin(ErspReferenceAdmin):
+    list_display = ["id", "name", "name_uz", "is_present"]
+    search_fields = ["name", "name_uz", "name_uzc"]
+
+
+@admin.register(ErspAreaType)
+class ErspAreaTypeAdmin(ErspNamedReferenceAdmin):
+    pass
+
+
+@admin.register(ErspInsuranceType)
+class ErspInsuranceTypeAdmin(ErspNamedReferenceAdmin):
+    pass
+
+
+@admin.register(ErspResidentType)
+class ErspResidentTypeAdmin(ErspNamedReferenceAdmin):
+    pass
+
+
+@admin.register(ErspCountry)
+class ErspCountryAdmin(ErspNamedReferenceAdmin):
+    pass
 
 
 @admin.register(CbuBank)

@@ -1,6 +1,7 @@
 """
 Автотесты справочников ЕРСП (регионы, районы, формы собственности,
-страховщики, валюты, ОКЭД): загрузка из файлов, повторная загрузка,
+страховщики, валюты, ОКЭД, типы местности, типы обязательного страхования,
+типы резидентства, страны): загрузка из файлов, повторная загрузка,
 пропавшие записи, ошибки в ответе ЕРСП, админ-панель только для чтения.
 
 Запуск на сервере: bin/test references
@@ -24,12 +25,16 @@ from .loader import (
     sync_all,
 )
 from .models import (
+    ErspAreaType,
+    ErspCountry,
     ErspCurrency,
     ErspDistrict,
+    ErspInsuranceType,
     ErspInsurer,
     ErspOked,
     ErspOwnershipForm,
     ErspRegion,
+    ErspResidentType,
 )
 
 ERSP_DIR = DATA_DIR / "ersp"
@@ -45,6 +50,10 @@ def file_rows():
         "districts": read_ersp_response(ERSP_DIR / "districts.json"),
         "currencies": read_ersp_response(ERSP_DIR / "currencies.json"),
         "okeds": read_ersp_response(ERSP_DIR / "okeds.json"),
+        "area_types": read_ersp_response(ERSP_DIR / "area_types.json"),
+        "insurance_types": read_ersp_response(ERSP_DIR / "insurance_types.json"),
+        "resident_types": read_ersp_response(ERSP_DIR / "resident_types.json"),
+        "countries": read_ersp_response(ERSP_DIR / "countries.json"),
     }
 
 
@@ -59,6 +68,10 @@ class DataFilesTests(SimpleTestCase):
         self.assertEqual(len(rows["districts"]), 249)
         self.assertEqual(len(rows["currencies"]), 164)
         self.assertEqual(len(rows["okeds"]), 696)
+        self.assertEqual(len(rows["area_types"]), 3)
+        self.assertEqual(len(rows["insurance_types"]), 19)
+        self.assertEqual(len(rows["resident_types"]), 6)
+        self.assertEqual(len(rows["countries"]), 247)
 
     def test_every_district_in_known_region(self):
         rows = file_rows()
@@ -95,6 +108,29 @@ class LoadFromFilesTests(TestCase):
         self.assertEqual(ErspDistrict.objects.count(), 249)
         self.assertEqual(ErspCurrency.objects.count(), 164)
         self.assertEqual(ErspOked.objects.count(), 696)
+        self.assertEqual(ErspAreaType.objects.count(), 3)
+        self.assertEqual(ErspInsuranceType.objects.count(), 19)
+        self.assertEqual(ErspResidentType.objects.count(), 6)
+        self.assertEqual(ErspCountry.objects.count(), 247)
+
+    def test_new_references_by_ersp_id(self):
+        # Эти id уходят в ЕРСП (areaTypeId, insuranceTypeId, residentType, countryId).
+        self.assertEqual(ErspAreaType.objects.get(pk=1).name, "Городская местность")
+        self.assertEqual(ErspInsuranceType.objects.get(pk=2).name, "ОСАГО")
+        self.assertEqual(ErspInsuranceType.objects.get(pk=999).name, "Другие")
+        self.assertEqual(ErspResidentType.objects.get(pk=1).name, "Гражданин")
+        self.assertEqual(ErspCountry.objects.get(pk=ErspCountry.UZBEKISTAN).name, "Узбекистан")
+        self.assertEqual(ErspCountry.objects.get(pk=9999).name, "Все страны")
+
+    def test_area_type_name_without_line_break(self):
+        # У сельской местности в ЕРСП узбекское название с \r в конце: в базе без него, в raw - как пришло.
+        rural = ErspAreaType.objects.get(pk=2)
+        self.assertEqual(rural.name_uzc, "Қишлоқ ҳудуди")
+        self.assertTrue(rural.raw["nameUzc"].endswith("\r"))
+
+    def test_empty_uzbek_names_allowed(self):
+        # У части записей nameUz пустой (null) - это не ошибка.
+        self.assertEqual(ErspAreaType.objects.get(pk=3).name_uz, "")
 
     def test_district_belongs_to_region(self):
         # В ЕРСП номер района - не СОАТО: Шайхантахурский - 1006 (СОАТО 1726277).
@@ -266,6 +302,7 @@ class CommandTests(TestCase):
         call_command("load_ersp_references", stdout=out)
         self.assertIn("страховщики: новых 49", out.getvalue())
         self.assertIn("ОКЭД: новых 696", out.getvalue())
+        self.assertIn("страны: новых 247", out.getvalue())
         self.assertEqual(ErspInsurer.objects.count(), 49)
 
 
@@ -286,6 +323,13 @@ class AdminReadOnlyTests(TestCase):
         self.assertEqual(page.status_code, 200)
         self.assertContains(page, "308143734")
 
+    def test_new_reference_pages_open_read_only(self):
+        for model in ["erspareatype", "erspinsurancetype", "erspresidenttype", "erspcountry"]:
+            self.assertEqual(self.client.get(f"/admin/references/{model}/").status_code, 200, model)
+        self.assertContains(self.client.get("/admin/references/erspcountry/210/change/"), "Узбекистан")
+        with refusal_expected(self):
+            self.assertEqual(self.client.get("/admin/references/erspcountry/add/").status_code, 403)
+
     def test_superuser_cannot_add_or_delete(self):
         with refusal_expected(self):
             self.assertEqual(self.client.get("/admin/references/erspregion/add/").status_code, 403)
@@ -298,3 +342,16 @@ class AdminReadOnlyTests(TestCase):
         with refusal_expected(self):
             self.client.post("/admin/references/erspregion/10/change/", {"name": "Взлом"})
         self.assertEqual(ErspRegion.objects.get(pk=10).name, "Город Ташкент")
+
+
+class NewReferencesRightsTests(TestCase):
+    """Новые справочники ЕРСП сотрудники только смотрят (миграция references/0006)."""
+
+    def test_groups_can_view_not_change(self):
+        from django.contrib.auth.models import Group
+
+        for name in ["Администратор справочников", "Сотрудник"]:
+            rights = set(Group.objects.get(name=name).permissions.values_list("codename", flat=True))
+            for model in ["erspareatype", "erspinsurancetype", "erspresidenttype", "erspcountry"]:
+                self.assertIn(f"view_{model}", rights, name)
+                self.assertNotIn(f"change_{model}", rights, name)

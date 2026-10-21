@@ -1,0 +1,42 @@
+{
+  "error": 0,
+  "error_message": "",
+  "result": [
+    {
+      "id": 3,
+      "name": "ЛБГ",
+      "nameUz": "FBSh",
+      "nameUzc": "ФБШ"
+    },
+    {
+      "id": 2,
+      "name": "Иностранец",
+      "nameUz": "Chet el fuqarosi",
+      "nameUzc": "Чет эл фуқароси"
+    },
+    {
+      "id": 6,
+      "name": "Ребёнок",
+      "nameUz": "Bola",
+      "nameUzc": "Бола"
+    },
+    {
+      "id": 4,
+      "name": "Военный",
+      "nameUz": "Harbiy",
+      "nameUzc": "Ҳарбий"
+    },
+    {
+      "id": 1,
+      "name": "Гражданин",
+      "nameUz": "Fuqaro",
+      "nameUzc": "Фуқаро"
+    },
+    {
+      "id": 5,
+      "name": "Иностранный резидент",
+      "nameUz": "Chet el rezidenti",
+      "nameUzc": "Чет эл резиденти"
+    }
+  ]
+}
