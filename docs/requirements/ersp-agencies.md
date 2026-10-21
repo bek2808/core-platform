@@ -42,6 +42,11 @@
 | `person` / `organization` | данные физлица или юрлица (заполнено одно) |
 | `organization` | `type`, `inn`, `name`, `representativeName`, `address`, `position`, `checkingAccount`, `phone`, `regionId`, `oked`, `ownershipFormId`, `email` |
 
+Метод — `GET`, без тела (проверено 21.10 в песочнице). Удалённые записи
+(кнопка «Delete», статус «Удалён») в ответ не попадают: в песочнице
+Mosaic пришла одна запись — 53 «direct dep» (`parentId` 1084), удалённой
+1084 «test» в ответе нет.
+
 Что видно в ответе для Mosaic (10 записей): головной офис (1600),
 «Головной Офис (резерв)» (1599, вид «филиал»), два брокера («Broker: ООО
 "InRe"», СП ООО «MOI Insurance Brokers Asia»), агенты-ИП и ЧП, один
