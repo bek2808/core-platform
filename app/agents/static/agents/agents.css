@@ -1,3 +1,28 @@
-/* Карточка агента: блок «Соглашения» - поля парами одной ширины («ровность полей», AGENTS.md). */
-.agreements .form-row input[type="text"] { width: 18em; }
-.agreements .form-row select { min-width: 18em; }
+/*
+ * Карточка агента («ровность полей», AGENTS.md; замечание Бекзода 21.10).
+ *
+ * Блок «Соглашения»: поля стоят парами. Колонки одной ширины, чтобы вторая
+ * колонка начиналась в одном месте во всех строках - и после даты
+ * (за ней «Сегодня | календарь»), и после обычного поля, и у полей только
+ * для чтения. Все поля ввода и списки - одной ширины.
+ */
+#agreements-group .form-row .fieldBox {
+    flex: 0 0 32em;
+    box-sizing: border-box;
+}
+#agreements-group .form-row input[type="text"],
+#agreements-group .form-row input.vDateField,
+#agreements-group .form-row select {
+    width: 16em;
+    box-sizing: border-box;
+}
+/* Дата (поле в <p class="date">) - на одной высоте с соседним полем пары:
+   у этого абзаца в стилях Django отступ сверху 6px. */
+#agreements-group .form-row .fieldBox p.date {
+    margin: 0;
+    padding-top: 0;
+}
+/* Подписи полей - в одну строку («Подписал (пользователь)» переносилась). */
+#agreements-group .form-row label {
+    white-space: nowrap;
+}

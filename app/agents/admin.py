@@ -166,7 +166,7 @@ class AgreementInline(NoRelatedLinks, admin.StackedInline):
 class PlacementInline(admin.TabularInline):
     model = Placement
     extra = 0
-    fields = ["department_name", "valid_from", "valid_to", "basis"]
+    fields = ["department_name", "since", "until", "basis"]
     readonly_fields = fields
     verbose_name = "место"
     verbose_name_plural = "Места (подразделение с даты по дату) - меняются кнопками «Прикрепить» и «Перевести»"
@@ -174,6 +174,15 @@ class PlacementInline(admin.TabularInline):
     @admin.display(description="подразделение")
     def department_name(self, placement):
         return placement.department.full_name()
+
+    # Даты - как во всей системе (14.04.2021), а не «14 апреля 2021 г.».
+    @admin.display(description="действует с")
+    def since(self, placement):
+        return f"{placement.valid_from:%d.%m.%Y}"
+
+    @admin.display(description="действует по")
+    def until(self, placement):
+        return f"{placement.valid_to:%d.%m.%Y}" if placement.valid_to else "по сей день"
 
     def has_add_permission(self, request, obj=None):
         return False
