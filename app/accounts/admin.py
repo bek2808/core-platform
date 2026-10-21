@@ -160,7 +160,10 @@ class AssignmentForm(forms.ModelForm):
         visibility = data.get("visibility", self.instance.visibility)
         problem = roles_visibility_error(roles, visibility)
         if problem and "visibility" in self.fields and "visibility" not in self.errors:
-            self.add_error("visibility", problem)
+            # Над всем прикреплением, а не над полем: «Видимость» стоит в паре
+            # с «Руководитель подразделения», и длинный текст над полем сдвигал
+            # его вниз - пара разъезжалась (замечание Бекзода 21.10).
+            self.add_error(None, problem)
         return data
 
     def validate_constraints(self):

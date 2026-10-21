@@ -106,3 +106,8 @@ class AgentsRoleOnScreenTests(AssignmentCase):
         page = self.client.post(f"{USER_URL}{self.bekzod.pk}/change/", data)
         self.assertContains(page, TOO_NARROW)
         self.assertEqual(Assignment.objects.get(pk=place.pk).visibility, Visibility.COMPANY)
+        # Ошибка - над прикреплением, а не над полем: «Видимость» стоит в паре
+        # с «Руководитель подразделения», и текст над полем разводил пару (21.10).
+        form = page.context["inline_admin_formsets"][0].formset.forms[0]
+        self.assertNotIn("visibility", form.errors)
+        self.assertIn(TOO_NARROW, " ".join(form.non_field_errors()))
