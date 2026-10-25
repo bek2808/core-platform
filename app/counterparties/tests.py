@@ -871,8 +871,9 @@ class CounterpartyAdminTests(CounterpartyTestCase):
         self.representative_for_delete(counterparty)
         response = self.client.get(self.change_url(counterparty))
         self.assertContains(response, 'name="representatives-0-DELETE"')
-        self.assertContains(response, "counterparties/representatives.js")
-        self.assertContains(response, "counterparties/representatives.css")
+        # В образе статика с хешем в имени (representatives.1a2b3c.js) - ищем с учётом хеша.
+        self.assertRegex(response.content.decode(), r"counterparties/representatives(\.[0-9a-f]+)?\.js")
+        self.assertRegex(response.content.decode(), r"counterparties/representatives(\.[0-9a-f]+)?\.css")
         script = finders.find("counterparties/representatives.js")
         self.assertIsNotNone(script)
         with open(script, encoding="utf-8") as handle:
