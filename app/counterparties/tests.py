@@ -13,6 +13,7 @@ from decimal import Decimal
 from unittest import mock
 
 from django.contrib.auth.models import Group
+from django.contrib.staticfiles import finders
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
@@ -862,6 +863,21 @@ class CounterpartyAdminTests(CounterpartyTestCase):
         ])
         self.assertEqual(self.client.post(self.change_url(counterparty), data).status_code, 302)
         self.assertFalse(counterparty.representatives.exists())
+
+    def test_delete_button_script_is_on_the_page_and_checkbox_stays(self):
+        # Кнопку рисует скрипт, а удаляет штатный флажок формы: он должен остаться
+        # на странице (без скрипта виден как есть), скрипт и стили - подключены.
+        counterparty, _ = self.make(by=self.bekzod)
+        self.representative_for_delete(counterparty)
+        response = self.client.get(self.change_url(counterparty))
+        self.assertContains(response, 'name="representatives-0-DELETE"')
+        self.assertContains(response, "counterparties/representatives.js")
+        self.assertContains(response, "counterparties/representatives.css")
+        script = finders.find("counterparties/representatives.js")
+        self.assertIsNotNone(script)
+        with open(script, encoding="utf-8") as handle:
+            # Скрипт работает с именем флажка Django; переименование блока его сломало бы.
+            self.assertIn('name^="representatives-"][name$="-DELETE"', handle.read())
 
     def test_delete_refused_when_something_refers_to_representative(self):
         # Когда на представителя сошлётся другая таблица (PROTECT), форма скажет об этом,

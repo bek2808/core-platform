@@ -1,0 +1,50 @@
+/*
+ * Блок «Представители»: кнопка «Удалить» вместо флажка (representatives.js).
+ * Флажок Django остаётся в форме и скрывается только когда скрипт отработал
+ * (класс rep-js); без скрипта виден обычный флажок.
+ * Кнопка стоит в заголовке строки, а пояснение - между заголовком и полями,
+ * поэтому поля пар внутри строки остаются на своих местах (правило «ровность
+ * полей» из AGENTS.md; замер в браузере - при приёмке).
+ */
+.inline-related.rep-js h3 .delete {
+    display: none;
+}
+.rep-delete-button {
+    float: right;
+    margin: -2px 0 0 12px;
+    padding: 2px 12px;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: #fff;
+    background: var(--delete-button-bg, #ba2121);
+    border: 0;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.rep-delete-button:hover {
+    background: var(--delete-button-hover-bg, #a41515);
+}
+.rep-delete-button.rep-undo {
+    color: var(--body-fg, #333);
+    background: var(--button-bg, #eee);
+    border: 1px solid var(--border-color, #ccc);
+}
+.rep-delete-notice {
+    margin: 0;
+    padding: 8px 12px;
+    font-weight: 600;
+    color: var(--error-fg, #ba2121);
+    background: var(--message-error-bg, #ffefef);
+    border-bottom: 1px solid var(--hairline-color, #e8e8e8);
+}
+.rep-delete-notice[hidden] {
+    display: none;
+}
+/* Помеченная строка: поля бледные и не редактируются, ФИО перечёркнуто. */
+.inline-related.rep-marked > fieldset {
+    opacity: 0.5;
+    pointer-events: none;
+}
+.inline-related.rep-marked input[name$="-full_name"] {
+    text-decoration: line-through;
+}

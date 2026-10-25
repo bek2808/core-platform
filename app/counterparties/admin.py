@@ -244,6 +244,11 @@ class RepresentativeInline(NoRelatedLinks, admin.StackedInline):
     can_delete = True
     extra = 0
 
+    class Media:
+        # Кнопка «Удалить» вместо флажка: она ставит тот же флажок, удаляет по-прежнему «Сохранить».
+        css = {"all": ["counterparties/representatives.css"]}
+        js = ["counterparties/representatives.js"]
+
     def has_delete_permission(self, request, obj=None):
         # Отдельного права на удаление у ролей нет: удалять строку может тот,
         # кто вправе её менять.
