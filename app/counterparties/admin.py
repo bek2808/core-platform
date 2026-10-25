@@ -132,6 +132,16 @@ class CardChildFormSet(BaseInlineFormSet):
         # Наши проверки - раньше встроенных Django: у встроенной проверки
         # повтора сообщение с техническим именем поля («number»).
         model = self.model
+        for form in self.forms:
+            # Удаляемую строку не проверяем на повтор и «основной», но спрашиваем,
+            # не ссылается ли на неё что-то (иначе была бы ошибка 500 при сохранении).
+            if getattr(form, "cleaned_data", None) and form.cleaned_data.get("DELETE") and form.instance.pk:
+                blockers = form.instance.delete_blockers()
+                if blockers:
+                    raise ValidationError(
+                        f"Удалить «{form.instance}» нельзя: {'; '.join(blockers)}. "
+                        "Закройте срок полномочий датой «действует по»."
+                    )
         rows = [
             form.instance
             for form in self.forms
@@ -228,8 +238,17 @@ class RepresentativeInline(NoRelatedLinks, admin.StackedInline):
 
     form = CardChildForm
     formset = CardChildFormSet
-    can_delete = False  # не удаляются: срок полномочий закрывается датой «действует по»
+    # Галочка «Удалить» - для строки, заведённой по ошибке (решение Бекзода 25.10);
+    # ушедшего руководителя не удаляют, а закрывают датой «действует по».
+    # Удаление пишется в журнал (TrackedModel.delete_tracked).
+    can_delete = True
     extra = 0
+
+    def has_delete_permission(self, request, obj=None):
+        # Отдельного права на удаление у ролей нет: удалять строку может тот,
+        # кто вправе её менять.
+        return request.user.has_perm("counterparties.change_representative")
+
     fieldsets = [
         (None, {"fields": [
             ("full_name", "is_primary"),

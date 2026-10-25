@@ -22,6 +22,9 @@ TrackedModel - общая основа для всех таблиц, котор�
 Обойти журнал нельзя. Массовые операции (QuerySet.update(), delete(),
 bulk_create(), bulk_update()) и удаление записи для этих таблиц запрещены:
 они меняют базу без сохранения записи и, значит, без журнала.
+Исключение - таблицы с allow_tracked_delete (представитель в карточке: его
+заводят по ошибке): их запись удаляется только через delete_tracked(by=...),
+и журнал хранит, кто, когда и что удалил (действие «удаление»).
 
 Сам журнал только пополняется: правку и удаление его строк запрещает
 триггер в PostgreSQL (миграция audit/0001_initial), для всех ролей,
@@ -39,6 +42,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models, router, transaction
+from django.db.models.deletion import Collector, ProtectedError, RestrictedError
 from django.utils import timezone
 
 # Служебные поля: в журнал не пишутся, у них своя роль.
@@ -119,6 +123,12 @@ class TrackedModel(models.Model):
     # вход затирал бы в карточке «кто изменил» и засорял журнал.
     audit_service_fields = ()
 
+    # Можно ли удалять запись целиком. По умолчанию нет: записи выводятся из
+    # работы (архив, «действует»). Включается только у вложенных записей карточки,
+    # которые заводят по ошибке (представитель): удаление идёт через
+    # delete_tracked(), и в журнале остаётся след «кто, когда и что удалил».
+    allow_tracked_delete = False
+
     objects = TrackedQuerySet.as_manager()
 
     class Meta:
@@ -181,6 +191,50 @@ class TrackedModel(models.Model):
             f"{self._meta.verbose_name}: удаление запрещено. "
             "Запись выводится из работы (архив, отметка «действует»)."
         )
+
+    def delete_blockers(self):
+        """
+        Что мешает удалить запись: список текстов (пусто - можно удалять).
+        Смотрит записи других таблиц, которые ссылаются на эту с защитой
+        (on_delete=PROTECT): когда на представителя сошлётся договор, удалить его
+        будет нельзя без правок этого места.
+        """
+        collector = Collector(using=router.db_for_write(type(self), instance=self))
+        try:
+            collector.collect([self])
+        except ProtectedError as error:
+            names = sorted({str(obj) for obj in error.protected_objects})
+            return [f"на запись ссылаются: {', '.join(names[:5])}"]
+        except RestrictedError as error:
+            names = sorted({str(obj) for obj in error.restricted_objects})
+            return [f"на запись ссылаются: {', '.join(names[:5])}"]
+        return []
+
+    def delete_tracked(self, *, by, source=None):
+        """
+        Настоящее удаление записи с отметкой в журнале (только если таблица
+        это разрешила: allow_tracked_delete). В журнал пишется «было -> пусто»
+        по каждому заполненному полю и действие «удаление»; сама строка
+        журнала остаётся навсегда.
+        """
+        if not self.allow_tracked_delete:
+            self.delete()  # бросит UntrackedChangeError с понятным текстом
+        if self.pk is None:
+            raise UntrackedChangeError(f"{self._meta.verbose_name}: запись ещё не сохранена, удалять нечего.")
+        blockers = self.delete_blockers()
+        if blockers:
+            raise UntrackedChangeError(f"{self._meta.verbose_name}: удалить нельзя - {'; '.join(blockers)}.")
+        if source is None:
+            source = Source.MANUAL if by is not None else Source.SYSTEM
+        with transaction.atomic(using=router.db_for_write(type(self), instance=self)):
+            # Блокируем строку и берём значения из базы: в журнал уходит то, что
+            # было на самом деле, а не то, что успели ввести в форму.
+            fields = self._journal_fields()
+            before = self._values_in_database(fields)
+            if before is None:
+                return  # уже удалена другим сотрудником
+            write_journal_delete(self, fields, before, by=by, source=source)
+            type(self)._base_manager.filter(pk=self.pk).delete()
 
     def _journal_fields(self):
         return [
@@ -249,6 +303,39 @@ def write_journal(instance, fields, before, *, by, source):
     ChangeLog.objects.bulk_create(entries)
 
 
+def write_journal_delete(instance, fields, before, *, by, source):
+    """Записать в журнал удаление: по каждому заполненному полю «было -> пусто»."""
+    content_type = ContentType.objects.get_for_model(type(instance))
+    root = instance.journal_root()
+    root_type = ContentType.objects.get_for_model(type(root)) if root is not None else None
+    change_id = uuid.uuid4()
+    entries = []
+    for field in fields:
+        old = field.to_python(before[field.attname])
+        if old in (None, ""):
+            continue
+        if field.name in instance.audit_mask:
+            old = MASK
+        entries.append(
+            ChangeLog(
+                change_id=change_id,
+                user=by,
+                source=source,
+                action=ChangeLog.Action.DELETE,
+                content_type=content_type,
+                object_id=instance.pk,
+                object_repr=str(instance)[:255],
+                root_content_type=root_type,
+                root_object_id=root.pk if root is not None else None,
+                insurance_company_id=getattr(instance, "insurance_company_id", None),
+                field=field.name,
+                old_value=old,
+                new_value=None,
+            )
+        )
+    ChangeLog.objects.bulk_create(entries)
+
+
 def write_journal_value(instance, field_name, old, new, *, by, source=None):
     """
     Записать в журнал одно изменение, которое обычное сохранение не видит.
@@ -289,6 +376,7 @@ class ChangeLog(models.Model):
     class Action(models.TextChoices):
         CREATE = "create", "создание"
         UPDATE = "update", "изменение"
+        DELETE = "delete", "удаление"
 
     changed_at = models.DateTimeField("когда", default=timezone.now, db_index=True)
     change_id = models.UUIDField(

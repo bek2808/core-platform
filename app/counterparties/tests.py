@@ -10,6 +10,7 @@
 import datetime
 import uuid
 from decimal import Decimal
+from unittest import mock
 
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
@@ -802,6 +803,116 @@ class CounterpartyAdminTests(CounterpartyTestCase):
         self.assertFalse(first.is_primary)
         self.assertTrue(second.is_primary)
 
+    # --- Удаление представителя, заведённого по ошибке (решение Бекзода 25.10) -------
+
+    def representative_for_delete(self, counterparty, name="Ошибочный", **fields):
+        representative = Representative(counterparty=counterparty, full_name=name,
+                                        position=self.director, **fields)
+        representative.save(by=self.bekzod)
+        return representative
+
+    def change_url(self, counterparty):
+        return f"/admin/counterparties/counterparty/{counterparty.pk}/change/"
+
+    def test_delete_representative_leaves_trace_in_journal(self):
+        counterparty, _ = self.make(by=self.bekzod)
+        keep = self.representative_for_delete(counterparty, "Остаётся", is_primary=True)
+        wrong = self.representative_for_delete(counterparty, "Ошибочный", pinfl="31203876540012")
+        data = self.post_data(counterparty, representatives=[
+            {"id": keep.pk, "full_name": "Остаётся", "position": self.director.pk, "is_primary": True},
+            {"id": wrong.pk, "full_name": "Ошибочный", "position": self.director.pk,
+             "pinfl": "31203876540012", "DELETE": True},
+        ])
+        response = self.client.post(self.change_url(counterparty), data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(list(counterparty.representatives.values_list("full_name", flat=True)), ["Остаётся"])
+        entries = ChangeLog.objects.filter(action=ChangeLog.Action.DELETE)
+        # В журнале - кто, что и какое значение было; сама карточка - хозяин записи.
+        self.assertEqual(entries.filter(user=self.bekzod, object_id=wrong.pk).count(), entries.count())
+        self.assertEqual(entries.get(field="full_name").old_value, "Ошибочный")
+        self.assertEqual(entries.get(field="pinfl").old_value, "31203876540012")
+        self.assertIsNone(entries.get(field="full_name").new_value)
+        self.assertEqual({e.root_object_id for e in entries}, {counterparty.pk})
+        self.assertEqual(len({e.change_id for e in entries}), 1)
+        # «История» карточки показывает удаление и не падает на нём.
+        history = self.client.get(f"/admin/counterparties/counterparty/{counterparty.pk}/history/", follow=True)
+        self.assertEqual(history.status_code, 200)
+        self.assertContains(history, "Ошибочный")
+
+    def test_delete_primary_and_add_new_primary_in_one_save(self):
+        # Удалённый основной освобождает место новому основному в той же форме
+        # (иначе база увидела бы двух основных и отказала).
+        counterparty, _ = self.make(by=self.bekzod)
+        old = self.representative_for_delete(counterparty, "Старый", is_primary=True)
+        data = self.post_data(counterparty, representatives=[
+            {"id": old.pk, "full_name": "Старый", "position": self.director.pk,
+             "is_primary": True, "DELETE": True},
+            {"full_name": "Новый", "position": self.director.pk, "is_primary": True},
+        ])
+        response = self.client.post(self.change_url(counterparty), data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(counterparty.representatives.get().full_name, "Новый")
+        self.assertTrue(counterparty.representatives.get().is_primary)
+
+    def test_deleting_all_representatives_is_allowed(self):
+        counterparty, _ = self.make(by=self.bekzod)
+        only = self.representative_for_delete(counterparty)
+        data = self.post_data(counterparty, representatives=[
+            {"id": only.pk, "full_name": "Ошибочный", "position": self.director.pk, "DELETE": True},
+        ])
+        self.assertEqual(self.client.post(self.change_url(counterparty), data).status_code, 302)
+        self.assertFalse(counterparty.representatives.exists())
+
+    def test_delete_refused_when_something_refers_to_representative(self):
+        # Когда на представителя сошлётся другая таблица (PROTECT), форма скажет об этом,
+        # а не упадёт ошибкой 500. Ссылку здесь заменяет подмена проверки.
+        counterparty, _ = self.make(by=self.bekzod)
+        used = self.representative_for_delete(counterparty, "Подписал договор")
+        data = self.post_data(counterparty, representatives=[
+            {"id": used.pk, "full_name": "Подписал договор", "position": self.director.pk, "DELETE": True},
+        ])
+        with mock.patch.object(Representative, "delete_blockers", return_value=["на запись ссылаются: договор № 5"]):
+            response = self.client.post(self.change_url(counterparty), data)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Удалить «Подписал договор» нельзя")
+        self.assertTrue(Representative.objects.filter(pk=used.pk).exists())
+        self.assertFalse(ChangeLog.objects.filter(action=ChangeLog.Action.DELETE).exists())
+
+    def test_delete_tracked_refuses_when_blocked_and_for_other_tables(self):
+        counterparty, _ = self.make(by=self.bekzod)
+        used = self.representative_for_delete(counterparty)
+        with mock.patch.object(Representative, "delete_blockers", return_value=["на запись ссылаются: x"]):
+            with self.assertRaises(UntrackedChangeError):
+                used.delete_tracked(by=self.bekzod)
+        self.assertTrue(Representative.objects.filter(pk=used.pk).exists())
+        # Прямое удаление по-прежнему запрещено везде, в том числе у представителя.
+        with self.assertRaises(UntrackedChangeError):
+            used.delete()
+        with self.assertRaises(UntrackedChangeError):
+            Representative.objects.filter(pk=used.pk).delete()
+        # Остальные таблицы удалять через delete_tracked не позволяют.
+        with self.assertRaises(UntrackedChangeError):
+            counterparty.delete_tracked(by=self.bekzod)
+        self.assertTrue(Counterparty.objects.filter(pk=counterparty.pk).exists())
+
+    def test_bank_accounts_are_still_not_deletable(self):
+        counterparty, _ = self.make(by=self.bekzod)
+        account = BankAccount(counterparty=counterparty, bank=self.bank, number="20216000004849419001")
+        account.save(by=self.bekzod)
+        data = self.post_data(counterparty, accounts=[
+            {"id": account.pk, "bank": self.bank.pk, "number": "20216000004849419001", "DELETE": True},
+        ])
+        self.assertEqual(self.client.post(self.change_url(counterparty), data).status_code, 302)
+        self.assertTrue(BankAccount.objects.filter(pk=account.pk).exists())
+        page = self.client.get(self.change_url(counterparty))
+        self.assertNotContains(page, "accounts-0-DELETE")
+
+    def test_card_shows_delete_checkbox_for_representative(self):
+        counterparty, _ = self.make(by=self.bekzod)
+        self.representative_for_delete(counterparty)
+        page = self.client.get(self.change_url(counterparty))
+        self.assertContains(page, "representatives-0-DELETE")
+
     def test_history_shows_representatives_and_accounts(self):
         counterparty, _ = self.make(by=self.bekzod)
         Representative(counterparty=counterparty, full_name="NIYAZMETOV ILXOMJON").save(by=self.bekzod)
@@ -1044,6 +1155,15 @@ class AccessTests(CounterpartyTestCase):
         self.assertEqual(response.status_code, 403)
         counterparty.refresh_from_db()
         self.assertEqual(counterparty.phone, "")
+
+    def test_delete_checkbox_only_for_those_who_may_change(self):
+        counterparty, _ = self.make()
+        Representative(counterparty=counterparty, full_name="Ошибочный").save(by=self.bekzod)
+        url = f"/admin/counterparties/counterparty/{counterparty.pk}/change/"
+        self.login("ivanov", EMPLOYEE_GROUP)
+        self.assertNotContains(self.client.get(url), "representatives-0-DELETE")
+        self.login("admin1", ADMIN_GROUP)
+        self.assertContains(self.client.get(url), "representatives-0-DELETE")
 
     def test_employee_has_no_archive_action(self):
         self.make()

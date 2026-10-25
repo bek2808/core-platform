@@ -69,6 +69,11 @@ class TrackedAdmin(admin.ModelAdmin):
         # иначе при смене основного в одной форме база увидела бы на миг двух
         # основных и отказала (правило «основной - только один»).
         instances = sorted(formset.save(commit=False), key=lambda obj: bool(getattr(obj, "is_primary", False)))
+        # Удаление строк (только у таблиц с allow_tracked_delete) - первым делом:
+        # удалённый основной освобождает место новому основному в той же форме.
+        # Каждое удаление пишется в журнал; у остальных таблиц оно запрещено.
+        for obj in formset.deleted_objects:
+            obj.delete_tracked(by=request.user)
         for obj in instances:
             obj.save(by=request.user)
         formset.save_m2m()
